@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Al Día #01 · 29 de octubre de 2026</title>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!-- Al Día #01. Maquetación basada en la plantilla de revista: páginas de 800x1130 px, visor con página doble/única, zoom, miniaturas y botón PDF. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Playfair+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: magazine reader on a dark desk. Spread (cover alone, then pairs) or single page, scaled to fit; toolbar below. Single deliberate dark look. */
+:root {
+  --desk: #0B1813;
+  --desk-raised: #142A21;
+  --desk-line: #284438;
+  --paper: #E9F3EE;
+  --ink: #2B1B12;
+  --accent: #6FCBA2;
+  --muted: #8DB7A4;
+  --display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  --body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --t: 0.33s;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--body);
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+button { font: inherit; }
+
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.mast b { font-family: var(--display); font-weight: 400; font-size: 18px; text-transform: uppercase; color: var(--accent); }
+.mast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mast #label { color: var(--paper); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.vp { height: 100%; min-width: 0; display: flex; overflow: hidden; }
+.vp.zoomed { overflow: auto; cursor: grab; }
+.vp.zoomed.grabbing { cursor: grabbing; }
+.book { position: relative; flex: none; margin: auto; cursor: e-resize; }
+.book.left { cursor: w-resize; }
+.vp.zoomed .book { cursor: inherit; }
+.scaler {
+  position: absolute; top: 0; left: 0; height: 1130px;
+  transform-origin: 0 0; perspective: 3200px;
+  transition: transform 0.45s ease;
+}
+.page {
+  position: absolute; top: 0; left: 0; width: 800px; height: 1130px;
+  visibility: hidden; overflow: hidden; backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.page.slot-r { left: 800px; }
+.page::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; }
+.page.slot-c::after, .page.slot-r::after { left: 0; background: linear-gradient(90deg, rgba(18, 38, 30, 0.28), rgba(18, 38, 30, 0)); }
+.page.slot-l::after { right: 0; background: linear-gradient(270deg, rgba(18, 38, 30, 0.28), rgba(18, 38, 30, 0)); }
+.page.on { visibility: visible; z-index: 2; }
+.page.under { visibility: visible; z-index: 1; }
+.page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { visibility: visible; z-index: 3; }
+.page.fx-out-r { transform-origin: left center; animation: outR var(--t) ease-in forwards; }
+.page.fx-in-l { transform-origin: right center; animation: inL var(--t) ease-out var(--t) both; }
+.page.fx-out-l { transform-origin: right center; animation: outL var(--t) ease-in forwards; }
+.page.fx-in-r { transform-origin: left center; animation: inR var(--t) ease-out var(--t) both; }
+.page.fx-turn { transform-origin: left center; animation: turnOut calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+.page.fx-return { transform-origin: left center; animation: turnIn calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+@keyframes outR { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-90deg); filter: brightness(0.65); } }
+@keyframes inL { from { transform: rotateY(90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes outL { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(90deg); filter: brightness(0.65); } }
+@keyframes inR { from { transform: rotateY(-90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes turnOut { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(0.6); } }
+@keyframes turnIn { from { transform: rotateY(-100deg); filter: brightness(0.6); } to { transform: rotateY(0); filter: brightness(1); } }
+
+.side {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--desk-line); background: var(--desk-raised); color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.side:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.side:disabled { opacity: 0.25; cursor: default; }
+.side svg { width: 22px; height: 22px; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--desk-line); padding-top: 8px;
+}
+.tg { display: flex; align-items: center; gap: 4px; }
+.tb {
+  width: 44px; height: 44px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+}
+.tb:hover:not(:disabled) { background: var(--desk-raised); color: var(--accent); }
+.tb:disabled { opacity: 0.3; cursor: default; }
+.tb[aria-pressed="true"] { background: var(--desk-raised); color: var(--accent); }
+.tb svg { width: 20px; height: 20px; }
+.pager { display: flex; align-items: center; gap: 8px; margin-inline: 6px; font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pager input {
+  width: 64px; height: 34px; box-sizing: border-box; text-align: center;
+  border: 1px solid var(--desk-line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.zoomval { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.thumbs {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(11, 24, 19, 0.97);
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+}
+.thumbs[hidden] { display: none; }
+.thumbs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; width: 100%; margin: 0 auto; }
+.thumbs-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--paper); }
+.thumbs-grid {
+  flex: 1 1 auto; overflow-y: auto; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 20px; align-content: start;
+}
+.thumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.thumb-box { width: 144px; height: 203px; overflow: hidden; position: relative; border-radius: 3px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); outline: 3px solid transparent; outline-offset: 3px; transition: outline-color 0.15s, transform 0.15s; }
+.thumb:hover .thumb-box { transform: translateY(-3px); }
+.thumb[aria-current="page"] .thumb-box { outline-color: var(--accent); }
+.thumb-page { position: absolute; top: 0; left: 0; width: 800px; height: 1130px; transform: scale(0.18); transform-origin: 0 0; pointer-events: none; }
+.thumb-cap { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.thumb[aria-current="page"] .thumb-cap { color: var(--accent); }
+.close {
+  height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--desk-line);
+  background: var(--desk-raised); color: var(--paper); cursor: pointer; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .toolbar { justify-content: center; }
+  .tg-c { order: -1; width: 100%; justify-content: center; }
+  .zoomval { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scaler { transition: none; }
+  .page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { animation: none; }
+}
+/* Al Día: páginas blancas, un acento frío (verde botella), Playfair Display para titulares y Figtree para el texto */
+.t1 {
+  --acc: #1F5A43; --tint: #D5E8DF; --tint2: #A9CFBD; --paper: #FBFDFC; --ink: #12261E; --soft: #3B5249; --mute: #5B7D6F; --on: #F2FAF6; --on-soft: #C2E1D3; --gold: #4FA582;
+  width: 800px; height: 1130px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+}
+.t1 * { box-sizing: border-box; }
+.t1 h1, .t1 h2, .t1 h3 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; margin: 0; color: inherit; text-wrap: balance; }
+.t1 p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
+.t1 ol { margin: 0; }
+.t1 .via { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.t1 .kick { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.t1 .art { position: relative; overflow: hidden; background: var(--tint); }
+.t1 .art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.t1 .acc { background: var(--acc); color: var(--on); }
+.t1 .acc p { color: var(--on); }
+.t1 .acc .via, .t1 .acc .kick { color: var(--on-soft); }
+.t1 .h-page { font-weight: 800; font-size: 50px; line-height: 1; letter-spacing: -0.01em; }
+.t1 .dbl { height: 7px; border-top: 2px solid var(--acc); border-bottom: 2px solid var(--acc); }
+.t1 .pnum { position: absolute; bottom: 22px; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.t1 .pnum.l { left: 44px; } .t1 .pnum.r { right: 44px; }
+.t1 .pnum.on { color: var(--on-soft); }
+.t1 .tag { display: inline-block; align-self: flex-start; background: var(--acc); color: var(--on); font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1.15; padding: 8px 14px; }
+.t1 .stack { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+/* Cover */
+.t1.cv { padding: 40px 44px 44px; display: flex; flex-direction: column; gap: 18px; }
+.cv-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.cv-mast { display: flex; flex-direction: column; gap: 6px; }
+.cv-band { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.1; text-align: center; text-transform: uppercase; letter-spacing: 0.02em; padding: 4px 0 8px; }
+.cv-art { height: 610px; background: repeating-conic-gradient(from 0deg at 50% 46%, #9DCBB6 0deg 9deg, #E3F1EA 9deg 18deg); }
+.cv-foot { display: flex; gap: 28px; align-items: flex-start; }
+.cv-box { flex: 0 0 190px; margin: -132px 0 0 18px; padding: 20px; position: relative; z-index: 1; font-weight: 700; font-size: 15px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 8px; }
+.cv-box b { font-family: 'Playfair Display', Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: 0; }
+.cv-head { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cv-head h2 { font-size: 36px; font-weight: 800; text-transform: uppercase; line-height: 1.02; }
+
+/* Contents */
+.t1.tc { display: grid; grid-template-columns: 448px 1fr; }
+.tc-l { padding: 70px 40px 60px 44px; display: flex; flex-direction: column; gap: 26px; }
+.tc-l h1 { font-size: 62px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.tc-l .dbl { margin-top: -10px; }
+.toc { display: flex; flex-direction: column; gap: 15px; }
+.toc a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+.toc .t { font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.toc .s { font-size: 13px; color: var(--soft); }
+.toc .ln { display: flex; align-items: center; gap: 10px; color: #3F8A6B; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.toc .ln::before { content: ""; flex: 1; border-bottom: 2px dashed var(--tint2); }
+.toc a:hover .t { color: var(--acc); }
+.tc-r { position: relative; overflow: hidden; }
+.strip { position: absolute; top: -50px; bottom: -50px; left: 62px; right: 62px; background: var(--ink); transform: rotate(-3deg); display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 34px; }
+.strip::before, .strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; background: repeating-linear-gradient(to bottom, var(--paper) 0 16px, transparent 16px 36px); }
+.strip::before { left: 10px; } .strip::after { right: 10px; }
+.frame { width: 100%; aspect-ratio: 1; background: var(--tint); border-radius: 4px; display: grid; place-items: center; }
+.frame svg { width: 62%; height: 62%; }
+
+/* Week in a minute */
+.t1.wm { padding: 54px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.wm h1 { font-size: 42px; font-weight: 800; text-transform: uppercase; }
+.box { padding: 20px 24px; }
+.box p { font-size: 15.5px; font-weight: 500; line-height: 1.55; }
+.zz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+.zz .art { height: 250px; }
+.zz h3 { font-size: 26px; font-weight: 700; }
+.top3 { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.top3 li::marker { color: var(--acc); font-weight: 700; }
+
+/* Rows (Animation) */
+.t1.nw { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 22px; }
+.nw-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--acc); color: var(--acc); padding: 4px 10px; border-radius: 999px; }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 30px; }
+.rows .art { height: 252px; }
+.rows p { font-size: 14px; }
+
+/* Highlights (Series) */
+.hl-band { height: 300px; padding: 46px 44px 0; }
+.hl-band h1 { font-size: 54px; font-weight: 800; }
+.hl-body { position: absolute; top: 130px; left: 44px; right: 44px; bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+.hl-hero { height: 290px; outline: 6px solid var(--paper); }
+.hl-lead { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 26px; align-items: start; }
+.hl-lead h2 { font-size: 27px; font-weight: 700; line-height: 1.12; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cols3 .art { height: 140px; }
+.cols3 h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.cols3 p { font-size: 13.5px; line-height: 1.5; }
+
+/* Profile (Film) */
+.t1.pf { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.pf-box { padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 26px; }
+.pf-box h2 { font-size: 30px; font-weight: 800; line-height: 1.08; }
+.pf-box h3 { font-size: 19px; font-weight: 700; margin-top: 6px; }
+.pf-box p { font-size: 14px; }
+.pf-box .art { height: 100%; min-height: 380px; outline: 4px solid var(--on); }
+.pf-row { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.pf-row .art { height: 196px; }
+.pf-row h3 { font-size: 23px; font-weight: 700; }
+
+/* Club grid (Music) */
+.t1.ex { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.ex-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.ex-top .art { height: 350px; }
+.ex-top h2 { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ex-top p { font-size: 14px; }
+.ex-box { padding: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.ex-box .art { height: 128px; outline: 3px solid var(--on); outline-offset: -3px; }
+.ex-box h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.ex-box p { font-size: 13.5px; line-height: 1.5; }
+
+/* Split (Video games) */
+.t1.sp { display: grid; grid-template-columns: 350px 1fr; }
+.sp-l { padding: 56px 32px 56px 44px; display: flex; flex-direction: column; gap: 18px; }
+.sp-l h1 { font-size: 52px; font-weight: 800; line-height: 0.98; }
+.sp-l h2 { font-size: 24px; font-weight: 700; line-height: 1.12; }
+.sp-l p { font-size: 14px; }
+.sp-l .art { height: 290px; background: #0F2A20; }
+.sp-r { padding: 56px 44px 56px 36px; display: flex; flex-direction: column; gap: 16px; }
+.sp-r h2 { font-size: 28px; font-weight: 700; }
+.item { display: flex; flex-direction: column; gap: 5px; }
+.item .n { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--acc); }
+.item h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.item p { font-size: 14px; }
+.sp-r hr { border: 0; border-top: 1px solid var(--tint2); margin: 4px 0; width: 100%; }
+.sp-r .art { height: 190px; }
+
+/* Back */
+.t1.bk { display: flex; flex-direction: column; }
+.bk-top { height: 650px; display: flex; flex: none; }
+.bk-block { flex: 0 0 88%; padding: 54px 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.bk-block h1 { font-size: 50px; font-weight: 800; }
+.bk-strip { flex: 0 0 4%; background: var(--tint); }
+.cal { display: flex; flex-direction: column; }
+.cal div { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-top: 1px solid rgba(242, 250, 246, 0.32); align-items: baseline; }
+.cal div:last-child { border-bottom: 1px solid rgba(242, 250, 246, 0.32); }
+.cal span { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--on); }
+.cal b { font-weight: 600; font-size: 15px; display: block; }
+.cal i { font-style: normal; font-size: 12.5px; color: var(--on-soft); }
+.bk-note { font-size: 13px !important; line-height: 1.5 !important; color: var(--on-soft) !important; max-width: 520px; }
+.bk-art { flex: 1 1 auto; }
+
+
+
+.t1.mn { padding: 56px 44px 60px; display: flex; flex-direction: column; gap: 18px; }
+.mn-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.mn-head p { font-size: 15px; }
+.mn-list { display: flex; flex-direction: column; }
+.mn-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; padding: 12px 0; border-bottom: 2px dashed var(--tint2); align-items: baseline; }
+.mn-row > div { display: flex; flex-direction: column; gap: 4px; }
+.mn-row b { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.mn-row div > span { font-size: 14.5px; line-height: 1.5; color: var(--soft); }
+.mn-row i { font-style: normal; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--mute); }
+
+
+.tb-pdf { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--desk-line); }
+@media print {
+  @page { size: 800px 1130px; margin: 0; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+  .mast, .toolbar, .side, .thumbs { display: none !important; }
+  .stage, .vp { display: block !important; height: auto !important; overflow: visible !important; max-width: none !important; width: 800px !important; margin: 0 !important; }
+  .book { width: 800px !important; height: auto !important; margin: 0 !important; }
+  .scaler { position: static !important; transform: none !important; width: 800px !important; height: auto !important; perspective: none !important; transition: none !important; }
+  .page { position: relative !important; left: 0 !important; top: 0 !important; visibility: visible !important; box-shadow: none !important; animation: none !important; transform: none !important; filter: none !important; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page::after { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+/* Al Día: imágenes de noticias y páginas añadidas */
+.t1 .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.tc-img { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
+.tc-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.t1 .h-sec { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.t1.nw .rows { gap: 22px 30px; }
+.t1.nw .rows .art-main { height: 210px; }
+.t1.nw .rows p { font-size: 13.5px; line-height: 1.5; }
+.rows3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; border-top: 2px solid var(--tint2); padding-top: 20px; }
+.rows3 .art { height: 120px; }
+.rows3 p { font-size: 13px; line-height: 1.5; }
+.t1.cu { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 20px; }
+.cu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 24px; }
+.cu-grid .art { height: 150px; }
+.cu-grid h3 { font-size: 19px; font-weight: 700; line-height: 1.18; }
+.cu-grid p { font-size: 13.5px; line-height: 1.5; }
+.cu-n { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; margin-right: 6px; color: var(--acc); }
+.t1.pf .pf-row .art { height: 168px; }
+.t1.bk .bk-top { height: 890px; }
+.t1.bk .bk-block { gap: 18px; padding-top: 50px; }
+.t1.bk .cal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 26px; border-bottom: 1px solid rgba(242, 250, 246, 0.32); }
+.t1.bk .cal div { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 9px 0; }
+.t1.bk .cal div:last-child { border-bottom: 0; }
+.t1.bk .cal p { margin: 0; }
+.t1.bk .cal span { font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-soft); }
+.t1.bk .cal b { font-size: 14.5px; line-height: 1.35; }
+.t1.nw { gap: 18px; }
+.t1.nw .rows .art-main { height: 180px; }
+.rows3 { padding-top: 16px; }
+.rows3 .art { height: 104px; }
+.t1 .hl-hero { flex: none; height: 180px; }
+.t1 .hl-lead, .t1 .hl-body .cols3 { flex: none; }
+.t1 .hl-lead { grid-template-columns: 220px minmax(0, 1fr); gap: 24px; }
+.t1 .hl-lead p { font-size: 13.5px; line-height: 1.5; }
+.t1 .hl-body .cols3 .art { height: 112px; }
+.t1 .hl-body .cols3 p { font-size: 13px; }
+.t1.pf { gap: 20px; }
+.t1 .pf-box { grid-template-columns: minmax(0, 1fr) 230px; padding: 24px; }
+.t1 .pf-box p { font-size: 13.5px; line-height: 1.5; }
+.t1 .pf-box .art { min-height: 0; }
+.pf-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.pf-cols .art { height: 112px; }
+.pf-cols h3 { font-size: 19px; font-weight: 700; line-height: 1.18; }
+.pf-cols p { font-size: 13px; line-height: 1.5; }
+.t1.ex { gap: 20px; }
+.t1 .ex-top .art { height: 300px; }
+.t1 .ex-top p { font-size: 13.5px; line-height: 1.5; }
+.t1 .ex-box { padding: 24px; }
+.t1 .ex-box .art { height: 100px; }
+.t1 .ex-box p { font-size: 13px; }
+.t1 .sp-r .art { height: 150px; flex: none; }
+.t1 .sp-l .art { height: 230px; flex: none; }
+.t1 .sp-l p, .t1 .sp-r .item p { font-size: 13.5px; line-height: 1.5; }
+.t1.mn { gap: 14px; padding-top: 50px; }
+.t1 .mn-row { padding: 9px 0; grid-template-columns: 104px minmax(0, 1fr); }
+.t1 .mn-row b { font-size: 17.5px; }
+.t1 .mn-row div > span { font-size: 13.5px; line-height: 1.42; }
+.t1.nw { gap: 16px; padding-top: 46px; }
+.t1.nw .rows .art-main { height: 210px; }
+.t1 .rows3 .art { height: 78px; }
+.t1 .rows3 .h-sec, .t1.nw .h-sec { font-size: 19px; }
+.t1 .cu-grid { gap: 22px 24px; }
+.t1 .cu-grid .art { height: 124px; }
+.t1 .mn-row { padding: 7px 0; }
+.t1 .mn-row > div { gap: 3px; }
+.t1 .mn-row b { font-size: 17px; }
+.t1 .hl-hero { height: 150px; }
+.t1.bk .bk-block { gap: 14px; padding-top: 46px; }
+.t1.bk .cal div { padding: 7px 0; }
+</style>
+
+</head>
+<body>
+<header class="mast">
+  <div><b>Al Día</b> <span>Número 01 · 29 oct 2026</span></div>
+  <span id="label">Portada</span>
+</header>
+
+<main class="stage">
+  <button type="button" class="side" id="prev" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="vp" id="vp">
+    <div class="book" id="book">
+      <div class="scaler" id="scaler">
+<section class="page" aria-label="Página 1: Portada" aria-hidden="true">
+<div class="t1 cv">
+  <div class="cv-top"><span>Número 01 · Martes y jueves</span><span>29 de octubre de 2026</span></div>
+  <div class="cv-mast"><div class="dbl"></div><div class="cv-band acc">Al Día</div><div class="dbl"></div></div>
+  <div class="art cv-art"><img src="https://i.abcnewsfe.com/a/3fd80bc5-9edc-439f-b458-38e2c795f791/spain-crash-1-ap-gmh-261028_1793190522581_hpMain_16x9.jpg?w=1600" alt="Equipos de emergencia en el lugar del choque de trenes de Urda" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  <div class="cv-foot">
+    <div class="cv-box acc"><b>37</b>historias: moda, tendencias, deporte, comunicación, actualidad y curiosidades</div>
+    <div class="cv-head">
+      <h2>España, de luto por el choque de trenes de Urda</h2>
+      <p>Un AVE alcanzó a un tren de Iryo detenido en la línea Madrid-Sevilla y deja al menos 68 muertos, el peor accidente de alta velocidad desde Angrois. Además: la Copa del Rey aplazada, Prada vuelve a reinar en el Índice Lyst y Netanyahu se aleja de la mayoría en Israel.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" aria-label="Página 2: Sumario" aria-hidden="true">
+<div class="t1 tc">
+  <div class="tc-l">
+    <h1>Sumario</h1>
+    <div class="dbl"></div>
+    <nav class="toc" aria-label="Sumario">
+      <a href="#p3" data-goto="2"><span class="t">En un minuto</span><span class="s">El resumen, el Top 3 y lo que viene</span><span class="ln">/ 03</span></a>
+      <a href="#p4" data-goto="3"><span class="t">Moda</span><span class="s">Prada en el Índice Lyst, Puig, H&amp;M, París</span><span class="ln">/ 04</span></a>
+      <a href="#p5" data-goto="4"><span class="t">Tendencias</span><span class="s">IA y RGPD, oficios manuales, menú del día</span><span class="ln">/ 05</span></a>
+      <a href="#p6" data-goto="5"><span class="t">Deporte</span><span class="s">La Copa aplazada, Sarabia, Landaluce, Wawrinka</span><span class="ln">/ 06</span></a>
+      <a href="#p7" data-goto="6"><span class="t">Comunicación</span><span class="s">La IA que negocia distinto y tres consejos</span><span class="ln">/ 07</span></a>
+      <a href="#p8" data-goto="7"><span class="t">Actualidad</span><span class="s">Urda, el 29-N, Israel y Brasil</span><span class="ln">/ 08</span></a>
+      <a href="#p9" data-goto="8"><span class="t">Curiosidades</span><span class="s">Seis datos sorprendentes y verificados</span><span class="ln">/ 09</span></a>
+      <a href="#p10" data-goto="9"><span class="t">Más noticias</span><span class="s">El resto de la actualidad, en una línea</span><span class="ln">/ 10</span></a>
+      <a href="#p11" data-goto="10"><span class="t">Próximamente</span><span class="s">La agenda de los próximos siete días</span><span class="ln">/ 11</span></a>
+    </nav>
+  </div>
+  <div class="tc-r acc" aria-hidden="true">
+    <div class="tc-img"><img src="https://i.abcnewsfe.com/a/510ebc3f-5dd5-4b82-8ee2-55893c2e566c/spain-crash-10-gty-gmh-261028_1793198040563_hpMain_16x9.jpg" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum l">02</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 3: En un minuto" aria-hidden="true">
+<div class="t1 wm">
+  <h1>En un minuto</h1>
+  <div class="box acc"><p>España guarda tres días de luto tras el choque de dos trenes de alta velocidad en Urda (Toledo), que deja al menos 68 muertos y ha paralizado la precampaña del 29-N y la Copa del Rey. En Israel, el bloque de Netanyahu cae a 53 escaños con casi todo escrutado, y en Brasil el derrotado Flávio Bolsonaro aterriza en Miami. En moda, Prada destrona a Chanel en el Índice Lyst; en tecnología, la UE abre la puerta a entrenar la IA con datos personales.</p></div>
+  <div class="zz">
+    <div class="stack">
+      <h3>No te lo pierdas</h3>
+      <ol class="top3">
+        <li><b>Al menos 68 muertos en Urda</b>: un AVE embiste a un Iryo detenido tras una orden «inexplicable» del control de Adif. <span class="via">p. 08</span></li>
+        <li><b>Netanyahu se aleja de la mayoría</b>: su bloque baja a 53 escaños y los partidos árabes logran un récord de 19. <span class="via">p. 08</span></li>
+        <li><b>Prada vuelve al número 1</b> del Índice Lyst y desbanca a Chanel, con su bolso Wish Pouch disparado. <span class="via">p. 04</span></li>
+      </ol>
+    </div>
+    <div class="art"><img src="https://static-cdn.toi-media.com/www/uploads/2026/10/montage-4up-20261028-de2314.jpg" alt="Líderes políticos israelíes" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://r.fashionunited.com/ufA_BausJOA_eUzb9kf7rjHub-EiXmR2zmV5ZBvLyCg/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMTAvMjgvcHJhZGEtczI3LTAyNy1wcHk1b3pjZy0yMDI2LTEwLTI4LmpwZWc.jpeg" alt="Desfile de Prada" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <h3>Lo que viene</h3>
+      <p>El BCE decide los tipos hoy, jueves 29, a las 14:15; el INE publica el viernes 30 el IPC adelantado y el avance del PIB. Estados Unidos vota en las elecciones de mitad de mandato el martes 3 de noviembre, e Israel tendrá resultados oficiales el 4.</p>
+      <p>Todas las fechas, en la contraportada.</p>
+    </div>
+  </div>
+  <div class="box acc"><p>Cada noticia está resumida con nuestras propias palabras a partir de medios como Euronews, ABC News, Times of Israel, FashionUnited, Xataka, ATP Tour, Forbes o Psychology Today, y cada una cita su fuente.</p></div>
+  <span class="pnum r">03</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 4: Moda" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Moda</h1><div class="chips"><span class="chip">Lujo</span><span class="chip">Industria</span><span class="chip">Pasarelas</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Índice Lyst · Tercer trimestre</span>
+      <h2 class="tag">Prada destrona a Chanel</h2>
+      <p>Prada es otra vez la marca más deseada del mundo según el Índice Lyst del tercer trimestre de 2026, publicado el 28 de octubre. Sube cinco puestos, con un 55 % más de demanda que el trimestre anterior, y relega a Chanel al segundo lugar y a Miu Miu al tercero. No lideraba desde finales de 2023. Su producto estrella es el bolso Wish Pouch, de seda duquesa brillante, cuya demanda ha crecido casi un 500 %.</p>
+      <p>Completan el top 10 Gucci, Saint Laurent, Dior, Burberry, Ralph Lauren, Chloé y Celine, que entra por primera vez de la mano de Michael Rider y de su colaboración con Reebok. La española Massimo Dutti cae al puesto 13, y Diesel vuelve a la lista tras el último desfile de Glenn Martens. El índice cruza las compras de los 160 millones de usuarios anuales de Lyst con datos de búsquedas y redes sociales.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+    <div class="stack">
+      <div class="art art-main"><img src="https://r.fashionunited.com/fn-p9_ZDCG9iP6DYcx7khPSDIhymd4hHRi34QMg4R70/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMTAvMjgvcHVpZy1jYXBpdGFsLW1hcmtldHMtZGF5LTEteWExamh5cnUtMjAyNi0xMC0yOC5qcGVn.jpeg" alt="Capital Markets Day de Puig" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Empresas · Belleza</span>
+      <h3 class="h-sec">Puig se marca 8.000 millones para 2032</h3>
+      <p>Puig presentó el 28 de octubre en Madrid su plan «Vision 2032», en su primer Capital Markets Day como cotizada. Aspira a superar los 8.000 millones de euros en ventas, frente a los 5.042 de 2025, con un margen superior al 22,5 %. Impulsará Rabanne, Jean Paul Gaultier y Byredo, y llevará Carolina Herrera al maquillaje. FashionUnited destaca que el plan no menciona sus casas de moda.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+  </div>
+  <div class="rows3">
+    <div class="stack">
+      <div class="art"><img src="https://r.fashionunited.com/_z7wF4Umb-AKwdMxaYU-Sz7Nn6tmjLbBCCLYcXYQ8Wc/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMDcvMjkvaGFuZG14bWxtYS1pbWFnZS12NW1xMHo1OS0yMDI2LTA3LTI5LmpwZWc.jpeg" alt="H&amp;M" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Talento · Premios</span>
+      <h3 class="h-sec">Vuelve el H&amp;M Design Award</h3>
+      <p>Tras seis años de pausa, H&amp;M anunció el 28 de octubre los ocho finalistas de su premio, estudiantes de escuelas como Central Saint Martins, Polimoda, La Cambre o la Academia de Amberes. En el jurado están Paloma Elsesser, IB Kamara y Chopova Lowena. El ganador se lleva 150.000 euros, un año de mentoría y una colección a la venta en H&amp;M. Se conocerá este año en Londres.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://r.fashionunited.com/9Ppl3VH1vaLH4wifpQdZs7IkweiVPz0pLIXScXFEHew/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMTAvMjgvc2FpbnQtbGF1cmVudC1hdG0tczIyLTAwMy1lajd0cm5xdi0yMDI2LTA4LTE5LXcyeXV2MG5qLTIwMjYtMTAtMjguanBlZw.jpeg" alt="Desfile en París" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Pasarelas · París</span>
+      <h3 class="h-sec">París fija su calendario hasta 2029</h3>
+      <p>La Federación de la Alta Costura y de la Moda ha publicado las fechas de la Semana de la Moda de París y de la Alta Costura para 2028 y 2029. La semana femenina de otoño-invierno 2028 irá del 28 de febrero al 7 de marzo, y la de primavera-verano 2029, del 25 de septiembre al 3 de octubre. La federación no ha explicado tanta antelación.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://r.fashionunited.com/6vnnolQ70mMdN277ckTrqxj1TASWDBqV3-26QvRapQk/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMTAvMjgvYXJ0aXNvLTEtZWQ4cGtkbGMtMjAyNi0xMC0yOC5qcGVn.jpeg" alt="Artiso" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Tecnología · Emprendimiento</span>
+      <h3 class="h-sec">Tres ex de Mango diseñan con IA</h3>
+      <p>Artiso, una plataforma de inteligencia artificial para el diseño de moda, ha levantado más de 3 millones de euros en una ronda pre-seed liderada por Criteria Venture Tech. La fundaron tres exdirectivos de Mango: Sarah Iglesias Hiller, Matthias Brenninkmeijer y Lucas Pastur Romay. Entre los inversores figura Nicolaj Reffstrup, fundador de Ganni.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+  </div>
+  <span class="pnum l">04</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 5: Tendencias" aria-hidden="true">
+<div class="t1">
+  <div class="hl-band acc"><h1>Tendencias</h1></div>
+  <div class="hl-body">
+    <div class="art hl-hero"><img src="https://i.blogs.es/1f7b0d/b3da5de2-c6af-a449-bd21-99ab2e8acbf4/840_560.jpeg" alt="Inteligencia artificial y datos personales" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="hl-lead">
+      <div class="stack"><span class="kick">Privacidad · Inteligencia artificial</span><h2>La UE quiere que la IA aprenda con tus datos sin pedirte permiso</h2><span class="via">Vía Xataka</span></div>
+      <div class="stack">
+        <p>Los embajadores de los Estados miembros aprobaron el 21 de octubre la posición del Consejo de la UE sobre el «Ómnibus Digital», un paquete de 179 páginas que retoca el RGPD, la directiva de cookies, la Data Act y la NIS2. Su novedad clave es un artículo 88 bis: las empresas podrán entrenar sistemas de IA con datos personales amparándose expresamente en el «interés legítimo». Según Xataka, el Consejo ha suprimido dos salvaguardas que proponía la Comisión: el derecho incondicional a oponerse y la excepción para menores.</p>
+        <p>También se permitirá el tratamiento «residual» de datos sensibles que aparezcan sin buscarlos, con la obligación de borrarlos al detectarlos. El ministro irlandés Thomas Byrne defiende que la reforma rebajará costes y animará la innovación. Por ahora es solo una propuesta: falta negociarla con la Comisión y con el Parlamento Europeo, que aún no tiene posición, y Bruselas quiere cerrar los ómnibus antes de que acabe 2026.</p>
+      </div>
+    </div>
+    <div class="cols3">
+      <div class="stack">
+        <div class="art"><img src="https://i.blogs.es/cdb1d9/wood-carpenter-log-cabin-house-lumber-architecture-1563627-pxhere.com/840_560.jpeg" alt="Carpintería" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Empleo · Oficios</span>
+        <h3>Los oficios manuales, refugio frente a la IA</h3>
+        <p>En EE. UU., las matrículas en programas de construcción y mecánica crecieron un 30 % entre 2022 y 2024, hasta cifras récord. Un carpintero recién formado en Los Ángeles puede empezar con unos 45.000 dólares al año. Según LinkedIn, el 63 % de los jóvenes de 18 a 28 años prefiere un trabajo práctico. En Francia la tendencia existe, pero aún es minoritaria.</p>
+        <span class="via">Vía Xataka</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://i.blogs.es/a549c4/photo-1566670735914-b2038696981d/840_560.jpeg" alt="Menú del día" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Consumo · Hostelería</span>
+        <h3>El menú del día ya roza los 15 euros</h3>
+        <p>Cuesta de media 14,7 euros en 2026, un 25,6 % más que hace diez años, según Hostelería de España y Edenred. El País Vasco es la comunidad más cara (16,3 €) y Canarias y Murcia, las más baratas (13,5 €). La subida va por detrás del IPC, y casi la mitad de los bares ya ofrece medio menú. La comida preparada del súper le come terreno.</p>
+        <span class="via">Vía Xataka</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://i.blogs.es/c3c6ae/original/840_560.jpeg" alt="iPhone Duo" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Móviles · Apple</span>
+        <h3>Grietas en el iPhone Duo plegable</h3>
+        <p>En su primer fin de semana a la venta, usuarios de Reddit mostraron la pantalla interior del primer plegable de Apple agrietada, con el mismo patrón junto a la bisagra. Apple admite un problema en «un pequeño número de unidades» y lo cambia aunque no se tenga AppleCare+. iFixit le da un 5 sobre 10 en reparabilidad.</p>
+        <span class="via">Vía Xataka</span>
+      </div>
+    </div>
+  </div>
+  <span class="pnum r">05</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 6: Deporte" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">Deporte</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">Copa del Rey · Primera ronda</span>
+      <h2>El fútbol se para por las víctimas de Urda</h2>
+      <p>La Federación Española de Fútbol suspendió el miércoles 28 de octubre los 24 partidos de la primera eliminatoria de la Copa del Rey previstos para esa tarde, «como muestra de respeto y solidaridad» con las víctimas del choque de trenes de Urda. Entre los aplazados estaban Navalcarnero-Betis, Tavernes-Valencia, Salamanca-Celta y Alcoyano-Mallorca. La RFEF canceló también la renovación del seleccionador de fútbol sala, Jesús Velasco.</p>
+      <h3>Qué viene ahora</h3>
+      <p>Ese mismo día se publicó el nuevo calendario: nueve partidos se juegan este jueves 29, junto a los catorce que ya estaban fijados, como AE Prat-Athletic (21:00). El resto se reparte entre el 3 y el 13 de noviembre: el Betis visita Navalcarnero el 12 y el Celta juega el 13. LaLiga y la RFEF guardarán un minuto de silencio en toda la jornada 11 de Primera y la 12 de Segunda, del viernes 30 al lunes 2.</p>
+      <span class="via">Vía Telemadrid · EFE · Libertad Digital</span>
+    </div>
+    <div class="art"><img src="https://static.telemadrid.es/clip/417c9457-49ce-4a76-bfa9-1a546fff4da5_facebook-aspect-ratio_default_0_x565y114.jpg" alt="Copa del Rey" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-cols">
+    <div class="stack">
+      <div class="art"><img src="https://www.elnacional.cat/uploads/s1/55/27/17/16/eder-sarabia-elx_4_1258x630.jpeg" alt="Eder Sarabia" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">LaLiga · Espanyol</span>
+      <h3>Eder Sarabia, nuevo técnico perico</h3>
+      <p>El Espanyol hizo oficial el 28 de octubre a Eder Sarabia, con contrato hasta 2028, tras despedir a Manolo González por el mal arranque y la eliminación ante el Sestao River. Fue segundo de Quique Setién y subió al Elche a Primera. Sergio García, del filial, dirigirá al equipo en Villarreal el viernes 30.</p>
+      <span class="via">Vía ElNacional.cat</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.atptour.com/-/media/images/news/2026/10/27/19/38/zverev-vienna-2026-tuesday.jpg" alt="Alexander Zverev en Viena" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Tenis · ATP 500 de Viena</span>
+      <h3>Landaluce acaricia la gesta ante Zverev</h3>
+      <p>Martín Landaluce, de 20 años, tuvo cuatro bolas de partido ante Alexander Zverev el martes 27. El alemán ganó 7-5, 3-6 y 7-6(11) tras un tie-break de más de 20 minutos. Si llega a cuartos, será número 1 del mundo por primera vez el 2 de noviembre.</p>
+      <span class="via">Vía ATP Tour</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.puntodebreak.com/sites/puntodebreak/files/2026-10/wawrinka-articulo-homenaje.jpg" alt="Stan Wawrinka" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Tenis · ATP 500 de Basilea</span>
+      <h3>Wawrinka dice adiós en casa</h3>
+      <p>Stan Wawrinka, de 41 años, jugó el último partido de su carrera el 27 de octubre en Basilea: perdió 7-5 y 7-6(2) ante Jiri Lehecka. El suizo ganó tres Grand Slams y fue número 3 del mundo. Agradeció poder despedirse en su país del deporte que ama.</p>
+      <span class="via">Vía Punto de Break</span>
+    </div>
+  </div>
+  <span class="pnum l">06</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 7: Comunicación" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Comunicación</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://imageio.forbes.com/specials-images/imageserve/6ad643f54252f7a9abb20f0a/0x0.jpg?format=jpg&amp;height=900&amp;width=1600&amp;fit=bounds" alt="Negociación salarial" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Negociar · Inteligencia artificial</span>
+      <h2>La IA aconseja negociar distinto a hombres y mujeres</h2>
+      <p>Un estudio preliminar de Harvard y el MIT, aún sin revisión por pares, analizó unas 86.000 respuestas de asistentes de IA sobre negociación salarial, según contó Kim Elsesser en Forbes el 19 de octubre. Con perfiles idénticos que solo cambiaban el nombre o los pronombres, los cuatro modelos probados propusieron sueldos más altos para los hombres. Además, empujaban a las mujeres a pedir teletrabajo, horario flexible o permiso parental, y a los hombres, acciones, subidas y ayudas por traslado.</p>
+      <p>Cómo aplicarlo: antes de negociar, contrasta lo que te diga la IA con datos salariales del sector y con mentores. Haz la prueba que propone Elsesser: pide la recomendación para «un hombre igual de cualificado» y compara las dos respuestas. Y decide tus prioridades, dinero o flexibilidad, según tu situación y no según lo que se espera de tu género.</p>
+      <span class="via">Vía Forbes</span>
+    </div>
+  </div>
+  <div class="ex-box acc">
+    <div class="stack">
+      <div class="art"><img src="https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_91_1_1528x800/public/teaser_image/blog_entry/2026-10/erwinbosman-business-10413659.jpg?itok=ruzjWeKO" alt="Reunión de negocios" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Consejo 1 · Negociar</span>
+      <h3>Pausas breves, nunca silencios largos</h3>
+      <p>En un análisis de 239 negociaciones grabadas, quienes hacían menos pausas cerraban mejores acuerdos. Deja huecos cortos para que el otro asienta, pero no tardes tres segundos o más en responder: cortas el ritmo y pareces menos competente. Y no interrumpas.</p>
+      <span class="via">Vía Psychology Today</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_91_1_1528x800/public/teaser_image/blog_entry/2026-10/kalhh-pen-1329258_1920.jpg?itok=ln1cwqqq" alt="Pluma sobre papel" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Consejo 2 · Disculparse</span>
+      <h3>Validar pesa más que «lo siento»</h3>
+      <p>En un experimento, lo que predijo el perdón fue reconocer el trato injusto, no decir «lo siento». Muestra primero que entiendes cómo lo vivió la otra persona y explica después tus intenciones. Evita el «siento que te hayas molestado» y di qué hiciste.</p>
+      <span class="via">Vía Psychology Today</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://images.fastcompany.com/image/upload/f_webp,q_auto,c_fit,w_1024/wp-cms-2/2026/10/p-1-91615935-feedback-literacy.jpg" alt="Feedback en el trabajo" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Consejo 3 · En el trabajo</span>
+      <h3>Feedback antes de 24 horas</h3>
+      <p>Usa un método común en el equipo, como emoción-conducta-impacto, y da el feedback en menos de un día; si necesitas más, explica por qué. Y nunca des una crítica difícil por mensaje: mejor cara a cara o por videollamada.</p>
+      <span class="via">Vía Fast Company</span>
+    </div>
+  </div>
+  <span class="pnum r">07</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 8: Actualidad" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l acc">
+    <h1>Actualidad</h1>
+    <span class="kick">Toledo · 28 de octubre</span>
+    <h2>Al menos 68 muertos en el choque de trenes de Urda</h2>
+    <p>Hacia las 8:53 del miércoles 28, un AVE de Renfe con 397 pasajeros alcanzó por detrás a un tren de Iryo con 146 que estaba detenido en la línea Madrid-Sevilla, entre Los Yébenes y Urda (Toledo). Dos coches del Iryo cayeron por un terraplén. García-Page confirmó al menos 68 muertos y 107 ingresados, 15 graves. Según Óscar Puente, el sistema de seguridad LZB falló a las 8:30 y el control de Adif autorizó al AVE a seguir con normalidad, una orden que calificó de «inexplicable».</p>
+    <div class="art"><img src="https://images.euronews.com/articles/stories/09/97/06/20/1200x675_cmsv2_866337c6-1ad7-52f7-88b5-29bb558e87d9-9970620.jpg" alt="Accidente ferroviario de Urda" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <p>Es el peor accidente de alta velocidad desde el del Alvia en Santiago (2013). Sánchez decretó tres días de luto oficial, del 29 al 31, y prometió «total contundencia» si hubo fallos. Investigan la CIAF, la Guardia Civil y un juzgado de Orgaz. Puente descarta dimitir, Feijóo pide una auditoría de toda la red y los partidos suspendieron su precampaña. Adif mantiene cortado el corredor sur.</p>
+    <span class="via">Vía Euronews · ABC News · CMM</span>
+  </div>
+  <div class="sp-r">
+    <h2>España</h2>
+    <div class="item">
+      <span class="n">01 · Elecciones del 29-N</span>
+      <h3>PP y Vox se alían en el Senado</h3>
+      <p>PP y Vox oficializaron el 26 de octubre una alianza de listas para el Senado con la vista puesta en lograr tres quintos de la Cámara. PSOE y sus socios irán juntos en 43 provincias. Cuatro sondeos publicados ese día dan mayoría absoluta a PP y Vox, aunque todos detectan una subida del PSOE. La campaña empieza el 13 de noviembre.</p>
+      <span class="via">Vía Público · EFE</span>
+    </div>
+    <hr>
+    <div class="art"><img src="https://assets1.cbsnewsstatic.com/hub/i/r/2026/10/28/74ba49d4-376f-4e33-8f99-7ccc7cb0bad5/thumbnail/1200x630g8/adc1bc74cbcdbe28d48594c5fbcad127/ap26301497988107.jpg" alt="Flávio Bolsonaro" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <h2>Mundo</h2>
+    <div class="item">
+      <span class="n">02 · Israel</span>
+      <h3>Netanyahu se queda en 53 escaños</h3>
+      <p>Con el 89,8 % escrutado, su bloque suma 53 escaños, ocho menos de la mayoría; el de Eisenkot, 48, y los partidos árabes logran un récord de 19. Quedan por contar los votos de doble sobre. Los resultados oficiales llegarán el 4 de noviembre.</p>
+      <span class="via">Vía Times of Israel</span>
+    </div>
+    <div class="item">
+      <span class="n">03 · Brasil</span>
+      <h3>Flávio Bolsonaro aterriza en Miami</h3>
+      <p>El derrotado en las presidenciales llegó a EE. UU. el 28 de octubre sin reconocer la victoria de Lula. Según AP, una orden del Supremo le exigía entregar sus pasaportes. Lula llamó «vergonzosa» su salida.</p>
+      <span class="via">Vía CBS News · AP</span>
+    </div>
+  </div>
+  <span class="pnum l on">08</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 9: Curiosidades" aria-hidden="true">
+<div class="t1 cu">
+  <div class="nw-head"><h1 class="h-page">Curiosidades</h1><div class="chips"><span class="chip">Ciencia</span><span class="chip">Historia</span><span class="chip">Sociedad</span></div></div>
+  <div class="dbl"></div>
+  <div class="cu-grid">
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/554bdb/gemini_generated_image_onr7q6onr7q6onr7/840_560.jpeg" alt="Felino salvaje" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">01</b> Ciencia</span>
+      <h3>Un gato nuevo, cien años después</h3>
+      <p>Investigadores han descrito Leopardus tilcayo, un pequeño felino de Bolivia de unos 46 cm y 1,4 kg: la primera especie de gato viva descrita en más de un siglo. El análisis de 38 genomas dividió además al gato tigre en cinco especies.</p>
+      <span class="via">Vía Xataka</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/6b04d6/image-from-rawpixel-id-27914654-jpeg/840_560.jpeg" alt="Fondo marino" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">02</b> Ciencia</span>
+      <h3>11.742 virus a 6.000 metros</h3>
+      <p>Un equipo chino analizó sedimentos del Pacífico a hasta 6.000 metros de profundidad y halló 11.742 unidades virales; el 99,3 % no figuraba en ninguna base de datos. Casi todas infectan bacterias, no a humanos.</p>
+      <span class="via">Vía Xataka</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/cce77a/retrato-editorial-de-giorgia-meloni-en-azul/840_560.jpeg" alt="Giorgia Meloni" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">03</b> Comunicación</span>
+      <h3>Meloni quiere registrar su voz</h3>
+      <p>La primera ministra italiana ha pedido a la EUIPO registrar como marca un audio de cuatro segundos en el que dice dos veces «Io sono Giorgia Meloni», para frenar los deepfakes. Antes lo intentaron Matthew McConaughey y Taylor Swift.</p>
+      <span class="via">Vía Xataka</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/046409/gemini_generated_image_uhcf55uhcf55uhcf/840_560.jpeg" alt="Neandertales" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">04</b> Historia</span>
+      <h3>Lanzas neandertales en Barcelona</h3>
+      <p>En el Abric Romaní (Capellades) se han identificado 13 objetos de madera neandertales de hace entre 62.000 y 40.000 años, entre ellos dos lanzas de 2,45 y 1,99 metros. Se conservan como moldes de piedra formados por el agua.</p>
+      <span class="via">Vía Xataka</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/163aae/ejercicioo/840_560.jpeg" alt="Ejercicio" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">05</b> Deporte</span>
+      <h3>El VO2 máx dice más que los pasos</h3>
+      <p>En un análisis de 20,9 millones de observaciones, las personas en mejor forma aeróbica tenían un 53 % menos de riesgo de morir. Los relojes lo estiman con un error de unos 10 ml/kg/min, y los intervalos intensos lo suben algo más que el ejercicio continuo.</p>
+      <span class="via">Vía Xataka</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/30da07/ropa-en-el-armario/840_560.jpeg" alt="Ropa en el armario" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">06</b> Moda</span>
+      <h3>¿Tienes demasiada ropa?</h3>
+      <p>Un vestido debe usarse unas 70 veces para compensar su huella de carbono. Con los 23 vestidos de media de un estudio australiano, poniéndose uno por semana, se tardaría unos 31 años. Hace 60 años se tenían unas 40 prendas; hoy, unas 199.</p>
+      <span class="via">Vía Xataka</span>
+    </div>
+  </div>
+  <span class="pnum r">09</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 10: Más noticias" aria-hidden="true">
+<div class="t1 mn">
+  <div class="mn-head"><h1 class="h-page">Más noticias</h1><p>El resto de la actualidad, en una línea.</p></div>
+  <div class="dbl"></div>
+  <div class="mn-list">
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>La Fed mantiene los tipos entre el 3,75 % y el 4 %</b><span>La Reserva Federal de Kevin Warsh decidió el 28 de octubre no moverlos, por 10 votos a 2; Cook y Hammack pedían subirlos.</span><i>Vía Reuters</i></div></div>
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>Drones marítimos atacan un portacontenedores en el mar Negro</b><span>El Contship Jet fue alcanzado el 28 de octubre frente a Bulgaria; sus 18 tripulantes fueron rescatados y nadie ha reivindicado el ataque.</span><i>Vía AP</i></div></div>
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>El OIEA no ve a Irán reparando sus instalaciones nucleares</b><span>Rafael Grossi dijo el 27 de octubre ante la ONU que no puede verificar dónde están 440,9 kg de uranio enriquecido al 60 %.</span><i>Vía AP</i></div></div>
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>Desalojan a los sindicatos policiales encerrados en Interior</b><span>Protestaban por la ruptura de la negociación sobre su jubilación anticipada; la UPR los desalojó de madrugada el 28 de octubre.</span><i>Vía Vozpópuli</i></div></div>
+      <div class="mn-row"><span class="kick">Moda</span><div><b>Zegna desfilará en Pekín su primavera-verano 2028</b><span>La firma presentará la colección el 11 de junio y abrirá Villa Zegna, un club temporal; sus ingresos crecieron un 8,9 % en el trimestre.</span><i>Vía FashionUnited</i></div></div>
+      <div class="mn-row"><span class="kick">Moda</span><div><b>Dior y On retiran a Mbappé de sus redes en China</b><span>Según medios chinos, ambas marcas borraron sus publicaciones con el francés tras el meme de Mao; On dice seguir «en diálogo».</span><i>Vía Inc. · Bloomberg Línea</i></div></div>
+      <div class="mn-row"><span class="kick">Tendencias</span><div><b>Eroski y Caprabo aceptan pagos con Bizum en tienda</b><span>El sistema ya funciona en 1,6 millones de comercios físicos, y Mercadona y El Corte Inglés preparan su llegada.</span><i>Vía Xataka</i></div></div>
+      <div class="mn-row"><span class="kick">Tendencias</span><div><b>Anthropic dedica 94 páginas a los riesgos en su salida a bolsa</b><span>Son el 23 % de su folleto S-1, registrado el 26 de octubre: más del doble de lo habitual en otras grandes tecnológicas.</span><i>Vía Xataka</i></div></div>
+      <div class="mn-row"><span class="kick">Deporte</span><div><b>Alcaraz busca hoy los cuartos de final de Viena</b><span>Se mide a Nikoloz Basilashvili el jueves 29, no antes de las 15:00; el murciano ganó sus dos duelos anteriores.</span><i>Vía Punto de Break</i></div></div>
+      <div class="mn-row"><span class="kick">Deporte</span><div><b>Antonelli puede ser campeón de F1 en México</b><span>El piloto de Mercedes llega con 365 puntos, 123 más que Russell, y puede convertirse en el campeón más joven de la historia.</span><i>Vía Motorsport.com</i></div></div>
+  </div>
+  <span class="pnum l">10</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 11: Próximamente" aria-hidden="true">
+<div class="t1 bk">
+  <div class="bk-top">
+    <div class="bk-block acc">
+      <h1>Próximamente</h1>
+      <div class="cal">
+        <div><span>Vie 30 oct</span><p><b>IPC adelantado de octubre y avance del PIB del tercer trimestre (INE)</b><i>España · Actualidad</i></p></div>
+        <div><span>Vie 30 oct · 21:00</span><p><b>Villarreal-Espanyol, jornada 11 de LaLiga, con minuto de silencio</b><i>Villarreal · Deporte</i></p></div>
+        <div><span>Sáb 31 oct · 21:00</span><p><b>Barcelona-Alavés; a las 14:00, Levante-Atlético de Madrid</b><i>Barcelona y Valencia · Deporte</i></p></div>
+        <div><span>31 oct – 8 nov</span><p><b>Rolex Paris Masters, último Masters 1000 del año</b><i>Nanterre (París) · Deporte</i></p></div>
+        <div><span>Dom 1 nov · 08:00</span><p><b>Gran Premio de Malasia de MotoGP</b><i>Sepang · Deporte</i></p></div>
+        <div><span>Dom 1 nov · 16:15</span><p><b>Racing de Santander-Real Madrid; a las 21:00, Athletic-Real Sociedad</b><i>Santander y Bilbao · Deporte</i></p></div>
+        <div><span>Dom 1 nov · 21:00</span><p><b>Gran Premio de México de Fórmula 1</b><i>Ciudad de México · Deporte</i></p></div>
+        <div><span>Lun 2 nov</span><p><b>Premios de la Moda del CFDA, presentados por Keke Palmer</b><i>Nueva York · Moda</i></p></div>
+        <div><span>Mar 3 nov</span><p><b>Elecciones de mitad de mandato en Estados Unidos</b><i>Estados Unidos · Actualidad</i></p></div>
+        <div><span>Mar 3 nov · 21:00</span><p><b>Champions: Atlético-Bayern, Barcelona-Aston Villa y Villarreal-PSG</b><i>Madrid, Barcelona y Villarreal · Deporte</i></p></div>
+        <div><span>3–5 nov</span><p><b>ISPO Munich, feria de moda y material deportivo</b><i>Múnich · Moda</i></p></div>
+        <div><span>Mié 4 nov</span><p><b>Resultados oficiales de las elecciones en Israel</b><i>Jerusalén · Actualidad</i></p></div>
+        <div><span>Mié 4 nov · 18:45</span><p><b>Champions: AEK-Real Madrid; a las 21:00, Dortmund-Betis</b><i>Atenas y Dortmund · Deporte</i></p></div>
+        <div><span>Jue 5 nov · 18:45</span><p><b>Europa League: Real Sociedad-Lyon; a las 21:00, Celta-Union Saint-Gilloise</b><i>San Sebastián y Vigo · Deporte</i></p></div>
+      </div>
+      <p class="bk-note">Horas peninsulares de España. Cada noticia de Al Día es un resumen escrito para esta edición, con sus fuentes citadas; las imágenes pertenecen a los medios enlazados.</p>
+    </div>
+    <div class="bk-strip"></div>
+  </div>
+    <div class="art bk-art" role="img" aria-label="Ilustración: un cine al atardecer con un rótulo que dice Nos vemos el martes">
+    <svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="800" height="480" fill="#D5E8DF"/><rect y="150" width="800" height="120" fill="#9DCBB6"/><rect y="270" width="800" height="210" fill="#4C9A7A"/>
+      <circle cx="640" cy="230" r="70" fill="#FBFDFC"/>
+      <path d="M0 480 V330 H60 V290 H120 V350 H170 V270 H220 V480 Z M580 480 V300 H630 V340 H690 V280 H750 V320 H800 V480 Z" fill="#1B3D30"/>
+      <rect x="250" y="150" width="300" height="330" fill="#174B39" stroke="#12261E" stroke-width="6"/>
+      <path d="M240 150 L400 90 L560 150 Z" fill="#12261E"/>
+      <rect x="226" y="210" width="348" height="84" fill="#FBFDFC" stroke="#12261E" stroke-width="6"/>
+      <g fill="#4FA582"><circle cx="246" cy="222" r="5"/><circle cx="276" cy="222" r="5"/><circle cx="306" cy="222" r="5"/><circle cx="336" cy="222" r="5"/><circle cx="366" cy="222" r="5"/><circle cx="396" cy="222" r="5"/><circle cx="426" cy="222" r="5"/><circle cx="456" cy="222" r="5"/><circle cx="486" cy="222" r="5"/><circle cx="516" cy="222" r="5"/><circle cx="546" cy="222" r="5"/>
+      <circle cx="246" cy="282" r="5"/><circle cx="276" cy="282" r="5"/><circle cx="306" cy="282" r="5"/><circle cx="336" cy="282" r="5"/><circle cx="366" cy="282" r="5"/><circle cx="396" cy="282" r="5"/><circle cx="426" cy="282" r="5"/><circle cx="456" cy="282" r="5"/><circle cx="486" cy="282" r="5"/><circle cx="516" cy="282" r="5"/><circle cx="546" cy="282" r="5"/></g>
+      <text x="400" y="262" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="26" fill="#12261E">NOS VEMOS EL MARTES</text>
+      <g fill="#12261E"><rect x="300" y="350" width="60" height="130"/><rect x="440" y="350" width="60" height="130"/><rect x="370" y="330" width="60" height="150" fill="#4FA582" stroke="#12261E" stroke-width="5"/></g>
+      <rect y="462" width="800" height="18" fill="#12261E"/>
+    </svg>
+  </div>
+</div>
+</section>
+
+      </div>
+    </div>
+  </div>
+  <button type="button" class="side" id="next" aria-label="Página siguiente" title="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</main>
+
+<footer class="toolbar">
+  <div class="tg tg-l">
+    <button type="button" class="tb" id="zoomOut" aria-label="Alejar" title="Alejar (−)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <span class="zoomval" id="zoomVal">100%</span>
+    <button type="button" class="tb" id="zoomIn" aria-label="Acercar" title="Acercar (+)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button type="button" class="tb" id="thumbsBtn" aria-label="Todas las páginas" title="Todas las páginas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button>
+    <button type="button" class="tb" id="playBtn" aria-label="Reproducción automática" aria-pressed="false" title="Reproducción automática"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  </div>
+  <div class="tg tg-c">
+    <button type="button" class="tb" id="firstBtn" aria-label="Primera página" title="Primera página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M18 6l-7 6 7 6"/></svg></button>
+    <button type="button" class="tb" id="prevBtn" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <label class="pager"><input type="text" id="pageInput" inputmode="numeric" autocomplete="off" aria-label="Página actual: escribe un número y pulsa Intro"><span id="total">/ 11</span></label>
+    <button type="button" class="tb" id="nextBtn" aria-label="Página siguiente" title="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button type="button" class="tb" id="lastBtn" aria-label="Última página" title="Última página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M6 6l7 6-7 6"/></svg></button>
+  </div>
+  <div class="tg tg-r">
+    <button type="button" class="tb tb-pdf" id="pdfBtn" title="Guardar como PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>PDF</button>
+    <button type="button" class="tb" id="viewBtn" aria-label="Cambiar a página única" title="Página única / doble"><svg id="icoDouble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h8v14H3zM13 5h8v14h-8z"/></svg><svg id="icoSingle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" hidden><path d="M7 3h10v18H7z"/></svg></button>
+    <button type="button" class="tb" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</footer>
+
+<div class="thumbs" id="thumbs" role="dialog" aria-modal="true" aria-labelledby="thumbsTitle" hidden>
+  <div class="thumbs-head"><h2 id="thumbsTitle">Todas las páginas</h2><button type="button" class="close" id="thumbsClose">Cerrar</button></div>
+  <div class="thumbs-grid" id="thumbsGrid"></div>
+</div>
+
+<script>
+(function () {
+  var labels = ['Portada', 'Sumario', 'En un minuto', 'Moda', 'Tendencias', 'Deporte', 'Comunicación', 'Actualidad', 'Curiosidades', 'Más noticias', 'Próximamente'];
+  var N = labels.length, W = 800, H = 1130, T = 330;
+  var Z = [1, 1.5, 2, 3];
+  var $ = function (id) { return document.getElementById(id); };
+  var pages = Array.prototype.slice.call(document.querySelectorAll('#scaler > .page'));
+  var vp = $('vp'), book = $('book'), scaler = $('scaler'), input = $('pageInput');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { pref: 'double', dbl: true, spreads: [], cur: 0, zi: 0, s: 0.5, busy: false, play: null };
+  var FX = ['under', 'fx-out-r', 'fx-in-l', 'fx-out-l', 'fx-in-r', 'fx-turn', 'fx-return'];
+
+  try { var saved = localStorage.getItem('aldia-view'); if (saved === 'single' || saved === 'double') st.pref = saved; } catch (e) {}
+  $('total').textContent = '/ ' + N;
+
+  function narrow() { return window.innerWidth < 760; }
+  function buildSpreads() {
+    var s = [];
+    if (st.dbl) { s.push([null, 0]); for (var i = 1; i < N; i += 2) s.push([i, i + 1 < N ? i + 1 : null]); }
+    else { for (var j = 0; j < N; j++) s.push([j]); }
+    st.spreads = s;
+  }
+  function spreadOf(p) { for (var i = 0; i < st.spreads.length; i++) if (st.spreads[i].indexOf(p) > -1) return i; return 0; }
+  function firstOf(i) { var sp = st.spreads[i]; return sp[0] != null ? sp[0] : sp[1]; }
+  function place() {
+    pages.forEach(function (p) { p.classList.remove('slot-l', 'slot-r', 'slot-c'); });
+    st.spreads.forEach(function (sp) {
+      if (st.dbl) { if (sp[0] != null) pages[sp[0]].classList.add('slot-l'); if (sp[1] != null) pages[sp[1]].classList.add('slot-r'); }
+      else pages[sp[0]].classList.add('slot-c');
+    });
+  }
+  function showOnly(i) {
+    var vis = st.spreads[i];
+    pages.forEach(function (p, k) {
+      var on = vis.indexOf(k) > -1;
+      FX.forEach(function (c) { p.classList.remove(c); });
+      p.classList.toggle('on', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  function shiftFor(i) { if (!st.dbl) return 0; var sp = st.spreads[i]; if (sp[0] == null) return -W / 2; if (sp[1] == null) return W / 2; return 0; }
+  function applyTransform() { scaler.style.transform = 'scale(' + st.s + ') translateX(' + shiftFor(st.cur) + 'px)'; }
+  function fit() {
+    var across = st.dbl ? 2 : 1;
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var base = Math.max(Math.min((w - 8) / (W * across), (h - 8) / H), 0.05);
+    st.s = base * Z[st.zi];
+    scaler.style.width = (W * across) + 'px';
+    book.style.width = (W * across * st.s) + 'px';
+    book.style.height = (H * st.s) + 'px';
+    applyTransform();
+  }
+
+  function ui() {
+    var sp = st.spreads[st.cur].filter(function (x) { return x != null; });
+    input.value = sp.map(function (x) { return x + 1; }).join('-');
+    $('label').textContent = sp.map(function (x) { return labels[x]; }).join(' · ');
+    var atStart = st.cur === 0, atEnd = st.cur === st.spreads.length - 1;
+    $('prev').disabled = $('prevBtn').disabled = $('firstBtn').disabled = atStart;
+    $('next').disabled = $('nextBtn').disabled = $('lastBtn').disabled = atEnd;
+    $('zoomOut').disabled = st.zi === 0;
+    $('zoomIn').disabled = st.zi === Z.length - 1;
+    $('zoomVal').textContent = Math.round(Z[st.zi] * 100) + '%';
+    $('icoDouble').hidden = !st.dbl;
+    $('icoSingle').hidden = st.dbl;
+    $('viewBtn').setAttribute('aria-label', st.dbl ? 'Cambiar a página única' : 'Cambiar a página doble');
+    $('viewBtn').disabled = narrow();
+    Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function (t, k) {
+      if (sp.indexOf(k) > -1) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#p' + (firstOf(st.cur) + 1)); } catch (e) {}
+  }
+
+  function go(i) {
+    if (i < 0 || i >= st.spreads.length || i === st.cur || st.busy) return;
+    var from = st.spreads[st.cur], to = st.spreads[i], fwd = i > st.cur;
+    st.cur = i; ui(); applyTransform();
+    if (reduce) { showOnly(i); return; }
+    st.busy = true;
+    var el = function (k) { return k == null ? null : pages[k]; };
+    var add = function (e, c) { if (e) e.classList.add(c); };
+    if (!st.dbl) {
+      if (fwd) { add(el(to[0]), 'under'); add(el(from[0]), 'fx-turn'); }
+      else { add(el(from[0]), 'under'); add(el(to[0]), 'fx-return'); }
+    } else if (fwd) {
+      add(el(to[1]), 'under'); add(el(from[1]), 'fx-out-r'); add(el(to[0]), 'fx-in-l');
+    } else {
+      add(el(to[0]), 'under'); add(el(from[0]), 'fx-out-l'); add(el(to[1]), 'fx-in-r');
+    }
+    setTimeout(function () { showOnly(st.cur); st.busy = false; }, 2 * T + 40);
+  }
+  function goPage(p) { go(spreadOf(p)); }
+
+  function setMode(dbl) {
+    var p = firstOf(st.cur);
+    st.dbl = dbl; buildSpreads(); place();
+    st.cur = spreadOf(p);
+    showOnly(st.cur); fit(); ui();
+  }
+  function setZoom(zi) {
+    zi = Math.max(0, Math.min(Z.length - 1, zi));
+    if (zi === st.zi) return;
+    st.zi = zi;
+    vp.classList.toggle('zoomed', zi > 0);
+    fit(); ui();
+    vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+    vp.scrollTop = 0;
+  }
+
+  book.addEventListener('click', function (e) {
+    if (moved) { moved = false; return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); goPage(+g.getAttribute('data-goto')); return; }
+    if (st.zi > 0) return;
+    var p = e.target.closest('.page');
+    if (!p) return;
+    if (p.classList.contains('slot-l')) go(st.cur - 1);
+    else if (p.classList.contains('slot-r')) go(st.cur + 1);
+    else { var r = p.getBoundingClientRect(); go(e.clientX - r.left < r.width / 2 ? st.cur - 1 : st.cur + 1); }
+  });
+  book.addEventListener('mousemove', function (e) {
+    var p = e.target.closest('.page');
+    var left = p ? (p.classList.contains('slot-l') || (p.classList.contains('slot-c') && e.clientX - p.getBoundingClientRect().left < p.getBoundingClientRect().width / 2)) : false;
+    book.classList.toggle('left', left);
+  });
+
+  var drag = null, moved = false;
+  vp.addEventListener('pointerdown', function (e) {
+    if (st.zi === 0 || e.button !== 0 || e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop }; moved = false;
+    vp.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    vp.scrollLeft = drag.l - dx; vp.scrollTop = drag.t - dy;
+  });
+  window.addEventListener('pointerup', function () { if (drag) { drag = null; vp.classList.remove('grabbing'); } });
+
+  var sx = null;
+  book.addEventListener('touchstart', function (e) { sx = st.zi === 0 ? e.touches[0].clientX : null; }, { passive: true });
+  book.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) { e.preventDefault(); go(dx < 0 ? st.cur + 1 : st.cur - 1); }
+  });
+
+  $('prev').addEventListener('click', function () { go(st.cur - 1); });
+  $('next').addEventListener('click', function () { go(st.cur + 1); });
+  $('prevBtn').addEventListener('click', function () { go(st.cur - 1); });
+  $('nextBtn').addEventListener('click', function () { go(st.cur + 1); });
+  $('firstBtn').addEventListener('click', function () { go(0); });
+  $('lastBtn').addEventListener('click', function () { go(st.spreads.length - 1); });
+  $('zoomIn').addEventListener('click', function () { setZoom(st.zi + 1); });
+  $('zoomOut').addEventListener('click', function () { setZoom(st.zi - 1); });
+  $('viewBtn').addEventListener('click', function () {
+    st.pref = st.dbl ? 'single' : 'double';
+    try { localStorage.setItem('aldia-view', st.pref); } catch (e) {}
+    setMode(st.pref === 'double');
+  });
+  input.addEventListener('focus', function () { input.select(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var n = parseInt(input.value, 10);
+    if (n >= 1 && n <= N) goPage(n - 1); else ui();
+    input.blur();
+  });
+  input.addEventListener('blur', ui);
+
+  function setPlay(on) {
+    if (st.play) { clearInterval(st.play); st.play = null; }
+    if (on) {
+      if (st.cur === st.spreads.length - 1) go(0);
+      st.play = setInterval(function () {
+        if (st.cur >= st.spreads.length - 1) { setPlay(false); return; }
+        go(st.cur + 1);
+      }, 4000);
+    }
+    $('playBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('playIco').hidden = on; $('pauseIco').hidden = !on;
+  }
+  $('playBtn').addEventListener('click', function () { setPlay(!st.play); });
+
+  $('pdfBtn').addEventListener('click', function () { setPlay(false); window.print(); });
+  var fsOk = document.fullscreenEnabled && document.documentElement.requestFullscreen;
+  if (!fsOk) $('fsBtn').hidden = true;
+  $('fsBtn').addEventListener('click', function () {
+    try {
+      var r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (r && r.catch) r.catch(function () {});
+    } catch (e) {}
+  });
+
+  var grid = $('thumbsGrid');
+  pages.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb';
+    b.setAttribute('aria-label', 'Página ' + (i + 1) + ': ' + labels[i]);
+    var box = document.createElement('span'); box.className = 'thumb-box';
+    var c = p.cloneNode(true);
+    c.className = 'thumb-page'; c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('a, button'), function (x) { x.setAttribute('tabindex', '-1'); });
+    box.appendChild(c);
+    var cap = document.createElement('span'); cap.className = 'thumb-cap';
+    cap.textContent = String(i + 1).padStart(2, '0') + ' · ' + labels[i];
+    b.appendChild(box); b.appendChild(cap);
+    b.addEventListener('click', function () { closeThumbs(); goPage(i); });
+    grid.appendChild(b);
+  });
+  function openThumbs() { $('thumbs').hidden = false; ui(); var cur = grid.querySelector('[aria-current="page"]') || grid.firstChild; if (cur) cur.focus(); }
+  function closeThumbs() { $('thumbs').hidden = true; $('thumbsBtn').focus(); }
+  $('thumbsBtn').addEventListener('click', openThumbs);
+  $('thumbsClose').addEventListener('click', closeThumbs);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target === input) return;
+    if (!$('thumbs').hidden) { if (e.key === 'Escape') closeThumbs(); return; }
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); go(st.cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(st.cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(st.spreads.length - 1); }
+    else if (k === '+' || k === '=') { e.preventDefault(); setZoom(st.zi + 1); }
+    else if (k === '-') { e.preventDefault(); setZoom(st.zi - 1); }
+    else if (k === '0') { e.preventDefault(); setZoom(0); }
+  });
+
+  function onResize() {
+    var want = !narrow() && st.pref === 'double';
+    if (want !== st.dbl) setMode(want); else { fit(); ui(); }
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(vp);
+
+  st.dbl = !narrow() && st.pref === 'double';
+  buildSpreads(); place();
+  var m = /^#p(\d+)$/.exec(location.hash || '');
+  var startPage = m ? Math.min(N, Math.max(1, +m[1])) - 1 : 0;
+  st.cur = spreadOf(startPage);
+  scaler.style.transition = 'none';
+  showOnly(st.cur); fit(); ui();
+  requestAnimationFrame(function () { scaler.style.transition = ''; });
+})();
+</script>
+
+</body></html>
