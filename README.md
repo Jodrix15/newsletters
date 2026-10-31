@@ -33,3 +33,7 @@ Archivo web de mis newsletters, publicado con GitHub Pages.
 1. Crea la carpeta con el número de la edición (por ejemplo, `al-dia/02/`) y su `index.html`.
 2. Añade el enlace en el `index.html` del archivo de esa newsletter.
 3. Haz commit y push a `main`: GitHub Pages la publica en un par de minutos.
+
+---
+
+🤖 Desarrollado con ayuda de [Claude](https://claude.ai) como asistente de programación.
