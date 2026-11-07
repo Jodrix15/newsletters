@@ -1,0 +1,970 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Hobby Fiction #03 · 7 November 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Playfair+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: magazine reader on a dark desk. Spread (cover alone, then pairs) or single page, scaled to fit; toolbar below. Single deliberate dark look. */
+:root {
+  --desk: #1E140D;
+  --desk-raised: #2E1F15;
+  --desk-line: #4A3426;
+  --paper: #FBF1DE;
+  --ink: #2B1B12;
+  --accent: #F2768B;
+  --muted: #C9A27E;
+  --display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  --body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --t: 0.33s;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--body);
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+button { font: inherit; }
+
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.mast b { font-family: var(--display); font-weight: 400; font-size: 18px; text-transform: uppercase; color: var(--accent); }
+.mast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mast #label { color: var(--paper); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.vp { height: 100%; min-width: 0; display: flex; overflow: hidden; }
+.vp.zoomed { overflow: auto; cursor: grab; }
+.vp.zoomed.grabbing { cursor: grabbing; }
+.book { position: relative; flex: none; margin: auto; cursor: e-resize; }
+.book.left { cursor: w-resize; }
+.vp.zoomed .book { cursor: inherit; }
+.scaler {
+  position: absolute; top: 0; left: 0; height: 1130px;
+  transform-origin: 0 0; perspective: 3200px;
+  transition: transform 0.45s ease;
+}
+.page {
+  position: absolute; top: 0; left: 0; width: 800px; height: 1130px;
+  visibility: hidden; overflow: hidden; backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.page.slot-r { left: 800px; }
+.page::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; }
+.page.slot-c::after, .page.slot-r::after { left: 0; background: linear-gradient(90deg, rgba(43, 27, 18, 0.28), rgba(43, 27, 18, 0)); }
+.page.slot-l::after { right: 0; background: linear-gradient(270deg, rgba(43, 27, 18, 0.28), rgba(43, 27, 18, 0)); }
+.page.on { visibility: visible; z-index: 2; }
+.page.under { visibility: visible; z-index: 1; }
+.page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { visibility: visible; z-index: 3; }
+.page.fx-out-r { transform-origin: left center; animation: outR var(--t) ease-in forwards; }
+.page.fx-in-l { transform-origin: right center; animation: inL var(--t) ease-out var(--t) both; }
+.page.fx-out-l { transform-origin: right center; animation: outL var(--t) ease-in forwards; }
+.page.fx-in-r { transform-origin: left center; animation: inR var(--t) ease-out var(--t) both; }
+.page.fx-turn { transform-origin: left center; animation: turnOut calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+.page.fx-return { transform-origin: left center; animation: turnIn calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+@keyframes outR { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-90deg); filter: brightness(0.65); } }
+@keyframes inL { from { transform: rotateY(90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes outL { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(90deg); filter: brightness(0.65); } }
+@keyframes inR { from { transform: rotateY(-90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes turnOut { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(0.6); } }
+@keyframes turnIn { from { transform: rotateY(-100deg); filter: brightness(0.6); } to { transform: rotateY(0); filter: brightness(1); } }
+
+.side {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--desk-line); background: var(--desk-raised); color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.side:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.side:disabled { opacity: 0.25; cursor: default; }
+.side svg { width: 22px; height: 22px; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--desk-line); padding-top: 8px;
+}
+.tg { display: flex; align-items: center; gap: 4px; }
+.tb {
+  width: 44px; height: 44px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+}
+.tb:hover:not(:disabled) { background: var(--desk-raised); color: var(--accent); }
+.tb:disabled { opacity: 0.3; cursor: default; }
+.tb[aria-pressed="true"] { background: var(--desk-raised); color: var(--accent); }
+.tb svg { width: 20px; height: 20px; }
+.pager { display: flex; align-items: center; gap: 8px; margin-inline: 6px; font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pager input {
+  width: 64px; height: 34px; box-sizing: border-box; text-align: center;
+  border: 1px solid var(--desk-line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.zoomval { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.thumbs {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(30, 20, 13, 0.97);
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+}
+.thumbs[hidden] { display: none; }
+.thumbs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; width: 100%; margin: 0 auto; }
+.thumbs-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--paper); }
+.thumbs-grid {
+  flex: 1 1 auto; overflow-y: auto; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 20px; align-content: start;
+}
+.thumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.thumb-box { width: 144px; height: 203px; overflow: hidden; position: relative; border-radius: 3px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); outline: 3px solid transparent; outline-offset: 3px; transition: outline-color 0.15s, transform 0.15s; }
+.thumb:hover .thumb-box { transform: translateY(-3px); }
+.thumb[aria-current="page"] .thumb-box { outline-color: var(--accent); }
+.thumb-page { position: absolute; top: 0; left: 0; width: 800px; height: 1130px; transform: scale(0.18); transform-origin: 0 0; pointer-events: none; }
+.thumb-cap { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.thumb[aria-current="page"] .thumb-cap { color: var(--accent); }
+.close {
+  height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--desk-line);
+  background: var(--desk-raised); color: var(--paper); cursor: pointer; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .toolbar { justify-content: center; }
+  .tg-c { order: -1; width: 100%; justify-content: center; }
+  .zoomval { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scaler { transition: none; }
+  .page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { animation: none; }
+}
+/* Template 1: white pages, one warm accent (terracotta, saturation close to the reference teal), Playfair display + Figtree body */
+.t1 {
+  --acc: #B3304B; --tint: #F5D6DC; --tint2: #EAB9C3; --paper: #FFFAFA; --ink: #2A181C; --soft: #5A4046; --mute: #93626C; --on: #FFF6F7; --on-soft: #F8D3DA; --gold: #D9772B;
+  width: 800px; height: 1130px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+}
+.t1 * { box-sizing: border-box; }
+.t1 h1, .t1 h2, .t1 h3 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; margin: 0; color: inherit; text-wrap: balance; }
+.t1 p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
+.t1 ol { margin: 0; }
+.t1 .via { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.t1 .kick { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.t1 .art { position: relative; overflow: hidden; background: var(--tint); }
+.t1 .art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.t1 .acc { background: var(--acc); color: var(--on); }
+.t1 .acc p { color: var(--on); }
+.t1 .acc .via, .t1 .acc .kick { color: var(--on-soft); }
+.t1 .h-page { font-weight: 800; font-size: 50px; line-height: 1; letter-spacing: -0.01em; }
+.t1 .dbl { height: 7px; border-top: 2px solid var(--acc); border-bottom: 2px solid var(--acc); }
+.t1 .pnum { position: absolute; bottom: 22px; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.t1 .pnum.l { left: 44px; } .t1 .pnum.r { right: 44px; }
+.t1 .pnum.on { color: var(--on-soft); }
+.t1 .tag { display: inline-block; align-self: flex-start; background: var(--acc); color: var(--on); font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1.15; padding: 8px 14px; }
+.t1 .stack { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+/* Cover */
+.t1.cv { padding: 40px 44px 44px; display: flex; flex-direction: column; gap: 18px; }
+.cv-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.cv-mast { display: flex; flex-direction: column; gap: 6px; }
+.cv-band { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.1; text-align: center; text-transform: uppercase; letter-spacing: 0.02em; padding: 4px 0 8px; }
+.cv-art { height: 610px; background: repeating-conic-gradient(from 0deg at 50% 46%, #EDAFBB 0deg 9deg, #F8E1E5 9deg 18deg); }
+.cv-foot { display: flex; gap: 28px; align-items: flex-start; }
+.cv-box { flex: 0 0 190px; margin: -132px 0 0 18px; padding: 20px; position: relative; z-index: 1; font-weight: 700; font-size: 15px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 8px; }
+.cv-box b { font-family: 'Playfair Display', Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: 0; }
+.cv-head { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cv-head h2 { font-size: 36px; font-weight: 800; text-transform: uppercase; line-height: 1.02; }
+
+/* Contents */
+.t1.tc { display: grid; grid-template-columns: 448px 1fr; }
+.tc-l { padding: 70px 40px 60px 44px; display: flex; flex-direction: column; gap: 26px; }
+.tc-l h1 { font-size: 62px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.tc-l .dbl { margin-top: -10px; }
+.toc { display: flex; flex-direction: column; gap: 15px; }
+.toc a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+.toc .t { font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.toc .s { font-size: 13px; color: var(--soft); }
+.toc .ln { display: flex; align-items: center; gap: 10px; color: #C05F72; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.toc .ln::before { content: ""; flex: 1; border-bottom: 2px dashed var(--tint2); }
+.toc a:hover .t { color: var(--acc); }
+.tc-r { position: relative; overflow: hidden; }
+.strip { position: absolute; top: -50px; bottom: -50px; left: 62px; right: 62px; background: var(--ink); transform: rotate(-3deg); display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 34px; }
+.strip::before, .strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; background: repeating-linear-gradient(to bottom, var(--paper) 0 16px, transparent 16px 36px); }
+.strip::before { left: 10px; } .strip::after { right: 10px; }
+.frame { width: 100%; aspect-ratio: 1; background: var(--tint); border-radius: 4px; display: grid; place-items: center; }
+.frame svg { width: 62%; height: 62%; }
+
+/* Week in a minute */
+.t1.wm { padding: 54px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.wm h1 { font-size: 42px; font-weight: 800; text-transform: uppercase; }
+.box { padding: 20px 24px; }
+.box p { font-size: 15.5px; font-weight: 500; line-height: 1.55; }
+.zz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+.zz .art { height: 250px; }
+.zz h3 { font-size: 26px; font-weight: 700; }
+.top3 { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.top3 li::marker { color: var(--acc); font-weight: 700; }
+
+/* Rows (Animation) */
+.t1.nw { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 22px; }
+.nw-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--acc); color: var(--acc); padding: 4px 10px; border-radius: 999px; }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 30px; }
+.rows .art { height: 252px; }
+.rows p { font-size: 14px; }
+
+/* Highlights (Series) */
+.hl-band { height: 300px; padding: 46px 44px 0; }
+.hl-band h1 { font-size: 54px; font-weight: 800; }
+.hl-body { position: absolute; top: 130px; left: 44px; right: 44px; bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+.hl-hero { height: 290px; outline: 6px solid var(--paper); }
+.hl-lead { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 26px; align-items: start; }
+.hl-lead h2 { font-size: 27px; font-weight: 700; line-height: 1.12; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cols3 .art { height: 140px; }
+.cols3 h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.cols3 p { font-size: 13.5px; line-height: 1.5; }
+
+/* Profile (Film) */
+.t1.pf { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.pf-box { padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 26px; }
+.pf-box h2 { font-size: 30px; font-weight: 800; line-height: 1.08; }
+.pf-box h3 { font-size: 19px; font-weight: 700; margin-top: 6px; }
+.pf-box p { font-size: 14px; }
+.pf-box .art { height: 100%; min-height: 380px; outline: 4px solid var(--on); }
+.pf-row { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.pf-row .art { height: 196px; }
+.pf-row h3 { font-size: 23px; font-weight: 700; }
+
+/* Club grid (Music) */
+.t1.ex { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.ex-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.ex-top .art { height: 350px; }
+.ex-top h2 { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ex-top p { font-size: 14px; }
+.ex-box { padding: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.ex-box .art { height: 128px; outline: 3px solid var(--on); outline-offset: -3px; }
+.ex-box h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.ex-box p { font-size: 13.5px; line-height: 1.5; }
+
+/* Split (Video games) */
+.t1.sp { display: grid; grid-template-columns: 350px 1fr; }
+.sp-l { padding: 56px 32px 56px 44px; display: flex; flex-direction: column; gap: 18px; }
+.sp-l h1 { font-size: 52px; font-weight: 800; line-height: 0.98; }
+.sp-l h2 { font-size: 24px; font-weight: 700; line-height: 1.12; }
+.sp-l p { font-size: 14px; }
+.sp-l .art { height: 290px; background: #3A1A20; }
+.sp-r { padding: 56px 44px 56px 36px; display: flex; flex-direction: column; gap: 16px; }
+.sp-r h2 { font-size: 28px; font-weight: 700; }
+.item { display: flex; flex-direction: column; gap: 5px; }
+.item .n { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--acc); }
+.item h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.item p { font-size: 14px; }
+.sp-r hr { border: 0; border-top: 1px solid var(--tint2); margin: 4px 0; width: 100%; }
+.sp-r .art { height: 190px; }
+
+/* Back */
+.t1.bk { display: flex; flex-direction: column; }
+.bk-top { height: 650px; display: flex; flex: none; }
+.bk-block { flex: 0 0 88%; padding: 54px 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.bk-block h1 { font-size: 50px; font-weight: 800; }
+.bk-strip { flex: 0 0 4%; background: var(--tint); }
+.cal { display: flex; flex-direction: column; }
+.cal div { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-top: 1px solid rgba(255, 248, 241, 0.32); align-items: baseline; }
+.cal div:last-child { border-bottom: 1px solid rgba(255, 248, 241, 0.32); }
+.cal span { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--on); }
+.cal b { font-weight: 600; font-size: 15px; display: block; }
+.cal i { font-style: normal; font-size: 12.5px; color: var(--on-soft); }
+.bk-note { font-size: 13px !important; line-height: 1.5 !important; color: var(--on-soft) !important; max-width: 520px; }
+.bk-art { flex: 1 1 auto; }
+
+
+
+.t1.mn { padding: 56px 44px 60px; display: flex; flex-direction: column; gap: 18px; }
+.mn-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.mn-head p { font-size: 15px; }
+.mn-list { display: flex; flex-direction: column; }
+.mn-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; padding: 12px 0; border-bottom: 2px dashed var(--tint2); align-items: baseline; }
+.mn-row > div { display: flex; flex-direction: column; gap: 4px; }
+.mn-row b { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.mn-row div > span { font-size: 14.5px; line-height: 1.5; color: var(--soft); }
+.mn-row i { font-style: normal; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--mute); }
+
+
+
+.t1 .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+/* Issue #03: longer agenda */
+.t1.bk .bk-top { height: 770px; }
+.t1.bk .cal div { padding: 7px 0; }
+.tc-img { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
+.tc-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.tb-pdf { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--desk-line); }
+@media print {
+  @page { size: 800px 1130px; margin: 0; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+  .mast, .toolbar, .side, .thumbs { display: none !important; }
+  .stage, .vp { display: block !important; height: auto !important; overflow: visible !important; max-width: none !important; width: 800px !important; margin: 0 !important; }
+  .book { width: 800px !important; height: auto !important; margin: 0 !important; }
+  .scaler { position: static !important; transform: none !important; width: 800px !important; height: auto !important; perspective: none !important; transition: none !important; }
+  .page { position: relative !important; left: 0 !important; top: 0 !important; visibility: visible !important; box-shadow: none !important; animation: none !important; transform: none !important; filter: none !important; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page::after { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+
+<header class="mast">
+  <div><b>Hobby Fiction</b> <span>Issue #03 · 7 Nov 2026</span></div>
+  <span id="label">Cover</span>
+</header>
+
+<main class="stage">
+  <button type="button" class="side" id="prev" aria-label="Previous page" title="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="vp" id="vp">
+    <div class="book" id="book">
+      <div class="scaler" id="scaler">
+<section class="page" aria-label="Page 1: Cover" aria-hidden="true">
+<div class="t1 cv">
+  <div class="cv-top"><span>Issue #03 · Weekly</span><span>7 November 2026</span></div>
+  <div class="cv-mast"><div class="dbl"></div><div class="cv-band acc">Hobby Fiction</div><div class="dbl"></div></div>
+  <div class="art cv-art"><img src="https://www.videogameschronicle.com/files/2026/11/vgc-social-review-overlay-5.jpg" alt="The Legend of Zelda: Ocarina of Time on Nintendo Switch 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  <div class="cv-foot">
+    <div class="cv-box acc"><b>32</b>stories this week: animation, series, film, music, games and books</div>
+    <div class="cv-head">
+      <h2>Ocarina of Time is reborn</h2>
+      <p>Nintendo's Switch 2 remake lands as the best-reviewed game of 2026. Plus a new president at Pixar, a Stranger Things prequel, U2 in Barcelona and Sanderson's first steps towards Stormlight 6.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" aria-label="Page 2: Contents" aria-hidden="true">
+<div class="t1 tc">
+  <div class="tc-l">
+    <h1>Contents</h1>
+    <div class="dbl"></div>
+    <nav class="toc" aria-label="Contents">
+      <a href="#p3" data-goto="2"><span class="t">The week in a minute</span><span class="s">Top 3 and what's coming</span><span class="ln">/ 03</span></a>
+      <a href="#p4" data-goto="3"><span class="t">Animation</span><span class="s">Pixar's new boss, Bocchi the Rock!, Blue Eye Samurai</span><span class="ln">/ 04</span></a>
+      <a href="#p5" data-goto="4"><span class="t">Series</span><span class="s">Stranger Things prequel, Nobody Wants This, The Pitt</span><span class="ln">/ 05</span></a>
+      <a href="#p6" data-goto="5"><span class="t">Film</span><span class="s">A sleepy Halloween box office, Cliff Booth, BIFAs</span><span class="ln">/ 06</span></a>
+      <a href="#p7" data-goto="6"><span class="t">Music</span><span class="s">U2 in Barcelona, RADWIMPS, My Chemical Romance</span><span class="ln">/ 07</span></a>
+      <a href="#p8" data-goto="7"><span class="t">Video games</span><span class="s">Ocarina of Time, Final Fantasy XIV, Pokémon</span><span class="ln">/ 08</span></a>
+      <a href="#p9" data-goto="8"><span class="t">Books</span><span class="s">Stormlight 6, Mistborn casting, Dunk and Egg</span><span class="ln">/ 09</span></a>
+      <a href="#p10" data-goto="9"><span class="t">More news</span><span class="s">The rest of the week in one line each</span><span class="ln">/ 10</span></a>
+      <a href="#p11" data-goto="10"><span class="t">Coming up</span><span class="s">Releases in Spain, 7–15 November</span><span class="ln">/ 11</span></a>
+    </nav>
+  </div>
+  <div class="tc-r acc" aria-hidden="true">
+    <div class="tc-img"><img src="contents.webp" alt=""></div>
+  </div>
+  <span class="pnum l">02</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 3: The week in a minute" aria-hidden="true">
+<div class="t1 wm">
+  <h1>The week in a minute</h1>
+  <div class="box acc"><p>Hyrule is back in 3D: Nintendo's Ocarina of Time remake arrived on Switch 2 with a Metacritic score of 96, the highest of the year. Pixar named Jonathan Garson as its next president, Netflix confirmed a Stranger Things prequel set in 1955, U2 booked two nights at Barcelona's Olympic Stadium and Brandon Sanderson started planning the sixth Stormlight book.</p></div>
+  <div class="zz">
+    <div class="stack">
+      <h3>Don't miss</h3>
+      <ol class="top3">
+        <li><b>Zelda: Ocarina of Time</b> launches on Switch 2 as 2026's best-reviewed game. <span class="via">p. 08</span></li>
+        <li><b>Other Worlds: A Stranger Things Adventure</b> is official for 2028. <span class="via">p. 05</span></li>
+        <li><b>U2</b> play Barcelona on 13 and 15 May 2027; general sale opens 13 November. <span class="via">p. 07</span></li>
+      </ol>
+    </div>
+    <div class="art"><img src="https://i.blogs.es/bb82ad/strangerthings_s5_0745_r-1-1-/840_560.jpeg" alt="Stranger Things" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://media.timeout.com/images/106464648/image.jpg" alt="U2 on stage" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <h3>Next week</h3>
+      <p>Football Manager 27 kicks off on 10 November, Metaphor: ReFantazio and Pikmin 4 reach Switch 2 on the 12th, and U2 presales run from the 9th ahead of the general sale on the 13th, when How to Rob a Bank and Ebenezer open in Spanish cinemas.</p>
+      <p>Full dates are on the back page.</p>
+    </div>
+  </div>
+  <div class="box acc"><p>Every story here is summarised in our own words from outlets such as Cartoon Brew, Animation Magazine, Variety, Espinof, NME, VGC, Gematsu and The Bookseller, and each one names its source.</p></div>
+  <span class="pnum r">03</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 4: Animation" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Animation</h1><div class="chips"><span class="chip">Pixar</span><span class="chip">Anime</span><span class="chip">Netflix</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Studio · Pixar</span>
+      <h2 class="tag">Pixar names a new president</h2>
+      <p>General manager Jonathan Garson will succeed Jim Morris, who has led Pixar since 2014, with the changes taking effect on 4 January 2027. Morris becomes president emeritus and stays on as executive producer of Incredibles 3, while Jonas Rivera, the Oscar-winning producer of Inside Out and Toy Story 4, moves into a full-time creative role beside Pete Docter.</p>
+      <p>Garson has spent more than 30 years at Disney and ran Pixar's marketing and franchise team. He takes over a studio that has cut staff twice and now caps each film's crew time. Next up are Gatto (5 March 2027), Ghost Market (10 March 2028) and Incredibles 3 (June 2028).</p>
+      <span class="via">Via Cartoon Brew</span>
+    </div>
+    <div class="art"><img src="https://www.cartoonbrew.com/wp-content/uploads/2026/11/Pixar-Execs-2026.jpg" alt="Pixar executives" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://i0.wp.com/anitrendz.net/news/wp-content/uploads/2026/11/Bocchi-the-Rock-Hoshi-no-Ashiato-teaser-visual-1-e1793539739185.jpg" alt="Bocchi the Rock! Hoshi no Ashiato teaser visual" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Anime film · CloverWorks · 2027</span>
+      <h2 class="tag">Bocchi the Rock! goes back in time</h2>
+      <p>Hoshi no Ashiato ("Starry Footprints") is a prequel film about the younger Ijichi sisters, Nijika and Seika, due in 2027. Shin Wakabayashi directs at CloverWorks, and Sayumi Suzushiro and Maaya Uchida return. Season two of the TV series is still in production with no date.</p>
+      <span class="via">Via Anime Corner · Anime Trending</span>
+    </div>
+    <div class="stack">
+      <span class="kick">Animated series · Netflix</span>
+      <h2 class="tag">Blue Eye Samurai sails to London</h2>
+      <p>Season two streams from 19 January, with Mizu hunting the last two men who could be her father in London while Akemi and Taigen serve a dangerous new shogun. Blue Spirit animates again, Maya Erskine leads, and Jonathan Pryce joins the cast.</p>
+      <span class="via">Via Cartoon Brew</span>
+    </div>
+    <div class="art"><img src="https://www.cartoonbrew.com/wp-content/uploads/2026/11/Blue-Eye-Samurai-S2-1.jpg" alt="Blue Eye Samurai season 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum l">04</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 5: Series" aria-hidden="true">
+<div class="t1">
+  <div class="hl-band acc"><h1>Series</h1></div>
+  <div class="hl-body">
+    <div class="art hl-hero"><img src="https://i.blogs.es/bb82ad/strangerthings_s5_0745_r-1-1-/840_560.jpeg" alt="Stranger Things" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="hl-lead">
+      <div class="stack"><span class="kick">Netflix · 2028</span><h2>Stranger Things goes back to 1955</h2></div>
+      <div class="stack"><p>Netflix has confirmed Other Worlds: A Stranger Things Adventure with a first teaser. The prequel is set in Marion, Nevada, and the Duffer Brothers have said it leads to Henry Creel becoming Vecna. Kate Trefry, who wrote the stage play The First Shadow, is showrunner and Joe Wright directs the first three episodes. It premieres in 2028; casting comes next.</p><span class="via">Via Espinof</span></div>
+    </div>
+    <div class="cols3">
+      <div class="stack">
+        <div class="art"><img src="https://s.yimg.com/lo/mysterio/api/9bbb8c3516c7549759058c174a56cc6914a69d9099cdc4ce472f83f451c7564a/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fthewrap.com%2Fcad9f564a8bdb978c8439400489770a1.jpg" alt="Nobody Wants This" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Netflix · Renewed</span>
+        <h3>Nobody Wants This gets a fourth season</h3>
+        <p>The renewal came two weeks after season three opened on 22 October with 13.4 million views. Kristen Bell and Adam Brody return.</p>
+        <span class="via">Via Variety · TheWrap</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://i.blogs.es/a9dbe4/the-pitt/840_560.jpeg" alt="The Pitt" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">HBO · In court</span>
+        <h3>The Pitt heads to trial over ER</h3>
+        <p>Michael Crichton's widow claims the hospital drama copies ER, and the case now goes to trial in Los Angeles. HBO's side denies any copying.</p>
+        <span class="via">Via Espinof</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://www.tvline.com/img/gallery/off-campus-lands-season-2-release-date-watch-announcement-for-dean-and-allie-centric-season/l-intro-1793897732.jpg" alt="Off Campus" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Prime Video · 28 Apr 2027</span>
+        <h3>Off Campus sets its return</h3>
+        <p>Season two adapts Elle Kennedy's The Score and shifts to Dean and Allie, played by Stephen Kalyn and Mika Abdalla.</p>
+        <span class="via">Via TVLine</span>
+      </div>
+    </div>
+  </div>
+  <span class="pnum r">05</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 6: Film" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">Film</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">US box office · 30 Oct–1 Nov</span>
+      <h2>A documentary wins a quiet Halloween</h2>
+      <p>You Can See Everything, Nathan Fielder and Lance Oppenheim's documentary about Elizabeth Holmes, reached No. 1 in its third weekend with an estimated $10.6 million, just $200,684 ahead of DC's Clayface ($10.4 million, down 57%). LAIKA's Wildwood was third with $7.5 million, ahead of Wicker and Street Fighter.</p>
+      <h3>The bigger picture</h3>
+      <p>The documentary has now taken $63.9 million on a reported $7 million budget. With Halloween keeping audiences at home on Saturday, the whole weekend came in under $56 million, the second-lowest of the year, although the domestic total for 2026 is still up more than 17%.</p>
+      <span class="via">Via AP · The Numbers</span>
+    </div>
+    <div class="art"><img src="https://bc.gmg.io/image/upload/c_thumb,q_auto,w_700,f_jpg/media/gmg/V57IUA6FRVHQZMF5U5RYWT5QVE.jpg?api_key=ksat_9a37fc89631abedf" alt="Box office weekend" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://www.thewrap.com/wp-content/uploads/2026/10/Cliff-Booth.jpg" alt="The Further Mis-Adventures of Cliff Booth" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Netflix · Imax from 25 Nov</span>
+      <h3>Cinemark says no to Cliff Booth</h3>
+      <p>Netflix's first Imax release, the Once Upon a Time in Hollywood follow-up with Brad Pitt, gets a two-week run before streaming on 25 December. Cinemark and Regal declined, so only AMC will show it; Cinemark's CEO said the short window does not help cinemas.</p>
+      <span class="via">Via TheWrap</span>
+    </div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://www.irishexaminer.com/cms_media/module_img/10561/5280993_1_org_2.86107865.jpg.jpg" alt="Andrew Scott in Elsinore" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Awards · BIFA</span>
+      <h3>Elsinore leads with 12 nominations</h3>
+      <p>Simon Stone's film, with Andrew Scott as actor Ian Charleson preparing Hamlet, tops the British Independent Film Awards list, ahead of Clio Barnard's I See Buildings Fall Like Lightning with eight. Winners are revealed on 6 December at London's Roundhouse.</p>
+      <span class="via">Via Irish Examiner · BFI</span>
+    </div>
+  </div>
+  <span class="pnum l">06</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 7: Music" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Music</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://media.timeout.com/images/106464648/image.jpg" alt="U2 on stage" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Barcelona · 13 &amp; 15 May 2027</span>
+      <h2>U2 book two nights at the Olympic Stadium</h2>
+      <p>The band's 2027 stadium tour for the album Carnaval de luz stops twice at Barcelona's Estadi Olímpic Lluís Companys, with a third Spanish date at La Cartuja in Seville on 22 May. The European leg opens in Stockholm on 26 April with Wolf Alice as guests.</p>
+      <p>Fan presales start on 9 November, followed by Visa (11 November) and Live Nation (12 November). General sale opens on 13 November through U2.com, Livenation.es and Ticketmaster; prices have not been announced.</p>
+      <span class="via">Via Time Out Barcelona</span>
+    </div>
+  </div>
+  <div class="ex-box acc">
+    <div class="stack">
+      <div class="art"><img src="https://skream.jp/news/2026/11/04/images/radwimpsAP.jpg" alt="RADWIMPS" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>RADWIMPS go abstract for "Shabadaba"</h3>
+      <p>The video for the theme of Fuji TV drama Political Pan, directed by Masaki Watanabe, follows two October songs for the film You, Like a Star.</p>
+      <span class="via">Via Skream!</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://bc.gmg.io/image/upload/c_thumb,q_auto,w_700,f_jpg/media/gmg/23Q5OWKRZ5FOPEOT2OLS2SRSX4.jpg?api_key=ksat_9a37fc89631abedf" alt="My Chemical Romance" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>The Black Parade finally hits No. 1</h3>
+      <p>The 20th-anniversary edition topped the Billboard 200 with 78,000 units, the longest wait ever for an album to reach the top.</p>
+      <span class="via">Via AP</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://soundtrackfest.com/wp-content/uploads/2026/11/PremiosMusimagen2026-9Edicion-Ganadores.jpg" alt="Premios Musimagen 2026" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>Spain's screen-music prizes</h3>
+      <p>At the 9th Musimagen Awards, Juan Barro won best video game score for Luto and Alfonso de Vilallonga best film score for Tres adioses.</p>
+      <span class="via">Via SoundTrackFest</span>
+    </div>
+  </div>
+  <span class="pnum r">07</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 8: Video games" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l acc">
+    <h1>Video games</h1>
+    <span class="kick">Out now · Switch 2</span>
+    <h2>Ocarina of Time, rebuilt</h2>
+    <p>Nintendo's remake came out on 5 November and debuted on Metacritic at 96 from 81 reviews, the best of 2026. HokWai Ng, who worked on Tears of the Kingdom, directs, with Eiji Aonuma producing.</p>
+    <div class="art"><img src="https://www.videogameschronicle.com/files/2026/11/vgc-social-review-overlay-5.jpg" alt="Zelda: Ocarina of Time remake" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <p>Link can now jump and dash, aim the bow with gyro controls and swap masks from the D-pad. Castle Town is fully 3D, dialogue is voiced and the Water Temple is less of a maze. VGC gave it 5/5.</p>
+    <span class="via">Via VGC · Nintendo Life · Nintendo Wire</span>
+  </div>
+  <div class="sp-r">
+    <h2>Also this week</h2>
+    <div class="item">
+      <span class="n">01 · Final Fantasy XIV</span>
+      <h3>Evercold slips to 23 February</h3>
+      <p>The expansion moves from January, with early access on 19 February. Fan Festival Tokyo revealed Zephyr, a crossbow job with a bird familiar.</p>
+      <span class="via">Via Gematsu</span>
+    </div>
+    <hr>
+    <div class="art"><img src="https://www.videogameschronicle.com/files/2026/11/Pokopia.jpg" alt="Pokémon Pokopia" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="item">
+      <span class="n">02 · Pokémon</span>
+      <h3>Pokopia's second expansion on 9 December</h3>
+      <p>Dazzling Decorations brings outfits and new towns; a third expansion is planned for 2027.</p>
+      <span class="via">Via VGC</span>
+    </div>
+    <div class="item">
+      <span class="n">03 · Pokémon</span>
+      <h3>A countdown to 30 November</h3>
+      <p>The Pokémon Company's posts count down in hours to a reveal nobody has explained yet.</p>
+      <span class="via">Via Nintendo Life</span>
+    </div>
+    <div class="item">
+      <span class="n">04 · Zelda</span>
+      <h3>The 40th anniversary runs into 2027</h3>
+      <p>Nintendo's president promised more plans; the live-action film opens on 30 April 2027.</p>
+      <span class="via">Via Nintendo Wire</span>
+    </div>
+  </div>
+  <span class="pnum l on">08</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 9: Books" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Books</h1><div class="chips"><span class="chip">Sanderson</span><span class="chip">Martin</span><span class="chip">Adaptations</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Brandon Sanderson · Stormlight</span>
+      <h2 class="tag">Stormlight 6 starts to take shape</h2>
+      <p>In his weekly video update, Sanderson said he is beginning to think about the sixth Stormlight Archive book. He plans to outline books six to ten during 2027 so he can start drafting in January 2028, after the Mistborn Era Three trilogy.</p>
+      <p>He gave no release date. For scale, he started Wind and Truth in January 2022 and it came out in December 2024. Apple TV holds the Cosmere rights, and he wants to stay ahead of the planned Stormlight series.</p>
+      <span class="via">Via CBR · Screen Rant</span>
+    </div>
+    <div class="art"><img src="https://static0.cbrimages.com/wordpress/wp-content/uploads/2026/08/stormlight-archive-cosmere-art.jpg?w=1600&amp;h=900&amp;fit=crop" alt="Stormlight Archive art" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://static0.moviewebimages.com/wordpress/wp-content/uploads/2026/08/mistborn-well-of-ascension-cover.jpg?w=1600&amp;h=900&amp;fit=crop" alt="Mistborn cover art" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Adaptation · Apple TV</span>
+      <h2 class="tag">Mistborn wants one star</h2>
+      <p>Sanderson told fans that Apple wants a well-known actor only for Kelsier, with newcomers as Vin and Elend. He finished the first draft of the film script in July and is now on a second. There are no release dates yet.</p>
+      <span class="via">Via MovieWeb</span>
+    </div>
+    <div class="stack">
+      <span class="kick">George R. R. Martin · HBO</span>
+      <h2 class="tag">Dunk and Egg finish season two</h2>
+      <p>A Knight of the Seven Kingdoms has wrapped its second season, which is expected in 2027 without an exact date. HBO has not renewed it for a third yet, though the showrunner has mapped one season per novella.</p>
+      <span class="via">Via Collider</span>
+    </div>
+    <div class="art"><img src="https://static0.colliderimages.com/wordpress/wp-content/uploads/2026/03/george-rr-martin.jpg?w=1600&amp;h=900&amp;fit=crop" alt="A Knight of the Seven Kingdoms" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum r">09</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 10: More news" aria-hidden="true">
+<div class="t1 mn">
+  <div class="mn-head"><h1 class="h-page">More news</h1><p>The rest of the week in one line each.</p></div>
+  <div class="dbl"></div>
+  <div class="mn-list">
+      <div class="mn-row"><span class="kick">Animation</span><div><b>An animated John Wick gets the green light</b><span>Keanu Reeves voices Wick in a prequel directed by Shannon Tindle.</span><i>Via Animation Magazine</i></div></div>
+      <div class="mn-row"><span class="kick">Animation</span><div><b>Netflix commits to two seasons of animated Twilight</b><span>The adult series adapts Midnight Sun, told from Edward's side.</span><i>Via Animation Magazine</i></div></div>
+      <div class="mn-row"><span class="kick">Animation</span><div><b>Dragon Ball Super: Beerus dubs come to Crunchyroll</b><span>English, Spanish and Portuguese dubs stream weekly from 12 November.</span><i>Via Animation Magazine</i></div></div>
+      <div class="mn-row"><span class="kick">Series</span><div><b>HBO renews Sharon Horgan's Youth</b><span>One of the channel's five biggest comedy launches worldwide.</span><i>Via Variety</i></div></div>
+      <div class="mn-row"><span class="kick">Series</span><div><b>Criminal shows a first trailer</b><span>Charlie Hunnam leads the Prime Video comic adaptation from 13 January 2027.</span><i>Via Espinof</i></div></div>
+      <div class="mn-row"><span class="kick">Film</span><div><b>Sebastián Lelio dies at 52</b><span>The Chilean director won the Oscar for A Fantastic Woman.</span><i>Via Espinof</i></div></div>
+      <div class="mn-row"><span class="kick">Film</span><div><b>La bola negra passes 5.5 million viewers</b><span>Los Javis' film is Spain's most-watched of the year, with €37 million.</span><i>Via Espinof</i></div></div>
+      <div class="mn-row"><span class="kick">Music</span><div><b>Jamiroquai plan a 2027 arena tour</b><span>Including three nights at London's O2; general sale on 13 November.</span><i>Via NME</i></div></div>
+      <div class="mn-row"><span class="kick">Video games</span><div><b>Poké Ball Vivillon returns to Legends: Z-A</b><span>The first worldwide gift of this form since 2014, until 26 February 2027.</span><i>Via Serebii</i></div></div>
+      <div class="mn-row"><span class="kick">Books</span><div><b>China Miéville wins the Goldsmiths Prize</b><span>At 1,242 pages, The Rouse is the longest winner in the prize's history.</span><i>Via The Bookseller</i></div></div>
+  </div>
+  <span class="pnum l">10</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 11: Coming up" aria-hidden="true">
+<div class="t1 bk">
+  <div class="bk-top">
+    <div class="bk-block acc">
+      <h1>Coming up</h1>
+      <div class="cal">
+        <div><span>10 Nov</span><p><b>Football Manager 27</b><i>PC, PS5, Xbox Series · Games</i></p></div>
+        <div><span>10 Nov</span><p><b>Warhammer Survivors</b><i>PC, PS5, Xbox Series, Switch, Switch 2 · Games</i></p></div>
+        <div><span>12 Nov</span><p><b>Metaphor: ReFantazio</b><i>Switch 2 · Games</i></p></div>
+        <div><span>12 Nov</span><p><b>Pikmin 4 – Switch 2 Edition + Dandori Academy</b><i>Switch 2 · Games</i></p></div>
+        <div><span>12 Nov</span><p><b>Sonic Pico Park</b><i>PC, PS5, Xbox Series, Switch, Switch 2 · Games</i></p></div>
+        <div><span>13 Nov</span><p><b>How to Rob a Bank (Cómo robar un banco)</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>13 Nov</span><p><b>Ebenezer (Scrooge y los fantasmas de la Navidad)</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>13 Nov</span><p><b>The Rivals of Amziah King</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>13 Nov</span><p><b>The Violinist (La violinista)</b><i>Cinemas in Spain · Animation</i></p></div>
+      </div>
+      <p class="bk-note">Release dates in Spain, 7–15 November. No new anime premieres in Spain this week. Every story in Hobby Fiction is a summary written for this issue, with its sources credited.</p>
+    </div>
+    <div class="bk-strip"></div>
+  </div>
+  <div class="art bk-art" role="img" aria-label="Illustration: a cinema at dusk with a marquee reading See you next week">
+<svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="800" height="480" fill="#F5D6DC"/><rect y="150" width="800" height="120" fill="#EDAFBB"/><rect y="270" width="800" height="210" fill="#DE7A88"/>
+      <circle cx="640" cy="230" r="70" fill="#FFFAFA"/>
+      <path d="M0 480 V330 H60 V290 H120 V350 H170 V270 H220 V480 Z M580 480 V300 H630 V340 H690 V280 H750 V320 H800 V480 Z" fill="#5A2630"/>
+      <rect x="250" y="150" width="300" height="330" fill="#8F2439" stroke="#2A181C" stroke-width="6"/>
+      <path d="M240 150 L400 90 L560 150 Z" fill="#2A181C"/>
+      <rect x="226" y="210" width="348" height="84" fill="#FFFAFA" stroke="#2A181C" stroke-width="6"/>
+      <g fill="#D9772B"><circle cx="246" cy="222" r="5"/><circle cx="276" cy="222" r="5"/><circle cx="306" cy="222" r="5"/><circle cx="336" cy="222" r="5"/><circle cx="366" cy="222" r="5"/><circle cx="396" cy="222" r="5"/><circle cx="426" cy="222" r="5"/><circle cx="456" cy="222" r="5"/><circle cx="486" cy="222" r="5"/><circle cx="516" cy="222" r="5"/><circle cx="546" cy="222" r="5"/>
+      <circle cx="246" cy="282" r="5"/><circle cx="276" cy="282" r="5"/><circle cx="306" cy="282" r="5"/><circle cx="336" cy="282" r="5"/><circle cx="366" cy="282" r="5"/><circle cx="396" cy="282" r="5"/><circle cx="426" cy="282" r="5"/><circle cx="456" cy="282" r="5"/><circle cx="486" cy="282" r="5"/><circle cx="516" cy="282" r="5"/><circle cx="546" cy="282" r="5"/></g>
+      <text x="400" y="262" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="32" fill="#2A181C">SEE YOU NEXT WEEK</text>
+      <g fill="#2A181C"><rect x="300" y="350" width="60" height="130"/><rect x="440" y="350" width="60" height="130"/><rect x="370" y="330" width="60" height="150" fill="#D9772B" stroke="#2A181C" stroke-width="5"/></g>
+      <rect y="462" width="800" height="18" fill="#2A181C"/>
+    </svg>
+  </div>
+</div>
+</section>
+
+
+      </div>
+    </div>
+  </div>
+  <button type="button" class="side" id="next" aria-label="Next page" title="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</main>
+
+<footer class="toolbar">
+  <div class="tg tg-l">
+    <button type="button" class="tb" id="zoomOut" aria-label="Zoom out" title="Zoom out (−)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <span class="zoomval" id="zoomVal">100%</span>
+    <button type="button" class="tb" id="zoomIn" aria-label="Zoom in" title="Zoom in (+)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button type="button" class="tb" id="thumbsBtn" aria-label="All pages" title="All pages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button>
+    <button type="button" class="tb" id="playBtn" aria-label="Autoplay" aria-pressed="false" title="Autoplay"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  </div>
+  <div class="tg tg-c">
+    <button type="button" class="tb" id="firstBtn" aria-label="First page" title="First page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M18 6l-7 6 7 6"/></svg></button>
+    <button type="button" class="tb" id="prevBtn" aria-label="Previous page" title="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <label class="pager"><input type="text" id="pageInput" inputmode="numeric" autocomplete="off" aria-label="Current page, type a number and press Enter"><span id="total">/ 11</span></label>
+    <button type="button" class="tb" id="nextBtn" aria-label="Next page" title="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button type="button" class="tb" id="lastBtn" aria-label="Last page" title="Last page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M6 6l7 6-7 6"/></svg></button>
+  </div>
+  <div class="tg tg-r">
+    <button type="button" class="tb tb-pdf" id="pdfBtn" title="Save as PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>PDF</button>
+    <button type="button" class="tb" id="viewBtn" aria-label="Switch to single page" title="Single / double page"><svg id="icoDouble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h8v14H3zM13 5h8v14h-8z"/></svg><svg id="icoSingle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" hidden><path d="M7 3h10v18H7z"/></svg></button>
+    <button type="button" class="tb" id="fsBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</footer>
+
+<div class="thumbs" id="thumbs" role="dialog" aria-modal="true" aria-labelledby="thumbsTitle" hidden>
+  <div class="thumbs-head"><h2 id="thumbsTitle">All pages</h2><button type="button" class="close" id="thumbsClose">Close</button></div>
+  <div class="thumbs-grid" id="thumbsGrid"></div>
+</div>
+
+<script>
+(function () {
+  var labels = ['Cover', 'Contents', 'The week in a minute', 'Animation', 'Series', 'Film', 'Music', 'Video games', 'Books', 'More news', 'Coming up'];
+  var N = labels.length, W = 800, H = 1130, T = 330;
+  var Z = [1, 1.5, 2, 3];
+  var $ = function (id) { return document.getElementById(id); };
+  var pages = Array.prototype.slice.call(document.querySelectorAll('#scaler > .page'));
+  var vp = $('vp'), book = $('book'), scaler = $('scaler'), input = $('pageInput');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { pref: 'double', dbl: true, spreads: [], cur: 0, zi: 0, s: 0.5, busy: false, play: null };
+  var FX = ['under', 'fx-out-r', 'fx-in-l', 'fx-out-l', 'fx-in-r', 'fx-turn', 'fx-return'];
+
+  try { var saved = localStorage.getItem('hf-view'); if (saved === 'single' || saved === 'double') st.pref = saved; } catch (e) {}
+  $('total').textContent = '/ ' + N;
+
+  function narrow() { return window.innerWidth < 760; }
+  function buildSpreads() {
+    var s = [];
+    if (st.dbl) { s.push([null, 0]); for (var i = 1; i < N; i += 2) s.push([i, i + 1 < N ? i + 1 : null]); }
+    else { for (var j = 0; j < N; j++) s.push([j]); }
+    st.spreads = s;
+  }
+  function spreadOf(p) { for (var i = 0; i < st.spreads.length; i++) if (st.spreads[i].indexOf(p) > -1) return i; return 0; }
+  function firstOf(i) { var sp = st.spreads[i]; return sp[0] != null ? sp[0] : sp[1]; }
+  function place() {
+    pages.forEach(function (p) { p.classList.remove('slot-l', 'slot-r', 'slot-c'); });
+    st.spreads.forEach(function (sp) {
+      if (st.dbl) { if (sp[0] != null) pages[sp[0]].classList.add('slot-l'); if (sp[1] != null) pages[sp[1]].classList.add('slot-r'); }
+      else pages[sp[0]].classList.add('slot-c');
+    });
+  }
+  function showOnly(i) {
+    var vis = st.spreads[i];
+    pages.forEach(function (p, k) {
+      var on = vis.indexOf(k) > -1;
+      FX.forEach(function (c) { p.classList.remove(c); });
+      p.classList.toggle('on', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  function shiftFor(i) { if (!st.dbl) return 0; var sp = st.spreads[i]; if (sp[0] == null) return -W / 2; if (sp[1] == null) return W / 2; return 0; }
+  function applyTransform() { scaler.style.transform = 'scale(' + st.s + ') translateX(' + shiftFor(st.cur) + 'px)'; }
+  function fit() {
+    var across = st.dbl ? 2 : 1;
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var base = Math.max(Math.min((w - 8) / (W * across), (h - 8) / H), 0.05);
+    st.s = base * Z[st.zi];
+    scaler.style.width = (W * across) + 'px';
+    book.style.width = (W * across * st.s) + 'px';
+    book.style.height = (H * st.s) + 'px';
+    applyTransform();
+  }
+
+  function ui() {
+    var sp = st.spreads[st.cur].filter(function (x) { return x != null; });
+    input.value = sp.map(function (x) { return x + 1; }).join('-');
+    $('label').textContent = sp.map(function (x) { return labels[x]; }).join(' · ');
+    var atStart = st.cur === 0, atEnd = st.cur === st.spreads.length - 1;
+    $('prev').disabled = $('prevBtn').disabled = $('firstBtn').disabled = atStart;
+    $('next').disabled = $('nextBtn').disabled = $('lastBtn').disabled = atEnd;
+    $('zoomOut').disabled = st.zi === 0;
+    $('zoomIn').disabled = st.zi === Z.length - 1;
+    $('zoomVal').textContent = Math.round(Z[st.zi] * 100) + '%';
+    $('icoDouble').hidden = !st.dbl;
+    $('icoSingle').hidden = st.dbl;
+    $('viewBtn').setAttribute('aria-label', st.dbl ? 'Switch to single page' : 'Switch to double page');
+    $('viewBtn').disabled = narrow();
+    Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function (t, k) {
+      if (sp.indexOf(k) > -1) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#p' + (firstOf(st.cur) + 1)); } catch (e) {}
+  }
+
+  function go(i) {
+    if (i < 0 || i >= st.spreads.length || i === st.cur || st.busy) return;
+    var from = st.spreads[st.cur], to = st.spreads[i], fwd = i > st.cur;
+    st.cur = i; ui(); applyTransform();
+    if (reduce) { showOnly(i); return; }
+    st.busy = true;
+    var el = function (k) { return k == null ? null : pages[k]; };
+    var add = function (e, c) { if (e) e.classList.add(c); };
+    if (!st.dbl) {
+      if (fwd) { add(el(to[0]), 'under'); add(el(from[0]), 'fx-turn'); }
+      else { add(el(from[0]), 'under'); add(el(to[0]), 'fx-return'); }
+    } else if (fwd) {
+      add(el(to[1]), 'under'); add(el(from[1]), 'fx-out-r'); add(el(to[0]), 'fx-in-l');
+    } else {
+      add(el(to[0]), 'under'); add(el(from[0]), 'fx-out-l'); add(el(to[1]), 'fx-in-r');
+    }
+    setTimeout(function () { showOnly(st.cur); st.busy = false; }, 2 * T + 40);
+  }
+  function goPage(p) { go(spreadOf(p)); }
+
+  function setMode(dbl) {
+    var p = firstOf(st.cur);
+    st.dbl = dbl; buildSpreads(); place();
+    st.cur = spreadOf(p);
+    showOnly(st.cur); fit(); ui();
+  }
+  function setZoom(zi) {
+    zi = Math.max(0, Math.min(Z.length - 1, zi));
+    if (zi === st.zi) return;
+    st.zi = zi;
+    vp.classList.toggle('zoomed', zi > 0);
+    fit(); ui();
+    vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+    vp.scrollTop = 0;
+  }
+
+  book.addEventListener('click', function (e) {
+    if (moved) { moved = false; return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); goPage(+g.getAttribute('data-goto')); return; }
+    if (st.zi > 0) return;
+    var p = e.target.closest('.page');
+    if (!p) return;
+    if (p.classList.contains('slot-l')) go(st.cur - 1);
+    else if (p.classList.contains('slot-r')) go(st.cur + 1);
+    else { var r = p.getBoundingClientRect(); go(e.clientX - r.left < r.width / 2 ? st.cur - 1 : st.cur + 1); }
+  });
+  book.addEventListener('mousemove', function (e) {
+    var p = e.target.closest('.page');
+    var left = p ? (p.classList.contains('slot-l') || (p.classList.contains('slot-c') && e.clientX - p.getBoundingClientRect().left < p.getBoundingClientRect().width / 2)) : false;
+    book.classList.toggle('left', left);
+  });
+
+  var drag = null, moved = false;
+  vp.addEventListener('pointerdown', function (e) {
+    if (st.zi === 0 || e.button !== 0 || e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop }; moved = false;
+    vp.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    vp.scrollLeft = drag.l - dx; vp.scrollTop = drag.t - dy;
+  });
+  window.addEventListener('pointerup', function () { if (drag) { drag = null; vp.classList.remove('grabbing'); } });
+
+  var sx = null;
+  book.addEventListener('touchstart', function (e) { sx = st.zi === 0 ? e.touches[0].clientX : null; }, { passive: true });
+  book.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) { e.preventDefault(); go(dx < 0 ? st.cur + 1 : st.cur - 1); }
+  });
+
+  $('prev').addEventListener('click', function () { go(st.cur - 1); });
+  $('next').addEventListener('click', function () { go(st.cur + 1); });
+  $('prevBtn').addEventListener('click', function () { go(st.cur - 1); });
+  $('nextBtn').addEventListener('click', function () { go(st.cur + 1); });
+  $('firstBtn').addEventListener('click', function () { go(0); });
+  $('lastBtn').addEventListener('click', function () { go(st.spreads.length - 1); });
+  $('zoomIn').addEventListener('click', function () { setZoom(st.zi + 1); });
+  $('zoomOut').addEventListener('click', function () { setZoom(st.zi - 1); });
+  $('viewBtn').addEventListener('click', function () {
+    st.pref = st.dbl ? 'single' : 'double';
+    try { localStorage.setItem('hf-view', st.pref); } catch (e) {}
+    setMode(st.pref === 'double');
+  });
+  input.addEventListener('focus', function () { input.select(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var n = parseInt(input.value, 10);
+    if (n >= 1 && n <= N) goPage(n - 1); else ui();
+    input.blur();
+  });
+  input.addEventListener('blur', ui);
+
+  function setPlay(on) {
+    if (st.play) { clearInterval(st.play); st.play = null; }
+    if (on) {
+      if (st.cur === st.spreads.length - 1) go(0);
+      st.play = setInterval(function () {
+        if (st.cur >= st.spreads.length - 1) { setPlay(false); return; }
+        go(st.cur + 1);
+      }, 4000);
+    }
+    $('playBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('playIco').hidden = on; $('pauseIco').hidden = !on;
+  }
+  $('playBtn').addEventListener('click', function () { setPlay(!st.play); });
+
+  $('pdfBtn').addEventListener('click', function () { setPlay(false); window.print(); });
+  var fsOk = document.fullscreenEnabled && document.documentElement.requestFullscreen;
+  if (!fsOk) $('fsBtn').hidden = true;
+  $('fsBtn').addEventListener('click', function () {
+    try {
+      var r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (r && r.catch) r.catch(function () {});
+    } catch (e) {}
+  });
+
+  var grid = $('thumbsGrid');
+  pages.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb';
+    b.setAttribute('aria-label', 'Page ' + (i + 1) + ': ' + labels[i]);
+    var box = document.createElement('span'); box.className = 'thumb-box';
+    var c = p.cloneNode(true);
+    c.className = 'thumb-page'; c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('a, button'), function (x) { x.setAttribute('tabindex', '-1'); });
+    box.appendChild(c);
+    var cap = document.createElement('span'); cap.className = 'thumb-cap';
+    cap.textContent = String(i + 1).padStart(2, '0') + ' · ' + labels[i];
+    b.appendChild(box); b.appendChild(cap);
+    b.addEventListener('click', function () { closeThumbs(); goPage(i); });
+    grid.appendChild(b);
+  });
+  function openThumbs() { $('thumbs').hidden = false; ui(); var cur = grid.querySelector('[aria-current="page"]') || grid.firstChild; if (cur) cur.focus(); }
+  function closeThumbs() { $('thumbs').hidden = true; $('thumbsBtn').focus(); }
+  $('thumbsBtn').addEventListener('click', openThumbs);
+  $('thumbsClose').addEventListener('click', closeThumbs);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target === input) return;
+    if (!$('thumbs').hidden) { if (e.key === 'Escape') closeThumbs(); return; }
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); go(st.cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(st.cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(st.spreads.length - 1); }
+    else if (k === '+' || k === '=') { e.preventDefault(); setZoom(st.zi + 1); }
+    else if (k === '-') { e.preventDefault(); setZoom(st.zi - 1); }
+    else if (k === '0') { e.preventDefault(); setZoom(0); }
+  });
+
+  function onResize() {
+    var want = !narrow() && st.pref === 'double';
+    if (want !== st.dbl) setMode(want); else { fit(); ui(); }
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(vp);
+
+  st.dbl = !narrow() && st.pref === 'double';
+  buildSpreads(); place();
+  var m = /^#p(\d+)$/.exec(location.hash || '');
+  var startPage = m ? Math.min(N, Math.max(1, +m[1])) - 1 : 0;
+  st.cur = spreadOf(startPage);
+  scaler.style.transition = 'none';
+  showOnly(st.cur); fit(); ui();
+  requestAnimationFrame(function () { scaler.style.transition = ''; });
+})();
+</script>
+
+</body></html>
