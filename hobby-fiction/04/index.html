@@ -1,0 +1,970 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Hobby Fiction #04 · 9 November 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Playfair+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: magazine reader on a dark desk. Spread (cover alone, then pairs) or single page, scaled to fit; toolbar below. Single deliberate dark look. */
+:root {
+  --desk: #1E140D;
+  --desk-raised: #2E1F15;
+  --desk-line: #4A3426;
+  --paper: #FBF1DE;
+  --ink: #2B1B12;
+  --accent: #F0965A;
+  --muted: #C9A27E;
+  --display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  --body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --t: 0.33s;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--body);
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+button { font: inherit; }
+
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.mast b { font-family: var(--display); font-weight: 400; font-size: 18px; text-transform: uppercase; color: var(--accent); }
+.mast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mast #label { color: var(--paper); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.vp { height: 100%; min-width: 0; display: flex; overflow: hidden; }
+.vp.zoomed { overflow: auto; cursor: grab; }
+.vp.zoomed.grabbing { cursor: grabbing; }
+.book { position: relative; flex: none; margin: auto; cursor: e-resize; }
+.book.left { cursor: w-resize; }
+.vp.zoomed .book { cursor: inherit; }
+.scaler {
+  position: absolute; top: 0; left: 0; height: 1130px;
+  transform-origin: 0 0; perspective: 3200px;
+  transition: transform 0.45s ease;
+}
+.page {
+  position: absolute; top: 0; left: 0; width: 800px; height: 1130px;
+  visibility: hidden; overflow: hidden; backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.page.slot-r { left: 800px; }
+.page::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; }
+.page.slot-c::after, .page.slot-r::after { left: 0; background: linear-gradient(90deg, rgba(43, 27, 18, 0.28), rgba(43, 27, 18, 0)); }
+.page.slot-l::after { right: 0; background: linear-gradient(270deg, rgba(43, 27, 18, 0.28), rgba(43, 27, 18, 0)); }
+.page.on { visibility: visible; z-index: 2; }
+.page.under { visibility: visible; z-index: 1; }
+.page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { visibility: visible; z-index: 3; }
+.page.fx-out-r { transform-origin: left center; animation: outR var(--t) ease-in forwards; }
+.page.fx-in-l { transform-origin: right center; animation: inL var(--t) ease-out var(--t) both; }
+.page.fx-out-l { transform-origin: right center; animation: outL var(--t) ease-in forwards; }
+.page.fx-in-r { transform-origin: left center; animation: inR var(--t) ease-out var(--t) both; }
+.page.fx-turn { transform-origin: left center; animation: turnOut calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+.page.fx-return { transform-origin: left center; animation: turnIn calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+@keyframes outR { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-90deg); filter: brightness(0.65); } }
+@keyframes inL { from { transform: rotateY(90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes outL { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(90deg); filter: brightness(0.65); } }
+@keyframes inR { from { transform: rotateY(-90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes turnOut { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(0.6); } }
+@keyframes turnIn { from { transform: rotateY(-100deg); filter: brightness(0.6); } to { transform: rotateY(0); filter: brightness(1); } }
+
+.side {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--desk-line); background: var(--desk-raised); color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.side:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.side:disabled { opacity: 0.25; cursor: default; }
+.side svg { width: 22px; height: 22px; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--desk-line); padding-top: 8px;
+}
+.tg { display: flex; align-items: center; gap: 4px; }
+.tb {
+  width: 44px; height: 44px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+}
+.tb:hover:not(:disabled) { background: var(--desk-raised); color: var(--accent); }
+.tb:disabled { opacity: 0.3; cursor: default; }
+.tb[aria-pressed="true"] { background: var(--desk-raised); color: var(--accent); }
+.tb svg { width: 20px; height: 20px; }
+.pager { display: flex; align-items: center; gap: 8px; margin-inline: 6px; font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pager input {
+  width: 64px; height: 34px; box-sizing: border-box; text-align: center;
+  border: 1px solid var(--desk-line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.zoomval { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.thumbs {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(30, 20, 13, 0.97);
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+}
+.thumbs[hidden] { display: none; }
+.thumbs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; width: 100%; margin: 0 auto; }
+.thumbs-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--paper); }
+.thumbs-grid {
+  flex: 1 1 auto; overflow-y: auto; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 20px; align-content: start;
+}
+.thumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.thumb-box { width: 144px; height: 203px; overflow: hidden; position: relative; border-radius: 3px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); outline: 3px solid transparent; outline-offset: 3px; transition: outline-color 0.15s, transform 0.15s; }
+.thumb:hover .thumb-box { transform: translateY(-3px); }
+.thumb[aria-current="page"] .thumb-box { outline-color: var(--accent); }
+.thumb-page { position: absolute; top: 0; left: 0; width: 800px; height: 1130px; transform: scale(0.18); transform-origin: 0 0; pointer-events: none; }
+.thumb-cap { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.thumb[aria-current="page"] .thumb-cap { color: var(--accent); }
+.close {
+  height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--desk-line);
+  background: var(--desk-raised); color: var(--paper); cursor: pointer; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .toolbar { justify-content: center; }
+  .tg-c { order: -1; width: 100%; justify-content: center; }
+  .zoomval { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scaler { transition: none; }
+  .page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { animation: none; }
+}
+/* Template 1: white pages, one warm accent (terracotta, saturation close to the reference teal), Playfair display + Figtree body */
+.t1 {
+  --acc: #B4561C; --tint: #F7E1CD; --tint2: #EDC5A2; --paper: #FFFBF6; --ink: #2B1A10; --soft: #5C4334; --mute: #946F57; --on: #FFF8F1; --on-soft: #F9DCC3; --gold: #C9962B;
+  width: 800px; height: 1130px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+}
+.t1 * { box-sizing: border-box; }
+.t1 h1, .t1 h2, .t1 h3 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; margin: 0; color: inherit; text-wrap: balance; }
+.t1 p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
+.t1 ol { margin: 0; }
+.t1 .via { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.t1 .kick { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.t1 .art { position: relative; overflow: hidden; background: var(--tint); }
+.t1 .art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.t1 .acc { background: var(--acc); color: var(--on); }
+.t1 .acc p { color: var(--on); }
+.t1 .acc .via, .t1 .acc .kick { color: var(--on-soft); }
+.t1 .h-page { font-weight: 800; font-size: 50px; line-height: 1; letter-spacing: -0.01em; }
+.t1 .dbl { height: 7px; border-top: 2px solid var(--acc); border-bottom: 2px solid var(--acc); }
+.t1 .pnum { position: absolute; bottom: 22px; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.t1 .pnum.l { left: 44px; } .t1 .pnum.r { right: 44px; }
+.t1 .pnum.on { color: var(--on-soft); }
+.t1 .tag { display: inline-block; align-self: flex-start; background: var(--acc); color: var(--on); font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1.15; padding: 8px 14px; }
+.t1 .stack { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+/* Cover */
+.t1.cv { padding: 40px 44px 44px; display: flex; flex-direction: column; gap: 18px; }
+.cv-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.cv-mast { display: flex; flex-direction: column; gap: 6px; }
+.cv-band { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.1; text-align: center; text-transform: uppercase; letter-spacing: 0.02em; padding: 4px 0 8px; }
+.cv-art { height: 610px; background: repeating-conic-gradient(from 0deg at 50% 46%, #EFC39C 0deg 9deg, #F9E7D6 9deg 18deg); }
+.cv-foot { display: flex; gap: 28px; align-items: flex-start; }
+.cv-box { flex: 0 0 190px; margin: -132px 0 0 18px; padding: 20px; position: relative; z-index: 1; font-weight: 700; font-size: 15px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 8px; }
+.cv-box b { font-family: 'Playfair Display', Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: 0; }
+.cv-head { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cv-head h2 { font-size: 36px; font-weight: 800; text-transform: uppercase; line-height: 1.02; }
+
+/* Contents */
+.t1.tc { display: grid; grid-template-columns: 448px 1fr; }
+.tc-l { padding: 70px 40px 60px 44px; display: flex; flex-direction: column; gap: 26px; }
+.tc-l h1 { font-size: 62px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.tc-l .dbl { margin-top: -10px; }
+.toc { display: flex; flex-direction: column; gap: 15px; }
+.toc a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+.toc .t { font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.toc .s { font-size: 13px; color: var(--soft); }
+.toc .ln { display: flex; align-items: center; gap: 10px; color: #C2733C; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.toc .ln::before { content: ""; flex: 1; border-bottom: 2px dashed var(--tint2); }
+.toc a:hover .t { color: var(--acc); }
+.tc-r { position: relative; overflow: hidden; }
+.strip { position: absolute; top: -50px; bottom: -50px; left: 62px; right: 62px; background: var(--ink); transform: rotate(-3deg); display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 34px; }
+.strip::before, .strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; background: repeating-linear-gradient(to bottom, var(--paper) 0 16px, transparent 16px 36px); }
+.strip::before { left: 10px; } .strip::after { right: 10px; }
+.frame { width: 100%; aspect-ratio: 1; background: var(--tint); border-radius: 4px; display: grid; place-items: center; }
+.frame svg { width: 62%; height: 62%; }
+
+/* Week in a minute */
+.t1.wm { padding: 54px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.wm h1 { font-size: 42px; font-weight: 800; text-transform: uppercase; }
+.box { padding: 20px 24px; }
+.box p { font-size: 15.5px; font-weight: 500; line-height: 1.55; }
+.zz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+.zz .art { height: 250px; }
+.zz h3 { font-size: 26px; font-weight: 700; }
+.top3 { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.top3 li::marker { color: var(--acc); font-weight: 700; }
+
+/* Rows (Animation) */
+.t1.nw { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 22px; }
+.nw-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--acc); color: var(--acc); padding: 4px 10px; border-radius: 999px; }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 30px; }
+.rows .art { height: 252px; }
+.rows p { font-size: 14px; }
+
+/* Highlights (Series) */
+.hl-band { height: 300px; padding: 46px 44px 0; }
+.hl-band h1 { font-size: 54px; font-weight: 800; }
+.hl-body { position: absolute; top: 130px; left: 44px; right: 44px; bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+.hl-hero { height: 290px; outline: 6px solid var(--paper); }
+.hl-lead { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 26px; align-items: start; }
+.hl-lead h2 { font-size: 27px; font-weight: 700; line-height: 1.12; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cols3 .art { height: 140px; }
+.cols3 h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.cols3 p { font-size: 13.5px; line-height: 1.5; }
+
+/* Profile (Film) */
+.t1.pf { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.pf-box { padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 26px; }
+.pf-box h2 { font-size: 30px; font-weight: 800; line-height: 1.08; }
+.pf-box h3 { font-size: 19px; font-weight: 700; margin-top: 6px; }
+.pf-box p { font-size: 14px; }
+.pf-box .art { height: 100%; min-height: 380px; outline: 4px solid var(--on); }
+.pf-row { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.pf-row .art { height: 196px; }
+.pf-row h3 { font-size: 23px; font-weight: 700; }
+
+/* Club grid (Music) */
+.t1.ex { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.ex-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.ex-top .art { height: 350px; }
+.ex-top h2 { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ex-top p { font-size: 14px; }
+.ex-box { padding: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.ex-box .art { height: 128px; outline: 3px solid var(--on); outline-offset: -3px; }
+.ex-box h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.ex-box p { font-size: 13.5px; line-height: 1.5; }
+
+/* Split (Video games) */
+.t1.sp { display: grid; grid-template-columns: 350px 1fr; }
+.sp-l { padding: 56px 32px 56px 44px; display: flex; flex-direction: column; gap: 18px; }
+.sp-l h1 { font-size: 52px; font-weight: 800; line-height: 0.98; }
+.sp-l h2 { font-size: 24px; font-weight: 700; line-height: 1.12; }
+.sp-l p { font-size: 14px; }
+.sp-l .art { height: 290px; background: #3A2214; }
+.sp-r { padding: 56px 44px 56px 36px; display: flex; flex-direction: column; gap: 16px; }
+.sp-r h2 { font-size: 28px; font-weight: 700; }
+.item { display: flex; flex-direction: column; gap: 5px; }
+.item .n { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--acc); }
+.item h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.item p { font-size: 14px; }
+.sp-r hr { border: 0; border-top: 1px solid var(--tint2); margin: 4px 0; width: 100%; }
+.sp-r .art { height: 190px; }
+
+/* Back */
+.t1.bk { display: flex; flex-direction: column; }
+.bk-top { height: 650px; display: flex; flex: none; }
+.bk-block { flex: 0 0 88%; padding: 54px 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.bk-block h1 { font-size: 50px; font-weight: 800; }
+.bk-strip { flex: 0 0 4%; background: var(--tint); }
+.cal { display: flex; flex-direction: column; }
+.cal div { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-top: 1px solid rgba(255, 248, 241, 0.32); align-items: baseline; }
+.cal div:last-child { border-bottom: 1px solid rgba(255, 248, 241, 0.32); }
+.cal span { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--on); }
+.cal b { font-weight: 600; font-size: 15px; display: block; }
+.cal i { font-style: normal; font-size: 12.5px; color: var(--on-soft); }
+.bk-note { font-size: 13px !important; line-height: 1.5 !important; color: var(--on-soft) !important; max-width: 520px; }
+.bk-art { flex: 1 1 auto; }
+
+
+
+.t1.mn { padding: 56px 44px 60px; display: flex; flex-direction: column; gap: 18px; }
+.mn-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.mn-head p { font-size: 15px; }
+.mn-list { display: flex; flex-direction: column; }
+.mn-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; padding: 12px 0; border-bottom: 2px dashed var(--tint2); align-items: baseline; }
+.mn-row > div { display: flex; flex-direction: column; gap: 4px; }
+.mn-row b { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.mn-row div > span { font-size: 14.5px; line-height: 1.5; color: var(--soft); }
+.mn-row i { font-style: normal; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--mute); }
+
+
+
+.t1 .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+/* Longer agenda */
+.t1.bk .bk-top { height: 770px; }
+.t1.bk .cal div { padding: 4px 0; }
+.tc-img { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
+.tc-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.tb-pdf { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--desk-line); }
+@media print {
+  @page { size: 800px 1130px; margin: 0; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+  .mast, .toolbar, .side, .thumbs { display: none !important; }
+  .stage, .vp { display: block !important; height: auto !important; overflow: visible !important; max-width: none !important; width: 800px !important; margin: 0 !important; }
+  .book { width: 800px !important; height: auto !important; margin: 0 !important; }
+  .scaler { position: static !important; transform: none !important; width: 800px !important; height: auto !important; perspective: none !important; transition: none !important; }
+  .page { position: relative !important; left: 0 !important; top: 0 !important; visibility: visible !important; box-shadow: none !important; animation: none !important; transform: none !important; filter: none !important; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page::after { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+
+<header class="mast">
+  <div><b>Hobby Fiction</b> <span>Issue #04 · 9 Nov 2026</span></div>
+  <span id="label">Cover</span>
+</header>
+
+<main class="stage">
+  <button type="button" class="side" id="prev" aria-label="Previous page" title="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="vp" id="vp">
+    <div class="book" id="book">
+      <div class="scaler" id="scaler">
+<section class="page" aria-label="Page 1: Cover" aria-hidden="true">
+<div class="t1 cv">
+  <div class="cv-top"><span>Issue #04 · Weekly</span><span>9 November 2026</span></div>
+  <div class="cv-mast"><div class="dbl"></div><div class="cv-band acc">Hobby Fiction</div><div class="dbl"></div></div>
+  <div class="art cv-art"><img src="https://media-cdn.socastsrm.com/wordpress/wp-content/blogs.dir/3836/files/2026/11/godzilla.jpg" alt="Godzilla Minus Zero" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  <div class="cv-foot">
+    <div class="cv-box acc"><b>31</b>stories this week: animation, series, film, music, games and books</div>
+    <div class="cv-head">
+      <h2>Godzilla stomps to a record</h2>
+      <p>Godzilla Minus Zero tops the North American box office with the biggest opening ever for a foreign-language live-action film. Plus Spy x Family's return, Black Doves, Final Fantasy's future and a record week for Sarah J. Maas.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" aria-label="Page 2: Contents" aria-hidden="true">
+<div class="t1 tc">
+  <div class="tc-l">
+    <h1>Contents</h1>
+    <div class="dbl"></div>
+    <nav class="toc" aria-label="Contents">
+      <a href="#p3" data-goto="2"><span class="t">The week in a minute</span><span class="s">Top 3 and what's coming</span><span class="ln">/ 03</span></a>
+      <a href="#p4" data-goto="3"><span class="t">Animation</span><span class="s">Spy x Family, The Cat in the Hat, Wildwood</span><span class="ln">/ 04</span></a>
+      <a href="#p5" data-goto="4"><span class="t">Series</span><span class="s">The Gilded Age, Black Doves, From</span><span class="ln">/ 05</span></a>
+      <a href="#p6" data-goto="5"><span class="t">Film</span><span class="s">Godzilla Minus Zero, Ramayana, Dune</span><span class="ln">/ 06</span></a>
+      <a href="#p7" data-goto="6"><span class="t">Music</span><span class="s">Ocarina's orchestra, Olivia Rodrigo, The Cure</span><span class="ln">/ 07</span></a>
+      <a href="#p8" data-goto="7"><span class="t">Video games</span><span class="s">Final Fantasy after the remakes, Switch 2</span><span class="ln">/ 08</span></a>
+      <a href="#p9" data-goto="8"><span class="t">Books</span><span class="s">Sarah J. Maas, Baillie Gifford, John Gwynne</span><span class="ln">/ 09</span></a>
+      <a href="#p10" data-goto="9"><span class="t">More news</span><span class="s">The rest of the week in one line each</span><span class="ln">/ 10</span></a>
+      <a href="#p11" data-goto="10"><span class="t">Coming up</span><span class="s">Releases in Spain, 9–15 November</span><span class="ln">/ 11</span></a>
+    </nav>
+  </div>
+  <div class="tc-r acc" aria-hidden="true">
+    <div class="tc-img"><img src="contents.webp" alt=""></div>
+  </div>
+  <span class="pnum l">02</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 3: The week in a minute" aria-hidden="true">
+<div class="t1 wm">
+  <h1>The week in a minute</h1>
+  <div class="box acc"><p>Godzilla Minus Zero opened at No. 1 in North America with $31.6 million, a record for a foreign-language live-action film. Spy x Family confirmed a fourth season and a second film for 2027, The Gilded Age had its most-watched premiere, Final Fantasy VII's producers looked beyond the remake trilogy and Sarah J. Maas broke a UK sales record.</p></div>
+  <div class="zz">
+    <div class="stack">
+      <h3>Don't miss</h3>
+      <ol class="top3">
+        <li><b>Godzilla Minus Zero</b> opens with a record $31.6 million in North America. <span class="via">p. 06</span></li>
+        <li><b>Spy x Family</b> returns in 2027 with season four and a new film. <span class="via">p. 04</span></li>
+        <li><b>A Court of Splintered Harmony</b> is the UK's fastest-selling adult fantasy novel. <span class="via">p. 09</span></li>
+      </ol>
+    </div>
+    <div class="art"><img src="https://static.animecorner.me/2026/11/1794134326-f4034910c9963ee0255458971d9daccd.jpg" alt="Spy x Family season 4 teaser visual" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://parade.com/.image/ODowMDAwMDAwMDAyNjE3NDE0/acotar_maas_side_by_side_no_borders_1920x1080.jpg?profile=share16-9" alt="A Court of Splintered Harmony" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <h3>Next week</h3>
+      <p>Football Manager 27 and Shrek 2 Remastered arrive on 10 November, Metaphor: ReFantazio and Pikmin 4 reach Switch 2 on the 12th, and on Friday 13 Spanish cinemas open Wild Horse Nine, How to Rob a Bank and the animated The Violinist.</p>
+      <p>Full dates are on the back page.</p>
+    </div>
+  </div>
+  <div class="box acc"><p>Every story here is summarised in our own words from outlets such as Anime Corner, Animation Magazine, TheWrap, AP, NME, VGC, Gematsu and Publishers Weekly, and each one names its source.</p></div>
+  <span class="pnum r">03</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 4: Animation" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Animation</h1><div class="chips"><span class="chip">Anime</span><span class="chip">Box office</span><span class="chip">Stop-motion</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Anime · Wit Studio &amp; CloverWorks · 2027</span>
+      <h2 class="tag">Spy x Family plans a double return</h2>
+      <p>A fourth TV season and a second feature film were announced on 8 November at the Spy x Family Anime Extra Mission II event in Tokyo. Both are due in 2027, with no exact dates yet. Wit Studio and CloverWorks share production again, and Satoshi Kadowaki, a chief animation director on Attack on Titan, joins as character designer.</p>
+      <p>Takuya Eguchi, Atsumi Tanezaki and Saori Hayami return as Loid, Anya and Yor. Season three ended in December 2025, so the wait will be close to two years. The first film, Code: White (2024), took $95.7 million worldwide; next year it shares the calendar with Demon Slayer and Solo Leveling.</p>
+      <span class="via">Via Anime Corner · Screen Rant</span>
+    </div>
+    <div class="art"><img src="https://static.animecorner.me/2026/11/1794134326-f4034910c9963ee0255458971d9daccd.jpg" alt="Spy x Family season 4 teaser visual" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://static0.srcdn.com/wordpress/wp-content/uploads/2026/11/the-cat-and-the-kids-looking-shocked-behind-a-countertop-in-the-cat-in-the-hat-2026.jpg" alt="The Cat in the Hat" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Box office · Warner Bros.</span>
+      <h2 class="tag">The Cat in the Hat lands softly</h2>
+      <p>The long-delayed Dr. Seuss film, with Bill Hader voicing the Cat, opened with $20.5 million in North America and about $10 million abroad, second behind Godzilla. It cost a reported $86 million. Critics were cool, but audiences gave it an A CinemaScore.</p>
+      <span class="via">Via Screen Rant · AP</span>
+    </div>
+    <div class="stack">
+      <span class="kick">Stop-motion · LAIKA</span>
+      <h2 class="tag">Wildwood keeps on walking</h2>
+      <p>LAIKA's film dropped only 22% in its third weekend to $7 million, for $39.8 million in North America. With a budget of at least $100 million, it is still a long way from breaking even, but it keeps holding well.</p>
+      <span class="via">Via AP · Fiction Horizon</span>
+    </div>
+    <div class="art"><img src="https://fictionhorizon.com/wp-content/uploads/2026/10/Wildwood-3.webp" alt="Wildwood" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum l">04</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 5: Series" aria-hidden="true">
+<div class="t1">
+  <div class="hl-band acc"><h1>Series</h1></div>
+  <div class="hl-body">
+    <div class="art hl-hero"><img src="https://www.thewrap.com/wp-content/uploads/2026/10/the-gilded-age-harry-richardson-louisa-jacobson-hbo.jpg" alt="The Gilded Age" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="hl-lead">
+      <div class="stack"><span class="kick">HBO · Season 4</span><h2>The Gilded Age has its best start yet</h2></div>
+      <div class="stack"><p>The fourth-season premiere of Julian Fellowes and Sonja Warfield's period drama drew nearly 4 million viewers, up 25% on season three's 3.2 million. Season three had already set five weekly series highs and averaged 8.8 million cross-platform viewers worldwide. New episodes air on Sundays on HBO and HBO Max.</p><span class="via">Via TheWrap</span></div>
+    </div>
+    <div class="cols3">
+      <div class="stack">
+        <div class="art"><img src="https://imgix.bustle.com/uploads/image/2026/11/4/ddff6f65/black-doves-unit-131.jpg?w=1200&amp;h=630&amp;fit=crop&amp;crop=focalpoint&amp;fm=jpg&amp;fp-x=0.4394&amp;fp-y=0.4109" alt="Black Doves season 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Netflix · Out now</span>
+        <h3>Black Doves takes flight again</h3>
+        <p>Keira Knightley and Ben Whishaw return in six new episodes, with Helen hunting whoever threatens her handler.</p>
+        <span class="via">Via Inverse</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://www.thewrap.com/wp-content/uploads/2026/04/from-season-4-1.jpg" alt="From" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Nielsen · Streaming</span>
+        <h3>From tops the chart on Netflix</h3>
+        <p>The MGM+ horror drew 1.65 billion minutes in a week after Netflix added its first three seasons.</p>
+        <span class="via">Via TheWrap</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://www.thewrap.com/wp-content/uploads/2026/11/high-potential-kaitlin-olson-the-rookie-nathan-fillion-disney.jpg" alt="High Potential and The Rookie" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">ABC · January 2027</span>
+        <h3>High Potential returns on 5 January</h3>
+        <p>The Rookie and its spinoff The Rookie: North follow on the 6th; Abbott Elementary is back on the 13th.</p>
+        <span class="via">Via TheWrap</span>
+      </div>
+    </div>
+  </div>
+  <span class="pnum r">05</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 6: Film" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">Film</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">US box office · 6–8 November</span>
+      <h2>Godzilla Minus Zero makes history</h2>
+      <p>Takashi Yamazaki's sequel to the Oscar-winning Godzilla Minus One opened at No. 1 with an estimated $31.6 million, the best start ever for a foreign-language live-action film in North America. It almost tripled Minus One's $11.4 million debut, and Imax screens brought in $21.3 million worldwide.</p>
+      <h3>The bigger picture</h3>
+      <p>Made for under $20 million, it is GKids' biggest opening and already has about $63 million worldwide, with 90% on Rotten Tomatoes and an A CinemaScore. Overall ticket sales nearly doubled on the previous weekend. Hollywood's Godzilla x Kong: Supernova follows in March.</p>
+      <span class="via">Via AP · Rotten Tomatoes</span>
+    </div>
+    <div class="art"><img src="https://editorial.rottentomatoes.com/wp-content/uploads/2026/11/Godzilla_Minus_Zero_BO1-Rep.jpg?w=600" alt="Godzilla Minus Zero" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://img.theweek.in/content/dam/week/en/archive/news/entertainment/images/2026/11/5/ramayana-dhurandhar-2.jpg" alt="Ramayana" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">India · Worldwide release</span>
+      <h3>Ramayana, India's costliest epic, opens</h3>
+      <p>Nitesh Tiwari's first part, starring Ranbir Kapoor, launched on 5 November in five languages. It took $32 million in India over the weekend and $8.7 million in North America, the widest release ever for an Indian film. Part two will complete the story.</p>
+      <span class="via">Via The Week · AP</span>
+    </div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://www.slashfilm.com/img/gallery/dune-part-threes-official-runtime-confirms-its-the-shortest-movie-in-the-series/l-intro-1793818389.jpg" alt="Dune: Part Three" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Warner Bros. · 18 December</span>
+      <h3>Dune: Part Three runs 151 minutes</h3>
+      <p>Ireland's classification office lists Denis Villeneuve's adaptation of Dune Messiah at 2h31m, shorter than both earlier films (155 and 166 minutes). It opens the same weekend as Avengers: Doomsday.</p>
+      <span class="via">Via /Film</span>
+    </div>
+  </div>
+  <span class="pnum l">06</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 7: Music" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Music</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://nintendowire.com/wp-content/uploads/2026/09/NS2_TheLegendofZeldaOcarinaofTime_scrn_16-1024x576.jpg" alt="Zelda: Ocarina of Time on Switch 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Game music · Zelda</span>
+      <h2>How Ocarina of Time got its orchestra</h2>
+      <p>In Nintendo's Ask the Developer series, sound director Masato Ohashi confirmed that the Switch 2 remake's score is fully orchestrated, with newly composed cutscene music built on motifs such as the Kokiri Forest theme. Some tracks layer the original N64 recording under the orchestra.</p>
+      <p>The team studied the 1998 arrangements and found that moods shifted through pacing, not volume. Producer Hidemaro Fujibayashi said that, unlike Breath of the Wild's ambient score, Ocarina's music guides the player's emotions.</p>
+      <span class="via">Via Nintendo Wire</span>
+    </div>
+  </div>
+  <div class="ex-box acc">
+    <div class="stack">
+      <div class="art"><img src="https://lede-admin.stereogum.com/wp-content/uploads/sites/64/2026/11/HWJU5UQaQAAOQbv.jpeg" alt="Olivia Rodrigo" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>Olivia Rodrigo goes Christmas</h3>
+      <p>"take me home (4 christmas)", produced by Dan Nigro, is her first holiday song and a UK Christmas No. 1 contender.</p>
+      <span class="via">Via Stereogum</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.nme.com/wp-content/uploads/2026/11/robert-smith@2000x1270.jpg" alt="Robert Smith" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>The Cure promise new songs</h3>
+      <p>Robert Smith says 2027 shows will be "bursting with new songs", with two new records reportedly finished.</p>
+      <span class="via">Via NME</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.nme.com/wp-content/uploads/2026/11/nick_cave_piano.jpg" alt="Nick Cave at the piano" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>Nick Cave revives Conversations</h3>
+      <p>His evenings of audience questions and solo piano tour North America from 9 April to 21 May 2027.</p>
+      <span class="via">Via NME</span>
+    </div>
+  </div>
+  <span class="pnum r">07</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 8: Video games" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l acc">
+    <h1>Video games</h1>
+    <span class="kick">Final Fantasy · Lucca 2026</span>
+    <h2>Final Fantasy looks beyond remakes</h2>
+    <p>Producer Yoshinori Kitase said at Lucca Comics &amp; Games that once the Final Fantasy VII trilogy ends, Square Enix is "more likely to invest in new titles", though he did not rule out remakes or spin-off games and series.</p>
+    <div class="art"><img src="https://i0.wp.com/tbreak.com/wp-content/uploads/2026/11/kitase-square-enix-new-games-over-remakes.jpg?fit=1200%2C699&amp;ssl=1" alt="Yoshinori Kitase" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <p>Director Naoki Hamaguchi added that the first Remake, started by about 30 people, was the hardest of the three to make. In Revelation, due in April 2027, summon challenges move into the open world.</p>
+    <span class="via">Via tbreak · GamingBolt</span>
+  </div>
+  <div class="sp-r">
+    <h2>Also this week</h2>
+    <div class="item">
+      <span class="n">01 · Nintendo</span>
+      <h3>Switch 2 passes 26.35 million</h3>
+      <p>First-half profit rose 49%; Splatoon Raiders sold 2.42 million and Pokémon Pokopia keeps selling.</p>
+      <span class="via">Via Nintendo Everything</span>
+    </div>
+    <hr>
+    <div class="art"><img src="https://www.gematsu.com/wp-content/uploads/2026/11/TESVI-Sentinel-Ann_11-03-26.jpg" alt="The Elder Scrolls VI: Sentinel" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="item">
+      <span class="n">02 · Bethesda</span>
+      <h3>The Elder Scrolls VI is Sentinel</h3>
+      <p>The subtitle points to Hammerfell; Bethesda says more news is still a while away.</p>
+      <span class="via">Via Gematsu</span>
+    </div>
+    <div class="item">
+      <span class="n">03 · PlayStation</span>
+      <h3>God of War Laufey slips to 20 May</h3>
+      <p>Santa Monica Studio moved Faye's adventure three months for finishing touches.</p>
+      <span class="via">Via VGC</span>
+    </div>
+    <div class="item">
+      <span class="n">04 · Rockstar</span>
+      <h3>GTA VI pre-loads open on 10 November</h3>
+      <p>The 19 November launch needs up to 212GB on PS5 and Xbox Series.</p>
+      <span class="via">Via TheSixthAxis</span>
+    </div>
+  </div>
+  <span class="pnum l on">08</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 9: Books" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Books</h1><div class="chips"><span class="chip">Fantasy</span><span class="chip">Prizes</span><span class="chip">New releases</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Sarah J. Maas · Bloomsbury</span>
+      <h2 class="tag">Maas breaks the UK fantasy record</h2>
+      <p>A Court of Splintered Harmony, the sixth A Court of Thorns and Roses novel, sold about 189,000 copies in the UK between 27 and 31 October, according to NielsenIQ BookData. That makes it the fastest-selling adult fantasy novel there since records began in 1998, ahead of Rebecca Yarros's Onyx Storm.</p>
+      <p>Bloomsbury counts 1.7 million English-language copies sold across the US, Canada, the UK and Australia, and the book also tops Publishers Weekly's US fiction list. Older Maas titles are climbing too. The next ACOTAR book, A Court of Forgotten Melody, is due in January 2027.</p>
+      <span class="via">Via Parade · The Bookseller</span>
+    </div>
+    <div class="art"><img src="https://parade.com/.image/ODowMDAwMDAwMDAyNjE3NDE0/acotar_maas_side_by_side_no_borders_1920x1080.jpg?profile=share16-9" alt="A Court of Splintered Harmony" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://bc.gmg.io/image/upload/c_thumb,q_auto,w_700,f_jpg/media/gmg/FQIODLKRWVCFROJLAEXAMUWDDM.jpg?api_key=ksat_9a37fc89631abedf" alt="Edmund Richardson" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Prize · Baillie Gifford</span>
+      <h2 class="tag">Alexander the Great wins in London</h2>
+      <p>Edmund Richardson's Alexander: God, King, Man took the £50,000 nonfiction prize, the first win for ancient history. He spent ten years on it, translating sources from 12 ancient languages.</p>
+      <span class="via">Via AP</span>
+    </div>
+    <div class="stack">
+      <span class="kick">John Gwynne · Orbit</span>
+      <h2 class="tag">The Wolves of War begins a duology</h2>
+      <p>Gwynne's new Wolfheart Chronicles draw on Slavic myth and the Rus Vikings. Its heart is Halia, a girl who runs with wolves, written as a tribute to his late daughter.</p>
+      <span class="via">Via Winter is Coming</span>
+    </div>
+    <div class="art"><img src="https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_1920,h_1080/c_fill,w_1440,ar_1440:810,f_auto,q_auto,g_auto/images/voltaxMediaLibrary/mmsport/385/01m6kk0rgcaxmgy1cbzr.jpg" alt="The Wolves of War" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum r">09</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 10: More news" aria-hidden="true">
+<div class="t1 mn">
+  <div class="mn-head"><h1 class="h-page">More news</h1><p>The rest of the week in one line each.</p></div>
+  <div class="dbl"></div>
+  <div class="mn-list">
+      <div class="mn-row"><span class="kick">Film</span><div><b>A Plutarch prequel for The Hunger Games?</b><span>Francis Lawrence floated the idea at the Sunrise on the Reaping premiere in London.</span><i>Via TheWrap</i></div></div>
+      <div class="mn-row"><span class="kick">Film</span><div><b>You Can See Everything nears $80 million</b><span>A24's Elizabeth Holmes documentary fell only 23% in its fourth weekend.</span><i>Via Rotten Tomatoes</i></div></div>
+      <div class="mn-row"><span class="kick">Film</span><div><b>Clayface passes $109 million worldwide</b><span>DC's horror film has $56.6 million in North America on a modest budget.</span><i>Via Rotten Tomatoes</i></div></div>
+      <div class="mn-row"><span class="kick">Music</span><div><b>Clair Obscur's symphony plays Barcelona</b><span>A Painted Symphony comes to the Palau Sant Jordi on 23 March 2027.</span><i>Via NME</i></div></div>
+      <div class="mn-row"><span class="kick">Music</span><div><b>50 years of Star Wars at L'Auditori</b><span>Film Symphony Orchestra plays John Williams in Barcelona on 8 May 2027.</span><i>Via Film Symphony Orchestra</i></div></div>
+      <div class="mn-row"><span class="kick">Music</span><div><b>Elton John and CMAT step into Christmas</b><span>Sam Fender covers the Rolling Stones for the John Lewis advert.</span><i>Via Official Charts</i></div></div>
+      <div class="mn-row"><span class="kick">Video games</span><div><b>Final Fantasy VII under $8 on Switch 2</b><span>Remake Intergrade and Rebirth are discounted until 17 November.</span><i>Via Final Weapon</i></div></div>
+      <div class="mn-row"><span class="kick">Books</span><div><b>GMA Book Club picks Whale Harbor</b><span>Mary Beth Keane's novel follows 11 Irish brothers in the 1960s.</span><i>Via Kirkus Reviews</i></div></div>
+      <div class="mn-row"><span class="kick">Books</span><div><b>Connelly and Grisham chase Maas</b><span>The Hollow and The French Illusion follow her on the US fiction list.</span><i>Via Publishers Weekly</i></div></div>
+  </div>
+  <span class="pnum l">10</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 11: Coming up" aria-hidden="true">
+<div class="t1 bk">
+  <div class="bk-top">
+    <div class="bk-block acc">
+      <h1>Coming up</h1>
+      <div class="cal">
+        <div><span>10 Nov</span><p><b>Football Manager 27</b><i>PC, PS5, Xbox Series · Games</i></p></div>
+        <div><span>10 Nov</span><p><b>DreamWorks Shrek 2 Remastered</b><i>PS5, Xbox Series, Switch, Switch 2, PC · Games</i></p></div>
+        <div><span>12 Nov</span><p><b>Metaphor: ReFantazio</b><i>Switch 2 · Games</i></p></div>
+        <div><span>12 Nov</span><p><b>Pikmin 4 – Switch 2 Edition + Dandori Academy</b><i>Switch 2 · Games</i></p></div>
+        <div><span>12 Nov</span><p><b>Sonic Pico Park</b><i>PC, PS5, Xbox, Switch, Switch 2 · Games</i></p></div>
+        <div><span>13 Nov</span><p><b>Wild Horse Nine</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>13 Nov</span><p><b>How to Rob a Bank (Cómo robar un banco)</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>13 Nov</span><p><b>Ebenezer (Scrooge y los fantasmas de la Navidad)</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>13 Nov</span><p><b>The Violinist (La violinista)</b><i>Cinemas in Spain · Animation</i></p></div>
+        <div><span>13 Nov</span><p><b>Ratones al ataque: Operación Navidad</b><i>Cinemas in Spain · Animation</i></p></div>
+      </div>
+      <p class="bk-note">Release dates in Spain, 9–15 November. No new anime premieres in Spain this week. Every story in Hobby Fiction is a summary written for this issue, with its sources credited.</p>
+    </div>
+    <div class="bk-strip"></div>
+  </div>
+  <div class="art bk-art" role="img" aria-label="Illustration: a cinema at dusk with a marquee reading See you next week">
+<svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="800" height="480" fill="#F7E1CD"/><rect y="150" width="800" height="120" fill="#EFC39C"/><rect y="270" width="800" height="210" fill="#E0965E"/>
+      <circle cx="640" cy="230" r="70" fill="#FFFBF6"/>
+      <path d="M0 480 V330 H60 V290 H120 V350 H170 V270 H220 V480 Z M580 480 V300 H630 V340 H690 V280 H750 V320 H800 V480 Z" fill="#5A3420"/>
+      <rect x="250" y="150" width="300" height="330" fill="#8F4418" stroke="#2B1A10" stroke-width="6"/>
+      <path d="M240 150 L400 90 L560 150 Z" fill="#2B1A10"/>
+      <rect x="226" y="210" width="348" height="84" fill="#FFFBF6" stroke="#2B1A10" stroke-width="6"/>
+      <g fill="#C9962B"><circle cx="246" cy="222" r="5"/><circle cx="276" cy="222" r="5"/><circle cx="306" cy="222" r="5"/><circle cx="336" cy="222" r="5"/><circle cx="366" cy="222" r="5"/><circle cx="396" cy="222" r="5"/><circle cx="426" cy="222" r="5"/><circle cx="456" cy="222" r="5"/><circle cx="486" cy="222" r="5"/><circle cx="516" cy="222" r="5"/><circle cx="546" cy="222" r="5"/>
+      <circle cx="246" cy="282" r="5"/><circle cx="276" cy="282" r="5"/><circle cx="306" cy="282" r="5"/><circle cx="336" cy="282" r="5"/><circle cx="366" cy="282" r="5"/><circle cx="396" cy="282" r="5"/><circle cx="426" cy="282" r="5"/><circle cx="456" cy="282" r="5"/><circle cx="486" cy="282" r="5"/><circle cx="516" cy="282" r="5"/><circle cx="546" cy="282" r="5"/></g>
+      <text x="400" y="262" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="32" fill="#2B1A10">SEE YOU NEXT WEEK</text>
+      <g fill="#2B1A10"><rect x="300" y="350" width="60" height="130"/><rect x="440" y="350" width="60" height="130"/><rect x="370" y="330" width="60" height="150" fill="#C9962B" stroke="#2B1A10" stroke-width="5"/></g>
+      <rect y="462" width="800" height="18" fill="#2B1A10"/>
+    </svg>
+  </div>
+</div>
+</section>
+
+
+      </div>
+    </div>
+  </div>
+  <button type="button" class="side" id="next" aria-label="Next page" title="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</main>
+
+<footer class="toolbar">
+  <div class="tg tg-l">
+    <button type="button" class="tb" id="zoomOut" aria-label="Zoom out" title="Zoom out (−)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <span class="zoomval" id="zoomVal">100%</span>
+    <button type="button" class="tb" id="zoomIn" aria-label="Zoom in" title="Zoom in (+)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button type="button" class="tb" id="thumbsBtn" aria-label="All pages" title="All pages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button>
+    <button type="button" class="tb" id="playBtn" aria-label="Autoplay" aria-pressed="false" title="Autoplay"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  </div>
+  <div class="tg tg-c">
+    <button type="button" class="tb" id="firstBtn" aria-label="First page" title="First page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M18 6l-7 6 7 6"/></svg></button>
+    <button type="button" class="tb" id="prevBtn" aria-label="Previous page" title="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <label class="pager"><input type="text" id="pageInput" inputmode="numeric" autocomplete="off" aria-label="Current page, type a number and press Enter"><span id="total">/ 11</span></label>
+    <button type="button" class="tb" id="nextBtn" aria-label="Next page" title="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button type="button" class="tb" id="lastBtn" aria-label="Last page" title="Last page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M6 6l7 6-7 6"/></svg></button>
+  </div>
+  <div class="tg tg-r">
+    <button type="button" class="tb tb-pdf" id="pdfBtn" title="Save as PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>PDF</button>
+    <button type="button" class="tb" id="viewBtn" aria-label="Switch to single page" title="Single / double page"><svg id="icoDouble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h8v14H3zM13 5h8v14h-8z"/></svg><svg id="icoSingle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" hidden><path d="M7 3h10v18H7z"/></svg></button>
+    <button type="button" class="tb" id="fsBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</footer>
+
+<div class="thumbs" id="thumbs" role="dialog" aria-modal="true" aria-labelledby="thumbsTitle" hidden>
+  <div class="thumbs-head"><h2 id="thumbsTitle">All pages</h2><button type="button" class="close" id="thumbsClose">Close</button></div>
+  <div class="thumbs-grid" id="thumbsGrid"></div>
+</div>
+
+<script>
+(function () {
+  var labels = ['Cover', 'Contents', 'The week in a minute', 'Animation', 'Series', 'Film', 'Music', 'Video games', 'Books', 'More news', 'Coming up'];
+  var N = labels.length, W = 800, H = 1130, T = 330;
+  var Z = [1, 1.5, 2, 3];
+  var $ = function (id) { return document.getElementById(id); };
+  var pages = Array.prototype.slice.call(document.querySelectorAll('#scaler > .page'));
+  var vp = $('vp'), book = $('book'), scaler = $('scaler'), input = $('pageInput');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { pref: 'double', dbl: true, spreads: [], cur: 0, zi: 0, s: 0.5, busy: false, play: null };
+  var FX = ['under', 'fx-out-r', 'fx-in-l', 'fx-out-l', 'fx-in-r', 'fx-turn', 'fx-return'];
+
+  try { var saved = localStorage.getItem('hf-view'); if (saved === 'single' || saved === 'double') st.pref = saved; } catch (e) {}
+  $('total').textContent = '/ ' + N;
+
+  function narrow() { return window.innerWidth < 760; }
+  function buildSpreads() {
+    var s = [];
+    if (st.dbl) { s.push([null, 0]); for (var i = 1; i < N; i += 2) s.push([i, i + 1 < N ? i + 1 : null]); }
+    else { for (var j = 0; j < N; j++) s.push([j]); }
+    st.spreads = s;
+  }
+  function spreadOf(p) { for (var i = 0; i < st.spreads.length; i++) if (st.spreads[i].indexOf(p) > -1) return i; return 0; }
+  function firstOf(i) { var sp = st.spreads[i]; return sp[0] != null ? sp[0] : sp[1]; }
+  function place() {
+    pages.forEach(function (p) { p.classList.remove('slot-l', 'slot-r', 'slot-c'); });
+    st.spreads.forEach(function (sp) {
+      if (st.dbl) { if (sp[0] != null) pages[sp[0]].classList.add('slot-l'); if (sp[1] != null) pages[sp[1]].classList.add('slot-r'); }
+      else pages[sp[0]].classList.add('slot-c');
+    });
+  }
+  function showOnly(i) {
+    var vis = st.spreads[i];
+    pages.forEach(function (p, k) {
+      var on = vis.indexOf(k) > -1;
+      FX.forEach(function (c) { p.classList.remove(c); });
+      p.classList.toggle('on', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  function shiftFor(i) { if (!st.dbl) return 0; var sp = st.spreads[i]; if (sp[0] == null) return -W / 2; if (sp[1] == null) return W / 2; return 0; }
+  function applyTransform() { scaler.style.transform = 'scale(' + st.s + ') translateX(' + shiftFor(st.cur) + 'px)'; }
+  function fit() {
+    var across = st.dbl ? 2 : 1;
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var base = Math.max(Math.min((w - 8) / (W * across), (h - 8) / H), 0.05);
+    st.s = base * Z[st.zi];
+    scaler.style.width = (W * across) + 'px';
+    book.style.width = (W * across * st.s) + 'px';
+    book.style.height = (H * st.s) + 'px';
+    applyTransform();
+  }
+
+  function ui() {
+    var sp = st.spreads[st.cur].filter(function (x) { return x != null; });
+    input.value = sp.map(function (x) { return x + 1; }).join('-');
+    $('label').textContent = sp.map(function (x) { return labels[x]; }).join(' · ');
+    var atStart = st.cur === 0, atEnd = st.cur === st.spreads.length - 1;
+    $('prev').disabled = $('prevBtn').disabled = $('firstBtn').disabled = atStart;
+    $('next').disabled = $('nextBtn').disabled = $('lastBtn').disabled = atEnd;
+    $('zoomOut').disabled = st.zi === 0;
+    $('zoomIn').disabled = st.zi === Z.length - 1;
+    $('zoomVal').textContent = Math.round(Z[st.zi] * 100) + '%';
+    $('icoDouble').hidden = !st.dbl;
+    $('icoSingle').hidden = st.dbl;
+    $('viewBtn').setAttribute('aria-label', st.dbl ? 'Switch to single page' : 'Switch to double page');
+    $('viewBtn').disabled = narrow();
+    Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function (t, k) {
+      if (sp.indexOf(k) > -1) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#p' + (firstOf(st.cur) + 1)); } catch (e) {}
+  }
+
+  function go(i) {
+    if (i < 0 || i >= st.spreads.length || i === st.cur || st.busy) return;
+    var from = st.spreads[st.cur], to = st.spreads[i], fwd = i > st.cur;
+    st.cur = i; ui(); applyTransform();
+    if (reduce) { showOnly(i); return; }
+    st.busy = true;
+    var el = function (k) { return k == null ? null : pages[k]; };
+    var add = function (e, c) { if (e) e.classList.add(c); };
+    if (!st.dbl) {
+      if (fwd) { add(el(to[0]), 'under'); add(el(from[0]), 'fx-turn'); }
+      else { add(el(from[0]), 'under'); add(el(to[0]), 'fx-return'); }
+    } else if (fwd) {
+      add(el(to[1]), 'under'); add(el(from[1]), 'fx-out-r'); add(el(to[0]), 'fx-in-l');
+    } else {
+      add(el(to[0]), 'under'); add(el(from[0]), 'fx-out-l'); add(el(to[1]), 'fx-in-r');
+    }
+    setTimeout(function () { showOnly(st.cur); st.busy = false; }, 2 * T + 40);
+  }
+  function goPage(p) { go(spreadOf(p)); }
+
+  function setMode(dbl) {
+    var p = firstOf(st.cur);
+    st.dbl = dbl; buildSpreads(); place();
+    st.cur = spreadOf(p);
+    showOnly(st.cur); fit(); ui();
+  }
+  function setZoom(zi) {
+    zi = Math.max(0, Math.min(Z.length - 1, zi));
+    if (zi === st.zi) return;
+    st.zi = zi;
+    vp.classList.toggle('zoomed', zi > 0);
+    fit(); ui();
+    vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+    vp.scrollTop = 0;
+  }
+
+  book.addEventListener('click', function (e) {
+    if (moved) { moved = false; return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); goPage(+g.getAttribute('data-goto')); return; }
+    if (st.zi > 0) return;
+    var p = e.target.closest('.page');
+    if (!p) return;
+    if (p.classList.contains('slot-l')) go(st.cur - 1);
+    else if (p.classList.contains('slot-r')) go(st.cur + 1);
+    else { var r = p.getBoundingClientRect(); go(e.clientX - r.left < r.width / 2 ? st.cur - 1 : st.cur + 1); }
+  });
+  book.addEventListener('mousemove', function (e) {
+    var p = e.target.closest('.page');
+    var left = p ? (p.classList.contains('slot-l') || (p.classList.contains('slot-c') && e.clientX - p.getBoundingClientRect().left < p.getBoundingClientRect().width / 2)) : false;
+    book.classList.toggle('left', left);
+  });
+
+  var drag = null, moved = false;
+  vp.addEventListener('pointerdown', function (e) {
+    if (st.zi === 0 || e.button !== 0 || e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop }; moved = false;
+    vp.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    vp.scrollLeft = drag.l - dx; vp.scrollTop = drag.t - dy;
+  });
+  window.addEventListener('pointerup', function () { if (drag) { drag = null; vp.classList.remove('grabbing'); } });
+
+  var sx = null;
+  book.addEventListener('touchstart', function (e) { sx = st.zi === 0 ? e.touches[0].clientX : null; }, { passive: true });
+  book.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) { e.preventDefault(); go(dx < 0 ? st.cur + 1 : st.cur - 1); }
+  });
+
+  $('prev').addEventListener('click', function () { go(st.cur - 1); });
+  $('next').addEventListener('click', function () { go(st.cur + 1); });
+  $('prevBtn').addEventListener('click', function () { go(st.cur - 1); });
+  $('nextBtn').addEventListener('click', function () { go(st.cur + 1); });
+  $('firstBtn').addEventListener('click', function () { go(0); });
+  $('lastBtn').addEventListener('click', function () { go(st.spreads.length - 1); });
+  $('zoomIn').addEventListener('click', function () { setZoom(st.zi + 1); });
+  $('zoomOut').addEventListener('click', function () { setZoom(st.zi - 1); });
+  $('viewBtn').addEventListener('click', function () {
+    st.pref = st.dbl ? 'single' : 'double';
+    try { localStorage.setItem('hf-view', st.pref); } catch (e) {}
+    setMode(st.pref === 'double');
+  });
+  input.addEventListener('focus', function () { input.select(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var n = parseInt(input.value, 10);
+    if (n >= 1 && n <= N) goPage(n - 1); else ui();
+    input.blur();
+  });
+  input.addEventListener('blur', ui);
+
+  function setPlay(on) {
+    if (st.play) { clearInterval(st.play); st.play = null; }
+    if (on) {
+      if (st.cur === st.spreads.length - 1) go(0);
+      st.play = setInterval(function () {
+        if (st.cur >= st.spreads.length - 1) { setPlay(false); return; }
+        go(st.cur + 1);
+      }, 4000);
+    }
+    $('playBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('playIco').hidden = on; $('pauseIco').hidden = !on;
+  }
+  $('playBtn').addEventListener('click', function () { setPlay(!st.play); });
+
+  $('pdfBtn').addEventListener('click', function () { setPlay(false); window.print(); });
+  var fsOk = document.fullscreenEnabled && document.documentElement.requestFullscreen;
+  if (!fsOk) $('fsBtn').hidden = true;
+  $('fsBtn').addEventListener('click', function () {
+    try {
+      var r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (r && r.catch) r.catch(function () {});
+    } catch (e) {}
+  });
+
+  var grid = $('thumbsGrid');
+  pages.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb';
+    b.setAttribute('aria-label', 'Page ' + (i + 1) + ': ' + labels[i]);
+    var box = document.createElement('span'); box.className = 'thumb-box';
+    var c = p.cloneNode(true);
+    c.className = 'thumb-page'; c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('a, button'), function (x) { x.setAttribute('tabindex', '-1'); });
+    box.appendChild(c);
+    var cap = document.createElement('span'); cap.className = 'thumb-cap';
+    cap.textContent = String(i + 1).padStart(2, '0') + ' · ' + labels[i];
+    b.appendChild(box); b.appendChild(cap);
+    b.addEventListener('click', function () { closeThumbs(); goPage(i); });
+    grid.appendChild(b);
+  });
+  function openThumbs() { $('thumbs').hidden = false; ui(); var cur = grid.querySelector('[aria-current="page"]') || grid.firstChild; if (cur) cur.focus(); }
+  function closeThumbs() { $('thumbs').hidden = true; $('thumbsBtn').focus(); }
+  $('thumbsBtn').addEventListener('click', openThumbs);
+  $('thumbsClose').addEventListener('click', closeThumbs);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target === input) return;
+    if (!$('thumbs').hidden) { if (e.key === 'Escape') closeThumbs(); return; }
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); go(st.cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(st.cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(st.spreads.length - 1); }
+    else if (k === '+' || k === '=') { e.preventDefault(); setZoom(st.zi + 1); }
+    else if (k === '-') { e.preventDefault(); setZoom(st.zi - 1); }
+    else if (k === '0') { e.preventDefault(); setZoom(0); }
+  });
+
+  function onResize() {
+    var want = !narrow() && st.pref === 'double';
+    if (want !== st.dbl) setMode(want); else { fit(); ui(); }
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(vp);
+
+  st.dbl = !narrow() && st.pref === 'double';
+  buildSpreads(); place();
+  var m = /^#p(\d+)$/.exec(location.hash || '');
+  var startPage = m ? Math.min(N, Math.max(1, +m[1])) - 1 : 0;
+  st.cur = spreadOf(startPage);
+  scaler.style.transition = 'none';
+  showOnly(st.cur); fit(); ui();
+  requestAnimationFrame(function () { scaler.style.transition = ''; });
+})();
+</script>
+
+</body></html>
