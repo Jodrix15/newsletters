@@ -1,0 +1,971 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Hobby Fiction #05 · 16 November 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Playfair+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: magazine reader on a dark desk. Spread (cover alone, then pairs) or single page, scaled to fit; toolbar below. Single deliberate dark look. */
+:root {
+  --desk: #1E180D;
+  --desk-raised: #2E2515;
+  --desk-line: #4A3C26;
+  --paper: #FBF1DE;
+  --ink: #2B2112;
+  --accent: #F0B95A;
+  --muted: #C9B37E;
+  --display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  --body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --t: 0.33s;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--body);
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+button { font: inherit; }
+
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.mast b { font-family: var(--display); font-weight: 400; font-size: 18px; text-transform: uppercase; color: var(--accent); }
+.mast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mast #label { color: var(--paper); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.vp { height: 100%; min-width: 0; display: flex; overflow: hidden; }
+.vp.zoomed { overflow: auto; cursor: grab; }
+.vp.zoomed.grabbing { cursor: grabbing; }
+.book { position: relative; flex: none; margin: auto; cursor: e-resize; }
+.book.left { cursor: w-resize; }
+.vp.zoomed .book { cursor: inherit; }
+.scaler {
+  position: absolute; top: 0; left: 0; height: 1130px;
+  transform-origin: 0 0; perspective: 3200px;
+  transition: transform 0.45s ease;
+}
+.page {
+  position: absolute; top: 0; left: 0; width: 800px; height: 1130px;
+  visibility: hidden; overflow: hidden; backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.page.slot-r { left: 800px; }
+.page::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; }
+.page.slot-c::after, .page.slot-r::after { left: 0; background: linear-gradient(90deg, rgba(43, 27, 18, 0.28), rgba(43, 27, 18, 0)); }
+.page.slot-l::after { right: 0; background: linear-gradient(270deg, rgba(43, 27, 18, 0.28), rgba(43, 27, 18, 0)); }
+.page.on { visibility: visible; z-index: 2; }
+.page.under { visibility: visible; z-index: 1; }
+.page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { visibility: visible; z-index: 3; }
+.page.fx-out-r { transform-origin: left center; animation: outR var(--t) ease-in forwards; }
+.page.fx-in-l { transform-origin: right center; animation: inL var(--t) ease-out var(--t) both; }
+.page.fx-out-l { transform-origin: right center; animation: outL var(--t) ease-in forwards; }
+.page.fx-in-r { transform-origin: left center; animation: inR var(--t) ease-out var(--t) both; }
+.page.fx-turn { transform-origin: left center; animation: turnOut calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+.page.fx-return { transform-origin: left center; animation: turnIn calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+@keyframes outR { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-90deg); filter: brightness(0.65); } }
+@keyframes inL { from { transform: rotateY(90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes outL { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(90deg); filter: brightness(0.65); } }
+@keyframes inR { from { transform: rotateY(-90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes turnOut { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(0.6); } }
+@keyframes turnIn { from { transform: rotateY(-100deg); filter: brightness(0.6); } to { transform: rotateY(0); filter: brightness(1); } }
+
+.side {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--desk-line); background: var(--desk-raised); color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.side:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.side:disabled { opacity: 0.25; cursor: default; }
+.side svg { width: 22px; height: 22px; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--desk-line); padding-top: 8px;
+}
+.tg { display: flex; align-items: center; gap: 4px; }
+.tb {
+  width: 44px; height: 44px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+}
+.tb:hover:not(:disabled) { background: var(--desk-raised); color: var(--accent); }
+.tb:disabled { opacity: 0.3; cursor: default; }
+.tb[aria-pressed="true"] { background: var(--desk-raised); color: var(--accent); }
+.tb svg { width: 20px; height: 20px; }
+.pager { display: flex; align-items: center; gap: 8px; margin-inline: 6px; font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pager input {
+  width: 64px; height: 34px; box-sizing: border-box; text-align: center;
+  border: 1px solid var(--desk-line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.zoomval { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.thumbs {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(30, 20, 13, 0.97);
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+}
+.thumbs[hidden] { display: none; }
+.thumbs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; width: 100%; margin: 0 auto; }
+.thumbs-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--paper); }
+.thumbs-grid {
+  flex: 1 1 auto; overflow-y: auto; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 20px; align-content: start;
+}
+.thumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.thumb-box { width: 144px; height: 203px; overflow: hidden; position: relative; border-radius: 3px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); outline: 3px solid transparent; outline-offset: 3px; transition: outline-color 0.15s, transform 0.15s; }
+.thumb:hover .thumb-box { transform: translateY(-3px); }
+.thumb[aria-current="page"] .thumb-box { outline-color: var(--accent); }
+.thumb-page { position: absolute; top: 0; left: 0; width: 800px; height: 1130px; transform: scale(0.18); transform-origin: 0 0; pointer-events: none; }
+.thumb-cap { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.thumb[aria-current="page"] .thumb-cap { color: var(--accent); }
+.close {
+  height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--desk-line);
+  background: var(--desk-raised); color: var(--paper); cursor: pointer; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .toolbar { justify-content: center; }
+  .tg-c { order: -1; width: 100%; justify-content: center; }
+  .zoomval { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scaler { transition: none; }
+  .page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { animation: none; }
+}
+/* Template 1: white pages, one warm accent (terracotta, saturation close to the reference teal), Playfair display + Figtree body */
+.t1 {
+  --acc: #B4791C; --tint: #F7EBCD; --tint2: #EDD6A2; --paper: #FFFDF6; --ink: #2B2010; --soft: #5C4C34; --mute: #947D57; --on: #FFFBF1; --on-soft: #F9E9C3; --gold: #C9962B;
+  width: 800px; height: 1130px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+}
+.t1 * { box-sizing: border-box; }
+.t1 h1, .t1 h2, .t1 h3 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; margin: 0; color: inherit; text-wrap: balance; }
+.t1 p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
+.t1 ol { margin: 0; }
+.t1 .via { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.t1 .kick { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.t1 .art { position: relative; overflow: hidden; background: var(--tint); }
+.t1 .art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.t1 .acc { background: var(--acc); color: var(--on); }
+.t1 .acc p { color: var(--on); }
+.t1 .acc .via, .t1 .acc .kick { color: var(--on-soft); }
+.t1 .h-page { font-weight: 800; font-size: 50px; line-height: 1; letter-spacing: -0.01em; }
+.t1 .dbl { height: 7px; border-top: 2px solid var(--acc); border-bottom: 2px solid var(--acc); }
+.t1 .pnum { position: absolute; bottom: 22px; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.t1 .pnum.l { left: 44px; } .t1 .pnum.r { right: 44px; }
+.t1 .pnum.on { color: var(--on-soft); }
+.t1 .tag { display: inline-block; align-self: flex-start; background: var(--acc); color: var(--on); font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1.15; padding: 8px 14px; }
+.t1 .stack { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+/* Cover */
+.t1.cv { padding: 40px 44px 44px; display: flex; flex-direction: column; gap: 18px; }
+.cv-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.cv-mast { display: flex; flex-direction: column; gap: 6px; }
+.cv-band { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.1; text-align: center; text-transform: uppercase; letter-spacing: 0.02em; padding: 4px 0 8px; }
+.cv-art { height: 610px; background: repeating-conic-gradient(from 0deg at 50% 46%, #EFD69C 0deg 9deg, #F9EFD6 9deg 18deg); }
+.cv-foot { display: flex; gap: 28px; align-items: flex-start; }
+.cv-box { flex: 0 0 190px; margin: -132px 0 0 18px; padding: 20px; position: relative; z-index: 1; font-weight: 700; font-size: 15px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 8px; }
+.cv-box b { font-family: 'Playfair Display', Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: 0; }
+.cv-head { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cv-head h2 { font-size: 36px; font-weight: 800; text-transform: uppercase; line-height: 1.02; }
+
+/* Contents */
+.t1.tc { display: grid; grid-template-columns: 448px 1fr; }
+.tc-l { padding: 70px 40px 60px 44px; display: flex; flex-direction: column; gap: 26px; }
+.tc-l h1 { font-size: 62px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.tc-l .dbl { margin-top: -10px; }
+.toc { display: flex; flex-direction: column; gap: 15px; }
+.toc a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+.toc .t { font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.toc .s { font-size: 13px; color: var(--soft); }
+.toc .ln { display: flex; align-items: center; gap: 10px; color: #C2923C; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.toc .ln::before { content: ""; flex: 1; border-bottom: 2px dashed var(--tint2); }
+.toc a:hover .t { color: var(--acc); }
+.tc-r { position: relative; overflow: hidden; }
+.strip { position: absolute; top: -50px; bottom: -50px; left: 62px; right: 62px; background: var(--ink); transform: rotate(-3deg); display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 34px; }
+.strip::before, .strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; background: repeating-linear-gradient(to bottom, var(--paper) 0 16px, transparent 16px 36px); }
+.strip::before { left: 10px; } .strip::after { right: 10px; }
+.frame { width: 100%; aspect-ratio: 1; background: var(--tint); border-radius: 4px; display: grid; place-items: center; }
+.frame svg { width: 62%; height: 62%; }
+
+/* Week in a minute */
+.t1.wm { padding: 54px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.wm h1 { font-size: 42px; font-weight: 800; text-transform: uppercase; }
+.box { padding: 20px 24px; }
+.box p { font-size: 15.5px; font-weight: 500; line-height: 1.55; }
+.zz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+.zz .art { height: 250px; }
+.zz h3 { font-size: 26px; font-weight: 700; }
+.top3 { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.top3 li::marker { color: var(--acc); font-weight: 700; }
+
+/* Rows (Animation) */
+.t1.nw { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 22px; }
+.nw-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--acc); color: var(--acc); padding: 4px 10px; border-radius: 999px; }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 30px; }
+.rows .art { height: 252px; }
+.rows p { font-size: 14px; }
+
+/* Highlights (Series) */
+.hl-band { height: 300px; padding: 46px 44px 0; }
+.hl-band h1 { font-size: 54px; font-weight: 800; }
+.hl-body { position: absolute; top: 130px; left: 44px; right: 44px; bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+.hl-hero { height: 290px; outline: 6px solid var(--paper); }
+.hl-lead { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 26px; align-items: start; }
+.hl-lead h2 { font-size: 27px; font-weight: 700; line-height: 1.12; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cols3 .art { height: 140px; }
+.cols3 h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.cols3 p { font-size: 13.5px; line-height: 1.5; }
+
+/* Profile (Film) */
+.t1.pf { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.pf-box { padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 26px; }
+.pf-box h2 { font-size: 30px; font-weight: 800; line-height: 1.08; }
+.pf-box h3 { font-size: 19px; font-weight: 700; margin-top: 6px; }
+.pf-box p { font-size: 14px; }
+.pf-box .art { height: 100%; min-height: 380px; outline: 4px solid var(--on); }
+.pf-row { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.pf-row .art { height: 196px; }
+.pf-row h3 { font-size: 23px; font-weight: 700; }
+
+/* Club grid (Music) */
+.t1.ex { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.ex-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.ex-top .art { height: 350px; }
+.ex-top h2 { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ex-top p { font-size: 14px; }
+.ex-box { padding: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.ex-box .art { height: 128px; outline: 3px solid var(--on); outline-offset: -3px; }
+.ex-box h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.ex-box p { font-size: 13.5px; line-height: 1.5; }
+
+/* Split (Video games) */
+.t1.sp { display: grid; grid-template-columns: 350px 1fr; }
+.sp-l { padding: 56px 32px 56px 44px; display: flex; flex-direction: column; gap: 18px; }
+.sp-l h1 { font-size: 52px; font-weight: 800; line-height: 0.98; }
+.sp-l h2 { font-size: 24px; font-weight: 700; line-height: 1.12; }
+.sp-l p { font-size: 14px; }
+.sp-l .art { height: 290px; background: #3A2B14; }
+.sp-r { padding: 56px 44px 56px 36px; display: flex; flex-direction: column; gap: 16px; }
+.sp-r h2 { font-size: 28px; font-weight: 700; }
+.item { display: flex; flex-direction: column; gap: 5px; }
+.item .n { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--acc); }
+.item h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.item p { font-size: 14px; }
+.sp-r hr { border: 0; border-top: 1px solid var(--tint2); margin: 4px 0; width: 100%; }
+.sp-r .art { height: 190px; }
+
+/* Back */
+.t1.bk { display: flex; flex-direction: column; }
+.bk-top { height: 650px; display: flex; flex: none; }
+.bk-block { flex: 0 0 88%; padding: 54px 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.bk-block h1 { font-size: 50px; font-weight: 800; }
+.bk-strip { flex: 0 0 4%; background: var(--tint); }
+.cal { display: flex; flex-direction: column; }
+.cal div { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-top: 1px solid rgba(255, 248, 241, 0.32); align-items: baseline; }
+.cal div:last-child { border-bottom: 1px solid rgba(255, 248, 241, 0.32); }
+.cal span { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--on); }
+.cal b { font-weight: 600; font-size: 15px; display: block; }
+.cal i { font-style: normal; font-size: 12.5px; color: var(--on-soft); }
+.bk-note { font-size: 13px !important; line-height: 1.5 !important; color: var(--on-soft) !important; max-width: 520px; }
+.bk-art { flex: 1 1 auto; }
+
+
+
+.t1.mn { padding: 56px 44px 60px; display: flex; flex-direction: column; gap: 18px; }
+.mn-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.mn-head p { font-size: 15px; }
+.mn-list { display: flex; flex-direction: column; }
+.mn-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; padding: 12px 0; border-bottom: 2px dashed var(--tint2); align-items: baseline; }
+.mn-row > div { display: flex; flex-direction: column; gap: 4px; }
+.mn-row b { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.mn-row div > span { font-size: 14.5px; line-height: 1.5; color: var(--soft); }
+.mn-row i { font-style: normal; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--mute); }
+
+
+
+.t1 .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+/* Longer agenda */
+.t1.bk .bk-top { height: 770px; }
+.t1.bk .cal div { padding: 2px 0; }
+.tc-img { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
+.tc-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.tb-pdf { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--desk-line); }
+@media print {
+  @page { size: 800px 1130px; margin: 0; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+  .mast, .toolbar, .side, .thumbs { display: none !important; }
+  .stage, .vp { display: block !important; height: auto !important; overflow: visible !important; max-width: none !important; width: 800px !important; margin: 0 !important; }
+  .book { width: 800px !important; height: auto !important; margin: 0 !important; }
+  .scaler { position: static !important; transform: none !important; width: 800px !important; height: auto !important; perspective: none !important; transition: none !important; }
+  .page { position: relative !important; left: 0 !important; top: 0 !important; visibility: visible !important; box-shadow: none !important; animation: none !important; transform: none !important; filter: none !important; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page::after { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+
+<header class="mast">
+  <div><b>Hobby Fiction</b> <span>Issue #05 · 16 Nov 2026</span></div>
+  <span id="label">Cover</span>
+</header>
+
+<main class="stage">
+  <button type="button" class="side" id="prev" aria-label="Previous page" title="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="vp" id="vp">
+    <div class="book" id="book">
+      <div class="scaler" id="scaler">
+<section class="page" aria-label="Page 1: Cover" aria-hidden="true">
+<div class="t1 cv">
+  <div class="cv-top"><span>Issue #05 · Weekly</span><span>16 November 2026</span></div>
+  <div class="cv-mast"><div class="dbl"></div><div class="cv-band acc">Hobby Fiction</div><div class="dbl"></div></div>
+  <div class="art cv-art"><img src="https://www.tvline.com/img/gallery/harry-potter-and-the-philosophers-stone-sneak-peek-hbo-releases-scene-from-start-of-term-banquet/l-intro-1794757298.jpg" alt="Harry Potter HBO series" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  <div class="cv-foot">
+    <div class="cv-box acc"><b>31</b>stories this week: animation, series, film, music, games and books</div>
+    <div class="cv-head">
+      <h2>Hogwarts opens its doors early</h2>
+      <p>HBO surprises fans with the first full scene of its Harry Potter series, six weeks before the Christmas premiere. Plus Ocarina of Time's record launch, Re:ZERO season five, Rosalía's third Album of the Year and a Booker Prize for M John Harrison.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" aria-label="Page 2: Contents" aria-hidden="true">
+<div class="t1 tc">
+  <div class="tc-l">
+    <h1>Contents</h1>
+    <div class="dbl"></div>
+    <nav class="toc" aria-label="Contents">
+      <a href="#p3" data-goto="2"><span class="t">The week in a minute</span><span class="s">Top 3 and what's coming</span><span class="ln">/ 03</span></a>
+      <a href="#p4" data-goto="3"><span class="t">Animation</span><span class="s">Re:ZERO, Disney's Hexed, Suikoden</span><span class="ln">/ 04</span></a>
+      <a href="#p5" data-goto="4"><span class="t">Series</span><span class="s">Harry Potter, Virgin River, 12 12 12</span><span class="ln">/ 05</span></a>
+      <a href="#p6" data-goto="5"><span class="t">Film</span><span class="s">Ebenezer, the Bond race, Thomas Crown</span><span class="ln">/ 06</span></a>
+      <a href="#p7" data-goto="6"><span class="t">Music</span><span class="s">Rosalía, Oasis, the GTA VI album</span><span class="ln">/ 07</span></a>
+      <a href="#p8" data-goto="7"><span class="t">Video games</span><span class="s">Ocarina of Time, Pokémon, FF7 Revelation</span><span class="ln">/ 08</span></a>
+      <a href="#p9" data-goto="8"><span class="t">Books</span><span class="s">The Booker, Whale Harbor, Goodreads</span><span class="ln">/ 09</span></a>
+      <a href="#p10" data-goto="9"><span class="t">More news</span><span class="s">The rest of the week in one line each</span><span class="ln">/ 10</span></a>
+      <a href="#p11" data-goto="10"><span class="t">Coming up</span><span class="s">Releases in Spain, 16–22 November</span><span class="ln">/ 11</span></a>
+    </nav>
+  </div>
+  <div class="tc-r acc" aria-hidden="true">
+    <div class="tc-img"><img src="contents.webp" alt=""></div>
+  </div>
+  <span class="pnum l">02</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 3: The week in a minute" aria-hidden="true">
+<div class="t1 wm">
+  <h1>The week in a minute</h1>
+  <div class="box acc"><p>HBO released the first full scene of its Harry Potter series, the Ocarina of Time remake sold 5.2 million copies in four days and Re:ZERO confirmed a fifth season. Rosalía took Album of the Year at the Latin Grammys for a third time, Johnny Depp's Ebenezer opened at No. 1 and M John Harrison won the Booker Prize.</p></div>
+  <div class="zz">
+    <div class="stack">
+      <h3>Don't miss</h3>
+      <ol class="top3">
+        <li><b>Ocarina of Time</b> sells 5.2 million in four days, a Switch 2 record for Nintendo. <span class="via">p. 08</span></li>
+        <li><b>Harry Potter</b>: HBO shares the first scene of its series, due on 25 December. <span class="via">p. 05</span></li>
+        <li><b>Rosalía</b> wins Album of the Year at the Latin Grammys for Lux, her third. <span class="via">p. 07</span></li>
+      </ol>
+    </div>
+    <div class="art"><img src="https://www.videogameschronicle.com/files/2026/11/NS2_TheLegendofZeldaOcarinaofTime_scrn_13.jpg" alt="The Legend of Zelda: Ocarina of Time on Switch 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://i0.wp.com/anitrendz.net/news/wp-content/uploads/2026/11/ReZero-Season-5-ultra-teaser-visual-1-scaled-e1794670052474.jpg" alt="Re:ZERO season 5 teaser visual" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <h3>Next week</h3>
+      <p>GTA VI finally arrives on 19 November on PS5 and Xbox Series, and on Friday 20 Spanish cinemas open The Hunger Games: Sunrise on the Reaping and the animated Iron Boy and Rebelde. One Piece 3D lands on Anime Box the same day.</p>
+      <p>Full dates are on the back page.</p>
+    </div>
+  </div>
+  <div class="box acc"><p>Every story here is summarised in our own words from outlets such as Anime Trending, TVLine, TheWrap, Deadline, NME, VGC, Gematsu, The Bookseller and Parade, and each one names its source.</p></div>
+  <span class="pnum r">03</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 4: Animation" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Animation</h1><div class="chips"><span class="chip">Anime</span><span class="chip">Disney</span><span class="chip">Streaming</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Anime · White Fox · Season 5</span>
+      <h2 class="tag">Re:ZERO goes round again</h2>
+      <p>KADOKAWA announced on 14 November that a fifth season of Re:ZERO -Starting Life in Another World is in production, with an "ultra teaser" visual of Subaru and Rem and the tagline "For you, again and again." White Fox returns, with Masahiro Shinohara directing for the third season running, Masahiro Yokotani on series composition and Haruka Segawa on character designs.</p>
+      <p>The news comes right after season four, which aired in two parts this year: the Loss Arc from April and the Recapture Arc from August. Yusuke Kobayashi, Rie Takahashi and Inori Minase lead the cast again. Tappei Nagatsuki's light novels have reached 46 volumes, so there is plenty left to adapt, but there is no premiere date yet.</p>
+      <span class="via">Via Anime Trending</span>
+    </div>
+    <div class="art"><img src="https://i0.wp.com/anitrendz.net/news/wp-content/uploads/2026/11/ReZero-Season-5-ultra-teaser-visual-1-scaled-e1794670052474.jpg" alt="Re:ZERO season 5 teaser visual" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://www.comingsoon.net/wp-content/uploads/sites/3/2026/11/Hexed.jpg?resize=1200,630" alt="Disney's Hexed" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Disney · Premiere</span>
+      <h2 class="tag">Hexed casts its first spell</h2>
+      <p>Walt Disney Animation's original film premiered on 12 November at the El Capitan in Los Angeles, with mostly positive first reactions praising its art style and voice cast, led by Hailee Steinfeld, Rashida Jones and Jodie Foster. It opens in US cinemas on 25 November.</p>
+      <span class="via">Via ComingSoon.net</span>
+    </div>
+    <div class="stack">
+      <span class="kick">Anime · Crunchyroll</span>
+      <h2 class="tag">Suikoden joins Crunchyroll</h2>
+      <p>The anime based on the classic RPG now streams with six episodes, then weekly from 17 November, with Spanish subtitles. Crunchyroll also licensed Medaka Kuroiwa season 2, which starts in Japan in January 2027.</p>
+      <span class="via">Via Anime Trending</span>
+    </div>
+    <div class="art"><img src="https://i0.wp.com/anitrendz.net/news/wp-content/uploads/2026/11/Medaka-Kuroiwa-is-Impervious-to-My-Charms-Season-2-trailer-still-e1794429584254.png" alt="Medaka Kuroiwa is Impervious to My Charms season 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum l">04</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 5: Series" aria-hidden="true">
+<div class="t1">
+  <div class="hl-band acc"><h1>Series</h1></div>
+  <div class="hl-body">
+    <div class="art hl-hero"><img src="https://www.tvline.com/img/gallery/harry-potter-and-the-philosophers-stone-sneak-peek-hbo-releases-scene-from-start-of-term-banquet/l-intro-1794757298.jpg" alt="Harry Potter HBO series" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="hl-lead">
+      <div class="stack"><span class="kick">HBO · 25 December</span><h2>Hogwarts opens its doors early</h2></div>
+      <div class="stack"><p>On 14 November HBO surprise-released a scene from the start-of-term banquet, just after the Sorting. Janet McTeer's McGonagall tells John Lithgow's Dumbledore that Harry looks just like James; he answers that looks can deceive. Dominic McLaughlin, Alastair Stout and Arabella Stanton appear as the trio.</p><p>Season one adapts Philosopher's Stone, with Francesca Gardiner as showrunner and Mark Mylod directing several episodes. Season two, Chamber of Secrets, is already in production.</p><span class="via">Via TVLine</span></div>
+    </div>
+    <div class="cols3">
+      <div class="stack">
+        <div class="art"><img src="https://www.tvline.com/img/gallery/virgin-river-renewed-for-season-9-becoming-netflixs-longest-running-scripted-drama-series/l-intro-1794544882.jpg" alt="Virgin River" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Netflix · Renewal</span>
+        <h3>Virgin River gets a ninth season</h3>
+        <p>Renewed before season eight even airs, it is set to become Netflix's longest-running scripted drama.</p>
+        <span class="via">Via TVLine</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://i0.wp.com/www.micropsiacine.com/wp-content/uploads/2026/11/121212_Photo_010106-edited.jpg?fit=832%2C468&amp;ssl=1" alt="12 12 12" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Apple TV · Out now</span>
+        <h3>12 12 12 plans a heist in three times</h3>
+        <p>Anthony Mackie's FBI agent hunts Jamie Dornan's thief across 12 months, 12 hours and 12 days.</p>
+        <span class="via">Via Micropsia</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://images.thebrag.com/cdn-cgi/image/fit=crop,width=1200,height=628/https://images-r2-1.thebrag.com/var/uploads/2026/11/TCDADUL_FX028.jpg" alt="Adults" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">FX · Season 3</span>
+        <h3>Adults doubles up</h3>
+        <p>FX ordered 16 episodes, twice as many as before, after season two viewing rose 60%.</p>
+        <span class="via">Via Variety</span>
+      </div>
+    </div>
+  </div>
+  <span class="pnum r">05</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 6: Film" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">Film</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">US box office · 13–15 November</span>
+      <h2>Ebenezer haunts the top spot</h2>
+      <p>Ti West's take on A Christmas Carol opened at No. 1 with $19 million in North America and $42 million worldwide, Johnny Depp's first No. 1 opening in eight years. Audiences gave it an A- CinemaScore, while critics were mixed. Ian McKellen plays Marley, with Rupert Grint and Daisy Ridley in the cast.</p>
+      <h3>The bigger picture</h3>
+      <p>Paramount spent a reported $38 million on it. Amazon MGM's How to Rob a Bank, with Nicholas Hoult and Zoë Kravitz, flopped with $5.1 million on a $60 million budget. Next weekend belongs to The Hunger Games: Sunrise on the Reaping.</p>
+      <span class="via">Via TheWrap · Seat42F</span>
+    </div>
+    <div class="art"><img src="https://www.thewrap.com/wp-content/uploads/2026/11/ebenezer-trammell-tillman-johnny-depp.jpg" alt="Johnny Depp in Ebenezer" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://images.euronews.com/articles/stories/09/98/52/97/1200x675_cmsv2_8b19521c-94a9-55fa-8d98-59fca6a182ce-9985297.jpg" alt="James Bond casting" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Bond 26 · Amazon MGM</span>
+      <h3>Pattinson and Hoult join the Bond race</h3>
+      <p>Robert Pattinson and Nicholas Hoult reportedly did secret screen tests for Denis Villeneuve's film, joining Callum Turner, Jack Lowden and Josh O'Connor. Nothing is confirmed; shooting is expected in 2027.</p>
+      <span class="via">Via Euronews</span>
+    </div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://thegrio.com/wp-content/uploads/2026/11/GettyImages-2271547990-scaled-e1794506317506-1600x900.jpg" alt="Michael B. Jordan" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Trailer · 5 March 2027</span>
+      <h3>Thomas Crown steals a van Gogh</h3>
+      <p>Michael B. Jordan directs and stars in the remake, with Adria Arjona as the ex-FBI agent on his trail and Kenneth Branagh as the painting's owner. Jon Batiste writes the score.</p>
+      <span class="via">Via theGrio</span>
+    </div>
+  </div>
+  <span class="pnum l">06</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 7: Music" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Music</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://s.yimg.com/lo/mysterio/api/bed804e4874468323191be843382951622c014a46a7b8dcd1492af56f660ce74/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fdeadline.com%2Fddd9660776df9d81f9fe7e1054d2d00a.jpg" alt="Rosalía at the Latin Grammys" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Latin Grammys · Las Vegas</span>
+      <h2>Rosalía's third crown</h2>
+      <p>At the 27th Latin Grammy Awards on 12 November, Rosalía won five prizes, including Album of the Year for Lux, her third after El Mal Querer and Motomami. "La Perla" also took Song of the Year and Best Pop Song.</p>
+      <p>Silvana Estrada won Record of the Year with "Dime" and Aria Vega was Best New Artist. Spain also celebrated Alejandro Sanz's Best Contemporary Pop Album, while Jorge Drexler, Karol G and Milo J added more awards.</p>
+      <span class="via">Via Deadline</span>
+    </div>
+  </div>
+  <div class="ex-box acc">
+    <div class="stack">
+      <div class="art"><img src="https://www.nme.com/wp-content/uploads/2026/11/oasis_big_brother_recordings.jpg" alt="Oasis" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>Oasis skip their own induction</h3>
+      <p>No Gallaghers in Los Angeles for the Rock &amp; Roll Hall of Fame; Phil Collins went in a second time.</p>
+      <span class="via">Via NME</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.nme.com/wp-content/uploads/2026/09/Grand-Theft-Auto-6-The-Album.jpg" alt="GTA VI: The Album" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>The GTA VI album leaks</h3>
+      <p>A 34-track list with Lana Del Rey, Dua Lipa and Justice emerged before Rockstar announced it.</p>
+      <span class="via">Via NME</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.nme.com/wp-content/uploads/2026/11/eurovision_asia.jpg" alt="Eurovision Asia" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <h3>The Philippines wins Eurovision Asia</h3>
+      <p>Carmelle's "Sobra-Sobra" took the first contest in Bangkok with 211 points.</p>
+      <span class="via">Via NME</span>
+    </div>
+  </div>
+  <span class="pnum r">07</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 8: Video games" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l acc">
+    <h1>Video games</h1>
+    <span class="kick">Zelda · Nintendo Switch 2</span>
+    <h2>Ocarina of Time breaks records</h2>
+    <p>Nintendo says the remake sold 5.2 million copies, physical and digital, in its first four days (5–9 November), 810,000 of them in Japan. That makes it the fastest-selling game Nintendo has published on Switch 2.</p>
+    <div class="art"><img src="https://www.videogameschronicle.com/files/2026/11/NS2_TheLegendofZeldaOcarinaofTime_scrn_13.jpg" alt="The Legend of Zelda: Ocarina of Time on Switch 2" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <p>In four days it already beat the lifetime sales of Echoes of Wisdom (4.09 million) and A Link Between Worlds (4.26 million). Breath of the Wild and Tears of the Kingdom remain far ahead.</p>
+    <span class="via">Via VGC · Gematsu</span>
+  </div>
+  <div class="sp-r">
+    <h2>Also this week</h2>
+    <div class="item">
+      <span class="n">01 · Square Enix</span>
+      <h3>FF7 Revelation brings Cid and Vincent</h3>
+      <p>A new hands-on shows Cid's lance, Vincent's Galian Beast and a job-like FITS system before the 8 April 2027 launch.</p>
+      <span class="via">Via GamesRadar+</span>
+    </div>
+    <hr>
+    <div class="art"><img src="https://www.dexerto.com/cdn-image/wp-content/uploads/2026/08/26/pokemon-winds-and-waves.jpg" alt="Pokémon Winds and Waves" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="item">
+      <span class="n">02 · Pokémon · Rumour</span>
+      <h3>Winds and Waves were due this month</h3>
+      <p>A leaker says Gen 10 was planned for November 2026 before a delay to 2027. Unconfirmed.</p>
+      <span class="via">Via Dexerto</span>
+    </div>
+    <div class="item">
+      <span class="n">03 · PlayStation</span>
+      <h3>PS5 passes 100 million</h3>
+      <p>Sony's site now lists over 100 million consoles shipped, days before GTA VI.</p>
+      <span class="via">Via Gematsu</span>
+    </div>
+    <div class="item">
+      <span class="n">04 · MachineGames</span>
+      <h3>Wolfenstein 3 is in production</h3>
+      <p>Announced for Xbox's 25th anniversary, with no platforms or date yet.</p>
+      <span class="via">Via Push Square</span>
+    </div>
+  </div>
+  <span class="pnum l on">08</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 9: Books" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Books</h1><div class="chips"><span class="chip">Prizes</span><span class="chip">Bestsellers</span><span class="chip">Readers' vote</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Booker Prize · Serpent's Tail</span>
+      <h2 class="tag">M John Harrison wins the Booker</h2>
+      <p>The veteran British writer won the £50,000 Booker Prize on 9 November for The End of Everything, a win The Bookseller called historic. Mary Beard, chair of the judges, described it as a "book that turns you upside down, raises a wry smile".</p>
+      <p>The prize had an instant effect: on 10 November publisher Profile Books ordered 50,000 more hardbacks, taking the print run to 148,000 including export paperbacks. The novel is also shortlisted for Blackwell's Book of the Year, a boost for a writer long admired in science fiction and fantasy circles.</p>
+      <span class="via">Via The Bookseller</span>
+    </div>
+    <div class="art"><img src="https://drsw10gc90t0z.cloudfront.net/AcuCustom/Sitename/DAM/685/Untitled_Design_28.jpg" alt="M John Harrison" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://parade.com/.image/ODowMDAwMDAwMDAyNjU1MTU4/barnes-noble-booksellers.jpg?profile=share16-9" alt="Barnes &amp; Noble" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Barnes &amp; Noble · Book of the Year</span>
+      <h2 class="tag">Whale Harbor wins the booksellers' vote</h2>
+      <p>Mary Beth Keane's novel about 11 Irish brothers was chosen by B&amp;N booksellers from 16 finalists. Craig Fehrman's history of Lewis and Clark won the nonfiction prize.</p>
+      <span class="via">Via Parade</span>
+    </div>
+    <div class="stack">
+      <span class="kick">Goodreads · Choice Awards</span>
+      <h2 class="tag">Readers start voting</h2>
+      <p>The opening round runs until 22 November. Fantasy nominees include Jim Butcher, Robert Jackson Bennett and Leigh Bardugo; winners are named on 3 December.</p>
+      <span class="via">Via Parade</span>
+    </div>
+    <div class="art"><img src="https://parade.com/.image/ODowMDAwMDAwMDAyNjQ4MTg5/a-bookshelf-filled-with-lots-of-books-next-to-a-mirror-stockpack-unsplash.jpg?profile=share16-9" alt="A bookshelf" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum r">09</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 10: More news" aria-hidden="true">
+<div class="t1 mn">
+  <div class="mn-head"><h1 class="h-page">More news</h1><p>The rest of the week in one line each.</p></div>
+  <div class="dbl"></div>
+  <div class="mn-list">
+      <div class="mn-row"><span class="kick">Animation</span><div><b>Beyond the Spider-Verse made its composer cry</b><span>Daniel Pemberton has seen an early cut of the June 2027 finale.</span><i>Via ComicBookMovie</i></div></div>
+      <div class="mn-row"><span class="kick">Animation</span><div><b>Fool Night comes to Netflix</b><span>The Sunrise and Shaft anime arrives on 26 November.</span><i>Via What's on Netflix</i></div></div>
+      <div class="mn-row"><span class="kick">Series</span><div><b>Rose Byrne and Meghann Fahy are sisters</b><span>Karin Slaughter adapts her own The Good Daughter for Peacock.</span><i>Via Variety</i></div></div>
+      <div class="mn-row"><span class="kick">Film</span><div><b>Brad Pitt climbs skyscrapers for Apple</b><span>He will play a 1970s New York ironworker in Darius Marder's Connector.</span><i>Via TheWrap</i></div></div>
+      <div class="mn-row"><span class="kick">Film</span><div><b>Children of Blood and Bone gets a new trailer</b><span>It previews Tems' song before the film opens on 15 January 2027.</span><i>Via theGrio</i></div></div>
+      <div class="mn-row"><span class="kick">Music</span><div><b>A tout lists over £1m of U2 tickets</b><span>More than 2,000 seats for the 2027 London shows appeared on StubHub.</span><i>Via NME</i></div></div>
+      <div class="mn-row"><span class="kick">Video games</span><div><b>Romancing SaGa 3 moves up</b><span>Square Enix's remake now arrives on 4 February 2027.</span><i>Via Gematsu</i></div></div>
+      <div class="mn-row"><span class="kick">Video games</span><div><b>The Game Awards stream on Disney+</b><span>Disney promises surprises on 10 December; fans hope for Kingdom Hearts IV.</span><i>Via sevengamer</i></div></div>
+      <div class="mn-row"><span class="kick">Video games</span><div><b>Pokémon tops Japan's wish list</b><span>Winds and Waves lead Famitsu's most-wanted chart; FF7 Revelation is fifth.</span><i>Via Nintendo Everything</i></div></div>
+  </div>
+  <span class="pnum l">10</span>
+</div>
+</section>
+
+<section class="page" aria-label="Page 11: Coming up" aria-hidden="true">
+<div class="t1 bk">
+  <div class="bk-top">
+    <div class="bk-block acc">
+      <h1>Coming up</h1>
+      <div class="cal">
+        <div><span>16 Nov</span><p><b>Dragon Ball Z TV Special 2</b><i>Anime Box · Anime</i></p></div>
+        <div><span>19 Nov</span><p><b>Grand Theft Auto VI</b><i>PS5, Xbox Series · Games</i></p></div>
+        <div><span>19 Nov</span><p><b>The Binding of Isaac: Repentance+ Online</b><i>PS5, Xbox Series, Switch 2 · Games</i></p></div>
+        <div><span>20 Nov</span><p><b>The Hunger Games: Sunrise on the Reaping</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>20 Nov</span><p><b>Iron Boy (Le Corset)</b><i>Cinemas in Spain · Animation</i></p></div>
+        <div><span>20 Nov</span><p><b>Rebelde: Nacida para ser libre</b><i>Cinemas in Spain · Animation</i></p></div>
+        <div><span>20 Nov</span><p><b>One Piece 3D: Straw Hat Chase</b><i>Anime Box · Anime film</i></p></div>
+        <div><span>20 Nov</span><p><b>Steel Ball Run: JoJo's Bizarre Adventure, ep. 10</b><i>Netflix · Anime</i></p></div>
+        <div><span>20 Nov</span><p><b>Citas: La película</b><i>Cinemas in Spain · Film</i></p></div>
+        <div><span>20 Nov</span><p><b>Hechos probados</b><i>Cinemas in Spain · Film</i></p></div>
+      </div>
+      <p class="bk-note">Release dates in Spain, 16–22 November. Every story in Hobby Fiction is a summary written for this issue, with its sources credited.</p>
+    </div>
+    <div class="bk-strip"></div>
+  </div>
+
+  <div class="art bk-art" role="img" aria-label="Illustration: a cinema at dusk with a marquee reading See you next week">
+<svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="800" height="480" fill="#F7EBCD"/><rect y="150" width="800" height="120" fill="#EFD69C"/><rect y="270" width="800" height="210" fill="#E0B45E"/>
+      <circle cx="640" cy="230" r="70" fill="#FFFDF6"/>
+      <path d="M0 480 V330 H60 V290 H120 V350 H170 V270 H220 V480 Z M580 480 V300 H630 V340 H690 V280 H750 V320 H800 V480 Z" fill="#5A4220"/>
+      <rect x="250" y="150" width="300" height="330" fill="#8F6018" stroke="#2B2010" stroke-width="6"/>
+      <path d="M240 150 L400 90 L560 150 Z" fill="#2B2010"/>
+      <rect x="226" y="210" width="348" height="84" fill="#FFFDF6" stroke="#2B2010" stroke-width="6"/>
+      <g fill="#C9962B"><circle cx="246" cy="222" r="5"/><circle cx="276" cy="222" r="5"/><circle cx="306" cy="222" r="5"/><circle cx="336" cy="222" r="5"/><circle cx="366" cy="222" r="5"/><circle cx="396" cy="222" r="5"/><circle cx="426" cy="222" r="5"/><circle cx="456" cy="222" r="5"/><circle cx="486" cy="222" r="5"/><circle cx="516" cy="222" r="5"/><circle cx="546" cy="222" r="5"/>
+      <circle cx="246" cy="282" r="5"/><circle cx="276" cy="282" r="5"/><circle cx="306" cy="282" r="5"/><circle cx="336" cy="282" r="5"/><circle cx="366" cy="282" r="5"/><circle cx="396" cy="282" r="5"/><circle cx="426" cy="282" r="5"/><circle cx="456" cy="282" r="5"/><circle cx="486" cy="282" r="5"/><circle cx="516" cy="282" r="5"/><circle cx="546" cy="282" r="5"/></g>
+      <text x="400" y="262" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="32" fill="#2B2010">SEE YOU NEXT WEEK</text>
+      <g fill="#2B2010"><rect x="300" y="350" width="60" height="130"/><rect x="440" y="350" width="60" height="130"/><rect x="370" y="330" width="60" height="150" fill="#C9962B" stroke="#2B2010" stroke-width="5"/></g>
+      <rect y="462" width="800" height="18" fill="#2B2010"/>
+    </svg>
+  </div>
+</div>
+</section>
+
+
+      </div>
+    </div>
+  </div>
+  <button type="button" class="side" id="next" aria-label="Next page" title="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</main>
+
+<footer class="toolbar">
+  <div class="tg tg-l">
+    <button type="button" class="tb" id="zoomOut" aria-label="Zoom out" title="Zoom out (−)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <span class="zoomval" id="zoomVal">100%</span>
+    <button type="button" class="tb" id="zoomIn" aria-label="Zoom in" title="Zoom in (+)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button type="button" class="tb" id="thumbsBtn" aria-label="All pages" title="All pages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button>
+    <button type="button" class="tb" id="playBtn" aria-label="Autoplay" aria-pressed="false" title="Autoplay"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  </div>
+  <div class="tg tg-c">
+    <button type="button" class="tb" id="firstBtn" aria-label="First page" title="First page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M18 6l-7 6 7 6"/></svg></button>
+    <button type="button" class="tb" id="prevBtn" aria-label="Previous page" title="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <label class="pager"><input type="text" id="pageInput" inputmode="numeric" autocomplete="off" aria-label="Current page, type a number and press Enter"><span id="total">/ 11</span></label>
+    <button type="button" class="tb" id="nextBtn" aria-label="Next page" title="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button type="button" class="tb" id="lastBtn" aria-label="Last page" title="Last page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M6 6l7 6-7 6"/></svg></button>
+  </div>
+  <div class="tg tg-r">
+    <button type="button" class="tb tb-pdf" id="pdfBtn" title="Save as PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>PDF</button>
+    <button type="button" class="tb" id="viewBtn" aria-label="Switch to single page" title="Single / double page"><svg id="icoDouble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h8v14H3zM13 5h8v14h-8z"/></svg><svg id="icoSingle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" hidden><path d="M7 3h10v18H7z"/></svg></button>
+    <button type="button" class="tb" id="fsBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</footer>
+
+<div class="thumbs" id="thumbs" role="dialog" aria-modal="true" aria-labelledby="thumbsTitle" hidden>
+  <div class="thumbs-head"><h2 id="thumbsTitle">All pages</h2><button type="button" class="close" id="thumbsClose">Close</button></div>
+  <div class="thumbs-grid" id="thumbsGrid"></div>
+</div>
+
+<script>
+(function () {
+  var labels = ['Cover', 'Contents', 'The week in a minute', 'Animation', 'Series', 'Film', 'Music', 'Video games', 'Books', 'More news', 'Coming up'];
+  var N = labels.length, W = 800, H = 1130, T = 330;
+  var Z = [1, 1.5, 2, 3];
+  var $ = function (id) { return document.getElementById(id); };
+  var pages = Array.prototype.slice.call(document.querySelectorAll('#scaler > .page'));
+  var vp = $('vp'), book = $('book'), scaler = $('scaler'), input = $('pageInput');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { pref: 'double', dbl: true, spreads: [], cur: 0, zi: 0, s: 0.5, busy: false, play: null };
+  var FX = ['under', 'fx-out-r', 'fx-in-l', 'fx-out-l', 'fx-in-r', 'fx-turn', 'fx-return'];
+
+  try { var saved = localStorage.getItem('hf-view'); if (saved === 'single' || saved === 'double') st.pref = saved; } catch (e) {}
+  $('total').textContent = '/ ' + N;
+
+  function narrow() { return window.innerWidth < 760; }
+  function buildSpreads() {
+    var s = [];
+    if (st.dbl) { s.push([null, 0]); for (var i = 1; i < N; i += 2) s.push([i, i + 1 < N ? i + 1 : null]); }
+    else { for (var j = 0; j < N; j++) s.push([j]); }
+    st.spreads = s;
+  }
+  function spreadOf(p) { for (var i = 0; i < st.spreads.length; i++) if (st.spreads[i].indexOf(p) > -1) return i; return 0; }
+  function firstOf(i) { var sp = st.spreads[i]; return sp[0] != null ? sp[0] : sp[1]; }
+  function place() {
+    pages.forEach(function (p) { p.classList.remove('slot-l', 'slot-r', 'slot-c'); });
+    st.spreads.forEach(function (sp) {
+      if (st.dbl) { if (sp[0] != null) pages[sp[0]].classList.add('slot-l'); if (sp[1] != null) pages[sp[1]].classList.add('slot-r'); }
+      else pages[sp[0]].classList.add('slot-c');
+    });
+  }
+  function showOnly(i) {
+    var vis = st.spreads[i];
+    pages.forEach(function (p, k) {
+      var on = vis.indexOf(k) > -1;
+      FX.forEach(function (c) { p.classList.remove(c); });
+      p.classList.toggle('on', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  function shiftFor(i) { if (!st.dbl) return 0; var sp = st.spreads[i]; if (sp[0] == null) return -W / 2; if (sp[1] == null) return W / 2; return 0; }
+  function applyTransform() { scaler.style.transform = 'scale(' + st.s + ') translateX(' + shiftFor(st.cur) + 'px)'; }
+  function fit() {
+    var across = st.dbl ? 2 : 1;
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var base = Math.max(Math.min((w - 8) / (W * across), (h - 8) / H), 0.05);
+    st.s = base * Z[st.zi];
+    scaler.style.width = (W * across) + 'px';
+    book.style.width = (W * across * st.s) + 'px';
+    book.style.height = (H * st.s) + 'px';
+    applyTransform();
+  }
+
+  function ui() {
+    var sp = st.spreads[st.cur].filter(function (x) { return x != null; });
+    input.value = sp.map(function (x) { return x + 1; }).join('-');
+    $('label').textContent = sp.map(function (x) { return labels[x]; }).join(' · ');
+    var atStart = st.cur === 0, atEnd = st.cur === st.spreads.length - 1;
+    $('prev').disabled = $('prevBtn').disabled = $('firstBtn').disabled = atStart;
+    $('next').disabled = $('nextBtn').disabled = $('lastBtn').disabled = atEnd;
+    $('zoomOut').disabled = st.zi === 0;
+    $('zoomIn').disabled = st.zi === Z.length - 1;
+    $('zoomVal').textContent = Math.round(Z[st.zi] * 100) + '%';
+    $('icoDouble').hidden = !st.dbl;
+    $('icoSingle').hidden = st.dbl;
+    $('viewBtn').setAttribute('aria-label', st.dbl ? 'Switch to single page' : 'Switch to double page');
+    $('viewBtn').disabled = narrow();
+    Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function (t, k) {
+      if (sp.indexOf(k) > -1) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#p' + (firstOf(st.cur) + 1)); } catch (e) {}
+  }
+
+  function go(i) {
+    if (i < 0 || i >= st.spreads.length || i === st.cur || st.busy) return;
+    var from = st.spreads[st.cur], to = st.spreads[i], fwd = i > st.cur;
+    st.cur = i; ui(); applyTransform();
+    if (reduce) { showOnly(i); return; }
+    st.busy = true;
+    var el = function (k) { return k == null ? null : pages[k]; };
+    var add = function (e, c) { if (e) e.classList.add(c); };
+    if (!st.dbl) {
+      if (fwd) { add(el(to[0]), 'under'); add(el(from[0]), 'fx-turn'); }
+      else { add(el(from[0]), 'under'); add(el(to[0]), 'fx-return'); }
+    } else if (fwd) {
+      add(el(to[1]), 'under'); add(el(from[1]), 'fx-out-r'); add(el(to[0]), 'fx-in-l');
+    } else {
+      add(el(to[0]), 'under'); add(el(from[0]), 'fx-out-l'); add(el(to[1]), 'fx-in-r');
+    }
+    setTimeout(function () { showOnly(st.cur); st.busy = false; }, 2 * T + 40);
+  }
+  function goPage(p) { go(spreadOf(p)); }
+
+  function setMode(dbl) {
+    var p = firstOf(st.cur);
+    st.dbl = dbl; buildSpreads(); place();
+    st.cur = spreadOf(p);
+    showOnly(st.cur); fit(); ui();
+  }
+  function setZoom(zi) {
+    zi = Math.max(0, Math.min(Z.length - 1, zi));
+    if (zi === st.zi) return;
+    st.zi = zi;
+    vp.classList.toggle('zoomed', zi > 0);
+    fit(); ui();
+    vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+    vp.scrollTop = 0;
+  }
+
+  book.addEventListener('click', function (e) {
+    if (moved) { moved = false; return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); goPage(+g.getAttribute('data-goto')); return; }
+    if (st.zi > 0) return;
+    var p = e.target.closest('.page');
+    if (!p) return;
+    if (p.classList.contains('slot-l')) go(st.cur - 1);
+    else if (p.classList.contains('slot-r')) go(st.cur + 1);
+    else { var r = p.getBoundingClientRect(); go(e.clientX - r.left < r.width / 2 ? st.cur - 1 : st.cur + 1); }
+  });
+  book.addEventListener('mousemove', function (e) {
+    var p = e.target.closest('.page');
+    var left = p ? (p.classList.contains('slot-l') || (p.classList.contains('slot-c') && e.clientX - p.getBoundingClientRect().left < p.getBoundingClientRect().width / 2)) : false;
+    book.classList.toggle('left', left);
+  });
+
+  var drag = null, moved = false;
+  vp.addEventListener('pointerdown', function (e) {
+    if (st.zi === 0 || e.button !== 0 || e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop }; moved = false;
+    vp.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    vp.scrollLeft = drag.l - dx; vp.scrollTop = drag.t - dy;
+  });
+  window.addEventListener('pointerup', function () { if (drag) { drag = null; vp.classList.remove('grabbing'); } });
+
+  var sx = null;
+  book.addEventListener('touchstart', function (e) { sx = st.zi === 0 ? e.touches[0].clientX : null; }, { passive: true });
+  book.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) { e.preventDefault(); go(dx < 0 ? st.cur + 1 : st.cur - 1); }
+  });
+
+  $('prev').addEventListener('click', function () { go(st.cur - 1); });
+  $('next').addEventListener('click', function () { go(st.cur + 1); });
+  $('prevBtn').addEventListener('click', function () { go(st.cur - 1); });
+  $('nextBtn').addEventListener('click', function () { go(st.cur + 1); });
+  $('firstBtn').addEventListener('click', function () { go(0); });
+  $('lastBtn').addEventListener('click', function () { go(st.spreads.length - 1); });
+  $('zoomIn').addEventListener('click', function () { setZoom(st.zi + 1); });
+  $('zoomOut').addEventListener('click', function () { setZoom(st.zi - 1); });
+  $('viewBtn').addEventListener('click', function () {
+    st.pref = st.dbl ? 'single' : 'double';
+    try { localStorage.setItem('hf-view', st.pref); } catch (e) {}
+    setMode(st.pref === 'double');
+  });
+  input.addEventListener('focus', function () { input.select(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var n = parseInt(input.value, 10);
+    if (n >= 1 && n <= N) goPage(n - 1); else ui();
+    input.blur();
+  });
+  input.addEventListener('blur', ui);
+
+  function setPlay(on) {
+    if (st.play) { clearInterval(st.play); st.play = null; }
+    if (on) {
+      if (st.cur === st.spreads.length - 1) go(0);
+      st.play = setInterval(function () {
+        if (st.cur >= st.spreads.length - 1) { setPlay(false); return; }
+        go(st.cur + 1);
+      }, 4000);
+    }
+    $('playBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('playIco').hidden = on; $('pauseIco').hidden = !on;
+  }
+  $('playBtn').addEventListener('click', function () { setPlay(!st.play); });
+
+  $('pdfBtn').addEventListener('click', function () { setPlay(false); window.print(); });
+  var fsOk = document.fullscreenEnabled && document.documentElement.requestFullscreen;
+  if (!fsOk) $('fsBtn').hidden = true;
+  $('fsBtn').addEventListener('click', function () {
+    try {
+      var r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (r && r.catch) r.catch(function () {});
+    } catch (e) {}
+  });
+
+  var grid = $('thumbsGrid');
+  pages.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb';
+    b.setAttribute('aria-label', 'Page ' + (i + 1) + ': ' + labels[i]);
+    var box = document.createElement('span'); box.className = 'thumb-box';
+    var c = p.cloneNode(true);
+    c.className = 'thumb-page'; c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('a, button'), function (x) { x.setAttribute('tabindex', '-1'); });
+    box.appendChild(c);
+    var cap = document.createElement('span'); cap.className = 'thumb-cap';
+    cap.textContent = String(i + 1).padStart(2, '0') + ' · ' + labels[i];
+    b.appendChild(box); b.appendChild(cap);
+    b.addEventListener('click', function () { closeThumbs(); goPage(i); });
+    grid.appendChild(b);
+  });
+  function openThumbs() { $('thumbs').hidden = false; ui(); var cur = grid.querySelector('[aria-current="page"]') || grid.firstChild; if (cur) cur.focus(); }
+  function closeThumbs() { $('thumbs').hidden = true; $('thumbsBtn').focus(); }
+  $('thumbsBtn').addEventListener('click', openThumbs);
+  $('thumbsClose').addEventListener('click', closeThumbs);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target === input) return;
+    if (!$('thumbs').hidden) { if (e.key === 'Escape') closeThumbs(); return; }
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); go(st.cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(st.cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(st.spreads.length - 1); }
+    else if (k === '+' || k === '=') { e.preventDefault(); setZoom(st.zi + 1); }
+    else if (k === '-') { e.preventDefault(); setZoom(st.zi - 1); }
+    else if (k === '0') { e.preventDefault(); setZoom(0); }
+  });
+
+  function onResize() {
+    var want = !narrow() && st.pref === 'double';
+    if (want !== st.dbl) setMode(want); else { fit(); ui(); }
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(vp);
+
+  st.dbl = !narrow() && st.pref === 'double';
+  buildSpreads(); place();
+  var m = /^#p(\d+)$/.exec(location.hash || '');
+  var startPage = m ? Math.min(N, Math.max(1, +m[1])) - 1 : 0;
+  st.cur = spreadOf(startPage);
+  scaler.style.transition = 'none';
+  showOnly(st.cur); fit(); ui();
+  requestAnimationFrame(function () { scaler.style.transition = ''; });
+})();
+</script>
+
+</body></html>
