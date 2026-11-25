@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Economía y Finanzas #03 · 25 de noviembre de 2026</title>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!-- Economía y Finanzas #03. Maquetación basada en la plantilla de revista: páginas de 800x1130 px, visor con página doble/única, zoom, miniaturas y botón PDF. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Playfair+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: magazine reader on a dark desk. Spread (cover alone, then pairs) or single page, scaled to fit; toolbar below. Single deliberate dark look. */
+:root {
+  --desk: #15120A;
+  --desk-raised: #241F12;
+  --desk-line: #423A22;
+  --paper: #F1ECDD;
+  --ink: #2B1B12;
+  --accent: #E2C774;
+  --muted: #B0A27C;
+  --display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  --body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --t: 0.33s;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--body);
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+button { font: inherit; }
+
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.mast b { font-family: var(--display); font-weight: 400; font-size: 18px; text-transform: uppercase; color: var(--accent); }
+.mast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mast #label { color: var(--paper); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.vp { height: 100%; min-width: 0; display: flex; overflow: hidden; }
+.vp.zoomed { overflow: auto; cursor: grab; }
+.vp.zoomed.grabbing { cursor: grabbing; }
+.book { position: relative; flex: none; margin: auto; cursor: e-resize; }
+.book.left { cursor: w-resize; }
+.vp.zoomed .book { cursor: inherit; }
+.scaler {
+  position: absolute; top: 0; left: 0; height: 1130px;
+  transform-origin: 0 0; perspective: 3200px;
+  transition: transform 0.45s ease;
+}
+.page {
+  position: absolute; top: 0; left: 0; width: 800px; height: 1130px;
+  visibility: hidden; overflow: hidden; backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.page.slot-r { left: 800px; }
+.page::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; }
+.page.slot-c::after, .page.slot-r::after { left: 0; background: linear-gradient(90deg, rgba(29, 36, 16, 0.28), rgba(29, 36, 16, 0)); }
+.page.slot-l::after { right: 0; background: linear-gradient(270deg, rgba(29, 36, 16, 0.28), rgba(29, 36, 16, 0)); }
+.page.on { visibility: visible; z-index: 2; }
+.page.under { visibility: visible; z-index: 1; }
+.page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { visibility: visible; z-index: 3; }
+.page.fx-out-r { transform-origin: left center; animation: outR var(--t) ease-in forwards; }
+.page.fx-in-l { transform-origin: right center; animation: inL var(--t) ease-out var(--t) both; }
+.page.fx-out-l { transform-origin: right center; animation: outL var(--t) ease-in forwards; }
+.page.fx-in-r { transform-origin: left center; animation: inR var(--t) ease-out var(--t) both; }
+.page.fx-turn { transform-origin: left center; animation: turnOut calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+.page.fx-return { transform-origin: left center; animation: turnIn calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+@keyframes outR { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-90deg); filter: brightness(0.65); } }
+@keyframes inL { from { transform: rotateY(90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes outL { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(90deg); filter: brightness(0.65); } }
+@keyframes inR { from { transform: rotateY(-90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes turnOut { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(0.6); } }
+@keyframes turnIn { from { transform: rotateY(-100deg); filter: brightness(0.6); } to { transform: rotateY(0); filter: brightness(1); } }
+
+.side {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--desk-line); background: var(--desk-raised); color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.side:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.side:disabled { opacity: 0.25; cursor: default; }
+.side svg { width: 22px; height: 22px; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--desk-line); padding-top: 8px;
+}
+.tg { display: flex; align-items: center; gap: 4px; }
+.tb {
+  width: 44px; height: 44px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+}
+.tb:hover:not(:disabled) { background: var(--desk-raised); color: var(--accent); }
+.tb:disabled { opacity: 0.3; cursor: default; }
+.tb[aria-pressed="true"] { background: var(--desk-raised); color: var(--accent); }
+.tb svg { width: 20px; height: 20px; }
+.pager { display: flex; align-items: center; gap: 8px; margin-inline: 6px; font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pager input {
+  width: 64px; height: 34px; box-sizing: border-box; text-align: center;
+  border: 1px solid var(--desk-line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.zoomval { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.thumbs {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(21, 18, 10, 0.97);
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+}
+.thumbs[hidden] { display: none; }
+.thumbs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; width: 100%; margin: 0 auto; }
+.thumbs-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--paper); }
+.thumbs-grid {
+  flex: 1 1 auto; overflow-y: auto; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 20px; align-content: start;
+}
+.thumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.thumb-box { width: 144px; height: 203px; overflow: hidden; position: relative; border-radius: 3px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); outline: 3px solid transparent; outline-offset: 3px; transition: outline-color 0.15s, transform 0.15s; }
+.thumb:hover .thumb-box { transform: translateY(-3px); }
+.thumb[aria-current="page"] .thumb-box { outline-color: var(--accent); }
+.thumb-page { position: absolute; top: 0; left: 0; width: 800px; height: 1130px; transform: scale(0.18); transform-origin: 0 0; pointer-events: none; }
+.thumb-cap { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.thumb[aria-current="page"] .thumb-cap { color: var(--accent); }
+.close {
+  height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--desk-line);
+  background: var(--desk-raised); color: var(--paper); cursor: pointer; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .toolbar { justify-content: center; }
+  .tg-c { order: -1; width: 100%; justify-content: center; }
+  .zoomval { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scaler { transition: none; }
+  .page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { animation: none; }
+}
+/* Economía y Finanzas: páginas blancas, acento oro viejo con verde dinero, Playfair Display para titulares y Figtree para el texto */
+.t1 {
+  --acc: #7D6418; --tint: #F3EEDC; --tint2: #E2D6AE; --paper: #FDFCF7; --ink: #2A2210; --soft: #54482A; --mute: #84744F; --on: #FDF9EE; --on-soft: #EDE1BE; --gold: #3F6B3A;
+  width: 800px; height: 1130px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+}
+.t1 * { box-sizing: border-box; }
+.t1 h1, .t1 h2, .t1 h3 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; margin: 0; color: inherit; text-wrap: balance; }
+.t1 p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
+.t1 ol { margin: 0; }
+.t1 .via { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.t1 .kick { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.t1 .art { position: relative; overflow: hidden; background: var(--tint); }
+.t1 .art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.t1 .acc { background: var(--acc); color: var(--on); }
+.t1 .acc p { color: var(--on); }
+.t1 .acc .via, .t1 .acc .kick { color: var(--on-soft); }
+.t1 .h-page { font-weight: 800; font-size: 50px; line-height: 1; letter-spacing: -0.01em; }
+.t1 .dbl { height: 7px; border-top: 2px solid var(--acc); border-bottom: 2px solid var(--acc); }
+.t1 .pnum { position: absolute; bottom: 22px; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.t1 .pnum.l { left: 44px; } .t1 .pnum.r { right: 44px; }
+.t1 .pnum.on { color: var(--on-soft); }
+.t1 .tag { display: inline-block; align-self: flex-start; background: var(--acc); color: var(--on); font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1.15; padding: 8px 14px; }
+.t1 .stack { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+/* Cover */
+.t1.cv { padding: 40px 44px 44px; display: flex; flex-direction: column; gap: 18px; }
+.cv-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.cv-mast { display: flex; flex-direction: column; gap: 6px; }
+.cv-band { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.1; text-align: center; text-transform: uppercase; letter-spacing: 0.02em; padding: 4px 0 8px; }
+.cv-art { height: 610px; background: repeating-conic-gradient(from 0deg at 50% 46%, #E2D6AE 0deg 9deg, #F6F1E2 9deg 18deg); }
+.cv-foot { display: flex; gap: 28px; align-items: flex-start; }
+.cv-box { flex: 0 0 190px; margin: -132px 0 0 18px; padding: 20px; position: relative; z-index: 1; font-weight: 700; font-size: 15px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 8px; }
+.cv-box b { font-family: 'Playfair Display', Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: 0; }
+.cv-head { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cv-head h2 { font-size: 36px; font-weight: 800; text-transform: uppercase; line-height: 1.02; }
+
+/* Contents */
+.t1.tc { display: grid; grid-template-columns: 448px 1fr; }
+.tc-l { padding: 70px 40px 60px 44px; display: flex; flex-direction: column; gap: 26px; }
+.tc-l h1 { font-size: 62px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.tc-l .dbl { margin-top: -10px; }
+.toc { display: flex; flex-direction: column; gap: 15px; }
+.toc a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+.toc .t { font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.toc .s { font-size: 13px; color: var(--soft); }
+.toc .ln { display: flex; align-items: center; gap: 10px; color: #3F6B3A; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.toc .ln::before { content: ""; flex: 1; border-bottom: 2px dashed var(--tint2); }
+.toc a:hover .t { color: var(--acc); }
+.tc-r { position: relative; overflow: hidden; }
+.strip { position: absolute; top: -50px; bottom: -50px; left: 62px; right: 62px; background: var(--ink); transform: rotate(-3deg); display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 34px; }
+.strip::before, .strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; background: repeating-linear-gradient(to bottom, var(--paper) 0 16px, transparent 16px 36px); }
+.strip::before { left: 10px; } .strip::after { right: 10px; }
+.frame { width: 100%; aspect-ratio: 1; background: var(--tint); border-radius: 4px; display: grid; place-items: center; }
+.frame svg { width: 62%; height: 62%; }
+
+/* Week in a minute */
+.t1.wm { padding: 54px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.wm h1 { font-size: 42px; font-weight: 800; text-transform: uppercase; }
+.box { padding: 20px 24px; }
+.box p { font-size: 15.5px; font-weight: 500; line-height: 1.55; }
+.zz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+.zz .art { height: 250px; }
+.zz h3 { font-size: 26px; font-weight: 700; }
+.top3 { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.top3 li::marker { color: var(--acc); font-weight: 700; }
+
+/* Rows (Animation) */
+.t1.nw { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 22px; }
+.nw-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--acc); color: var(--acc); padding: 4px 10px; border-radius: 999px; }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 30px; }
+.rows .art { height: 252px; }
+.rows p { font-size: 14px; }
+
+/* Highlights (Series) */
+.hl-band { height: 300px; padding: 46px 44px 0; }
+.hl-band h1 { font-size: 54px; font-weight: 800; }
+.hl-body { position: absolute; top: 130px; left: 44px; right: 44px; bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+.hl-hero { height: 290px; outline: 6px solid var(--paper); }
+.hl-lead { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 26px; align-items: start; }
+.hl-lead h2 { font-size: 27px; font-weight: 700; line-height: 1.12; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cols3 .art { height: 140px; }
+.cols3 h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.cols3 p { font-size: 13.5px; line-height: 1.5; }
+
+/* Profile (Film) */
+.t1.pf { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.pf-box { padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 26px; }
+.pf-box h2 { font-size: 30px; font-weight: 800; line-height: 1.08; }
+.pf-box h3 { font-size: 19px; font-weight: 700; margin-top: 6px; }
+.pf-box p { font-size: 14px; }
+.pf-box .art { height: 100%; min-height: 380px; outline: 4px solid var(--on); }
+.pf-row { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.pf-row .art { height: 196px; }
+.pf-row h3 { font-size: 23px; font-weight: 700; }
+
+/* Club grid (Music) */
+.t1.ex { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.ex-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.ex-top .art { height: 350px; }
+.ex-top h2 { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ex-top p { font-size: 14px; }
+.ex-box { padding: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.ex-box .art { height: 128px; outline: 3px solid var(--on); outline-offset: -3px; }
+.ex-box h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.ex-box p { font-size: 13.5px; line-height: 1.5; }
+
+/* Split (Video games) */
+.t1.sp { display: grid; grid-template-columns: 350px 1fr; }
+.sp-l { padding: 56px 32px 56px 44px; display: flex; flex-direction: column; gap: 18px; }
+.sp-l h1 { font-size: 52px; font-weight: 800; line-height: 0.98; }
+.sp-l h2 { font-size: 24px; font-weight: 700; line-height: 1.12; }
+.sp-l p { font-size: 14px; }
+.sp-l .art { height: 290px; background: #2A2210; }
+.sp-r { padding: 56px 44px 56px 36px; display: flex; flex-direction: column; gap: 16px; }
+.sp-r h2 { font-size: 28px; font-weight: 700; }
+.item { display: flex; flex-direction: column; gap: 5px; }
+.item .n { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--acc); }
+.item h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.item p { font-size: 14px; }
+.sp-r hr { border: 0; border-top: 1px solid var(--tint2); margin: 4px 0; width: 100%; }
+.sp-r .art { height: 190px; }
+
+/* Back */
+.t1.bk { display: flex; flex-direction: column; }
+.bk-top { height: 650px; display: flex; flex: none; }
+.bk-block { flex: 0 0 88%; padding: 54px 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.bk-block h1 { font-size: 50px; font-weight: 800; }
+.bk-strip { flex: 0 0 4%; background: var(--tint); }
+.cal { display: flex; flex-direction: column; }
+.cal div { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-top: 1px solid rgba(248, 250, 238, 0.32); align-items: baseline; }
+.cal div:last-child { border-bottom: 1px solid rgba(248, 250, 238, 0.32); }
+.cal span { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--on); }
+.cal b { font-weight: 600; font-size: 15px; display: block; }
+.cal i { font-style: normal; font-size: 12.5px; color: var(--on-soft); }
+.bk-note { font-size: 13px !important; line-height: 1.5 !important; color: var(--on-soft) !important; max-width: 520px; }
+.bk-art { flex: 1 1 auto; }
+
+
+
+.t1.mn { padding: 56px 44px 60px; display: flex; flex-direction: column; gap: 18px; }
+.mn-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.mn-head p { font-size: 15px; }
+.mn-list { display: flex; flex-direction: column; }
+.mn-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; padding: 12px 0; border-bottom: 2px dashed var(--tint2); align-items: baseline; }
+.mn-row > div { display: flex; flex-direction: column; gap: 4px; }
+.mn-row b { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.mn-row div > span { font-size: 14.5px; line-height: 1.5; color: var(--soft); }
+.mn-row i { font-style: normal; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--mute); }
+
+
+.tb-pdf { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--desk-line); }
+@media print {
+  @page { size: 800px 1130px; margin: 0; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+  .mast, .toolbar, .side, .thumbs { display: none !important; }
+  .stage, .vp { display: block !important; height: auto !important; overflow: visible !important; max-width: none !important; width: 800px !important; margin: 0 !important; }
+  .book { width: 800px !important; height: auto !important; margin: 0 !important; }
+  .scaler { position: static !important; transform: none !important; width: 800px !important; height: auto !important; perspective: none !important; transition: none !important; }
+  .page { position: relative !important; left: 0 !important; top: 0 !important; visibility: visible !important; box-shadow: none !important; animation: none !important; transform: none !important; filter: none !important; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page::after { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+/* Imágenes de noticias y páginas añadidas */
+.t1 .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.tc-img { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
+.tc-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.t1 .h-sec { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.t1.nw .rows { gap: 22px 30px; }
+.t1.nw .rows .art-main { height: 210px; }
+.t1.nw .rows p { font-size: 13.5px; line-height: 1.5; }
+.rows3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; border-top: 2px solid var(--tint2); padding-top: 20px; }
+.rows3 .art { height: 120px; }
+.rows3 p { font-size: 13px; line-height: 1.5; }
+.t1.cu { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 20px; }
+.cu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 24px; }
+.cu-grid .art { height: 150px; }
+.cu-grid h3 { font-size: 19px; font-weight: 700; line-height: 1.18; }
+.cu-grid p { font-size: 13.5px; line-height: 1.5; }
+.cu-n { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; margin-right: 6px; color: var(--acc); }
+.t1.pf .pf-row .art { height: 168px; }
+.t1.bk .bk-top { height: 890px; }
+.t1.bk .bk-block { gap: 18px; padding-top: 50px; }
+.t1.bk .cal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 26px; border-bottom: 1px solid rgba(248, 250, 238, 0.32); }
+.t1.bk .cal div { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 9px 0; }
+.t1.bk .cal div:last-child { border-bottom: 0; }
+.t1.bk .cal p { margin: 0; }
+.t1.bk .cal span { font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-soft); }
+.t1.bk .cal b { font-size: 14.5px; line-height: 1.35; }
+.t1.nw { gap: 18px; }
+.t1.nw .rows .art-main { height: 180px; }
+.rows3 { padding-top: 16px; }
+.rows3 .art { height: 104px; }
+.t1 .hl-hero { flex: none; height: 180px; }
+.t1 .hl-lead, .t1 .hl-body .cols3 { flex: none; }
+.t1 .hl-lead { grid-template-columns: 220px minmax(0, 1fr); gap: 24px; }
+.t1 .hl-lead p { font-size: 13.5px; line-height: 1.5; }
+.t1 .hl-body .cols3 .art { height: 112px; }
+.t1 .hl-body .cols3 p { font-size: 13px; }
+.t1.pf { gap: 20px; }
+.t1 .pf-box { grid-template-columns: minmax(0, 1fr) 230px; padding: 24px; }
+.t1 .pf-box p { font-size: 13.5px; line-height: 1.5; }
+.t1 .pf-box .art { min-height: 0; }
+.pf-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.pf-cols .art { height: 112px; }
+.pf-cols h3 { font-size: 19px; font-weight: 700; line-height: 1.18; }
+.pf-cols p { font-size: 13px; line-height: 1.5; }
+.t1.ex { gap: 20px; }
+.t1 .ex-top .art { height: 300px; }
+.t1 .ex-top p { font-size: 13.5px; line-height: 1.5; }
+.t1 .ex-box { padding: 24px; }
+.t1 .ex-box .art { height: 100px; }
+.t1 .ex-box p { font-size: 13px; }
+.t1 .sp-r .art { height: 150px; flex: none; }
+.t1 .sp-l .art { height: 230px; flex: none; }
+.t1 .sp-l p, .t1 .sp-r .item p { font-size: 13.5px; line-height: 1.5; }
+.t1.mn { gap: 14px; padding-top: 50px; }
+.t1 .mn-row { padding: 9px 0; grid-template-columns: 104px minmax(0, 1fr); }
+.t1 .mn-row b { font-size: 17.5px; }
+.t1 .mn-row div > span { font-size: 13.5px; line-height: 1.42; }
+.t1.nw { gap: 16px; padding-top: 46px; }
+.t1.nw .rows .art-main { height: 210px; }
+.t1 .rows3 .art { height: 78px; }
+.t1 .rows3 .h-sec, .t1.nw .h-sec { font-size: 19px; }
+.t1 .cu-grid { gap: 22px 24px; }
+.t1 .cu-grid .art { height: 124px; }
+.t1 .mn-row { padding: 7px 0; }
+.t1 .mn-row > div { gap: 3px; }
+.t1 .mn-row b { font-size: 17px; }
+.t1 .hl-hero { height: 150px; }
+.t1.bk .bk-block { gap: 14px; padding-top: 46px; }
+.t1.bk .cal div { padding: 7px 0; }
+.t1.mn .mn-row div > span { line-height: 1.38; }
+
+/* Economía y Finanzas: ajustes de maquetación propios */
+.t1 .cv-band { font-size: 60px; letter-spacing: 0.01em; padding: 10px 0 12px; }
+.t1.tc .tc-l { padding: 56px 36px 56px 44px; gap: 20px; }
+.t1.tc .tc-l h1 { font-size: 60px; }
+.t1.tc .toc { gap: 9px; }
+.t1.tc .toc a { gap: 2px; }
+.t1.tc .toc .t { font-size: 16.5px; }
+.t1.tc .toc .s { font-size: 12.5px; }
+.t1.tc .toc .ln { font-size: 13px; }
+.t1 .note { font-size: 11.5px !important; line-height: 1.45 !important; color: var(--mute) !important; }
+.t1 .acc .note { color: var(--on-soft) !important; }
+.t1 .chg-box { background: var(--tint); padding: 16px 22px; display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 20px; align-items: start; border-left: 6px solid var(--gold); }
+.t1 .chg-box h3 { font-size: 21px; font-weight: 700; line-height: 1.15; }
+.t1 .chg-box p { font-size: 13.5px; line-height: 1.5; }
+.qt-wrap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.qt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.qt caption { text-align: left; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; color: var(--ink); padding-bottom: 8px; }
+.qt th { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); font-weight: 700; text-align: right; padding: 6px 0; border-bottom: 2px solid var(--acc); }
+.qt th:first-child, .qt td:first-child { text-align: left; }
+.qt td { font-size: 14px; padding: 8px 0; border-bottom: 1px dashed var(--tint2); text-align: right; color: var(--ink); }
+.qt td:first-child { font-weight: 600; }
+.qt .up { color: #2E7D3E; font-weight: 700; }
+.qt .dn { color: #A23B2A; font-weight: 700; }
+.qt.sm td { font-size: 13px; padding: 6px 0; }
+.qt.sm td:first-child { font-weight: 600; padding-right: 8px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.tile { background: var(--tint); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; border-top: 4px solid var(--gold); }
+.tile .k { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.tile b { font-family: 'Playfair Display', Georgia, serif; font-size: 25px; line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tile .c { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile .c.up { color: #2E7D3E; } .tile .c.dn { color: #A23B2A; } .tile .c.nd { color: var(--mute); font-size: 12.5px; }
+.tile i { font-style: normal; font-size: 11.5px; color: var(--soft); line-height: 1.35; }
+.t1 .price { padding: 12px 16px; font-size: 13.5px; line-height: 1.45; font-weight: 600; }
+.t1 .price b { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; }
+.pf-cols.two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.t1 .pf-cols .kick + h3 { margin-top: 0; }
+.t1.sp .sp-r .qt { margin-bottom: 2px; }
+.t1 .hl-band h1 { font-size: 50px; }
+.t1.ex .ex-box.nart { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.t1 .mn-row { grid-template-columns: 126px minmax(0, 1fr); }
+.qt th + th, .qt td + td { padding-left: 10px; }
+.t1.sp .sp-l .art { height: 170px; }
+.t1.sp .sp-r .art { height: 130px; }
+.t1.pf .pf-box h2 { font-size: 28px; }
+.t1.bk .bk-top { height: 720px; }
+.t1.bk .cal { grid-template-columns: minmax(0, 1fr); }
+.t1.bk .cal div { grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+.t1.bk .cal div:last-child { border-bottom: 0; }
+.t1.bk .bk-top { height: 790px; }
+.t1.ex .ex-box.nart.two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+</style>
+
+</head>
+<body>
+<header class="mast">
+  <div><b>Economía y Finanzas</b> <span>Número 03 · 25 nov 2026</span></div>
+  <span id="label">Portada</span>
+</header>
+
+<main class="stage">
+  <button type="button" class="side" id="prev" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="vp" id="vp">
+    <div class="book" id="book">
+      <div class="scaler" id="scaler">
+<section class="page" aria-label="Página 1: Portada" aria-hidden="true">
+<div class="t1 cv">
+  <div class="cv-top"><span>Número 03 · Del 18 al 24 de noviembre</span><span>25 de noviembre de 2026</span></div>
+  <div class="cv-mast"><div class="dbl"></div><div class="cv-band acc">Economía y Finanzas</div><div class="dbl"></div></div>
+  <div class="art cv-art"><img src="https://s.yimg.com/lo/mysterio/api/b7d3b1b5d30b68835f1326cde549ef90eed2d0ddcaf422b77514fa76caf40c35/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_webp/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Freuters.com%2Fd66d831380a5586b0786c4d083dce05d.jpg_up.jpg" alt="Jensen Huang, de Nvidia" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  <div class="cv-foot">
+    <div class="cv-box acc"><b>40</b>noticias: índices, tecnológicas, macro, geopolítica, materias primas, España y bitcoin</div>
+    <div class="cv-head">
+      <h2>Wall Street entra en corrección y Huang vuelve a Nvidia</h2>
+      <p>El S&amp;P 500 pierde un 8,6 % en la semana del 16 al 20, la peor desde abril de 2025, y el lunes 23 rebota un 4,7 % con la vuelta de Jensen Huang. Además: Anthropic firma la mayor salida a bolsa de la historia de EE. UU., el oro cae cerca de un 9 % y el bitcoin toca 55.100 dólares.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" aria-label="Página 2: Sumario" aria-hidden="true">
+<div class="t1 tc">
+  <div class="tc-l">
+    <h1>Sumario</h1>
+    <div class="dbl"></div>
+    <nav class="toc" aria-label="Sumario">
+      <a href="#p3" data-goto="2"><span class="t">En un minuto</span><span class="s">El resumen, el Top 3 y lo que viene</span><span class="ln">/ 03</span></a>
+      <a href="#p4" data-goto="3"><span class="t">Índices</span><span class="s">Corrección en Wall Street y SharkNinja al S&amp;P 500</span><span class="ln">/ 04</span></a>
+      <a href="#p5" data-goto="4"><span class="t">Grandes tecnológicas</span><span class="s">Huang vuelve, Anthropic y Tesla-SpaceX</span><span class="ln">/ 05</span></a>
+      <a href="#p6" data-goto="5"><span class="t">Datos económicos</span><span class="s">Actas de la Fed, PMI y euríbor</span><span class="ln">/ 06</span></a>
+      <a href="#p7" data-goto="6"><span class="t">Internacional</span><span class="s">Trump, Xi y Putin en Shenzhen; aranceles</span><span class="ln">/ 07</span></a>
+      <a href="#p8" data-goto="7"><span class="t">Materias primas</span><span class="s">El oro de China, la plata y la OPEP+</span><span class="ln">/ 08</span></a>
+      <a href="#p9" data-goto="8"><span class="t">España</span><span class="s">El IBEX, los precios industriales y el 29-N</span><span class="ln">/ 09</span></a>
+      <a href="#p10" data-goto="9"><span class="t">Bitcoin</span><span class="s">Dos expedientes a España y mínimo desde 2024</span><span class="ln">/ 10</span></a>
+      <a href="#p11" data-goto="10"><span class="t">Tesoreras de bitcoin</span><span class="s">Strategy, Metaplanet y MARA</span><span class="ln">/ 11</span></a>
+      <a href="#p12" data-goto="11"><span class="t">Guerras y tensiones</span><span class="s">Ormuz, refinerías rusas y mar Rojo</span><span class="ln">/ 12</span></a>
+      <a href="#p13" data-goto="12"><span class="t">Más noticias</span><span class="s">El resto de la semana, en una línea</span><span class="ln">/ 13</span></a>
+      <a href="#p14" data-goto="13"><span class="t">Próximamente</span><span class="s">La agenda de los próximos siete días</span><span class="ln">/ 14</span></a>
+    </nav>
+  </div>
+  <div class="tc-r acc" aria-hidden="true">
+    <div class="tc-img"><img src="https://s.yimg.com/lo/mysterio/api/b7d3b1b5d30b68835f1326cde549ef90eed2d0ddcaf422b77514fa76caf40c35/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_webp/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Freuters.com%2Fd66d831380a5586b0786c4d083dce05d.jpg_up.jpg" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum l">02</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 3: En un minuto" aria-hidden="true">
+<div class="t1 wm">
+  <h1>En un minuto</h1>
+  <div class="box acc"><p>Wall Street encadena siete caídas y el viernes 20 entra en corrección: el S&amp;P 500 pierde un 8,6 % en la semana y el Nasdaq 100, más de un 10 %. Anthropic debuta tras la mayor salida a bolsa de la historia de EE. UU., pero el martes 24 ya cotiza por debajo de su precio de salida. Nvidia devuelve el mando a Jensen Huang y sube un 31,5 % en un día. Las actas de la Fed apuntan a otra subida de tipos, el oro y la plata se hunden, el IBEX 35 vive su peor semana desde marzo e Irán aprieta el cierre de Ormuz.</p></div>
+  <div class="zz">
+    <div class="stack">
+      <h3>No te lo pierdas</h3>
+      <ol class="top3">
+        <li><b>Wall Street entra en corrección:</b> el S&amp;P 500 cae un 8,61 % y el Nasdaq 100, un 10,43 % en la semana del 16 al 20. <span class="via">p. 04</span></li>
+        <li><b>Nvidia restituye a Jensen Huang</b> el lunes 23 y la acción sube un 31,5 % en la sesión. <span class="via">p. 05</span></li>
+        <li><b>El bitcoin toca 55.100 dólares</b> el sábado 21, su nivel más bajo desde septiembre de 2024. <span class="via">p. 10</span></li>
+      </ol>
+    </div>
+    <div class="art"><img src="https://www.aljazeera.com/wp-content/uploads/2026/11/reuters_6afeffb8-1795096504.jpg?resize=1920%2C1440" alt="Debut de Anthropic en el Nasdaq" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://images.kitco.com/img/extract_0_0_1024_575,width_1200,enlarge,format_jpeg/icms/5768df25-c265-4c2d-a489-e51917a45667.jpeg" alt="Oro" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <h3>Lo que viene</h3>
+      <p>Hoy, miércoles 25, EE. UU. publica el PCE y la segunda estimación del PIB. El jueves 26 Wall Street cierra por Acción de Gracias; el viernes 27 llega el IPC adelantado de España y el domingo 29 se reúne la OPEP+ y España vota en elecciones generales.</p>
+      <p>Todas las fechas, en la contraportada.</p>
+    </div>
+  </div>
+  <div class="box acc"><p>Cada noticia está resumida con nuestras propias palabras a partir de fuentes como Nvidia, la Reserva Federal, S&amp;P Dow Jones Indices, el INE, Reuters, AP, Kitco, el World Gold Council, Euronews o The Block, y cada una cita su fuente. Nada de lo publicado es una recomendación de inversión.</p></div>
+  <span class="pnum r">03</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 4: Índices" aria-hidden="true">
+<div class="t1 pf">
+  <div class="nw-head"><h1 class="h-page">Índices</h1><div class="chips"><span class="chip">Bolsa</span><span class="chip">Bonos</span><span class="chip">Cambios</span></div></div>
+  <div class="chg-box">
+    <div class="stack"><span class="kick">S&amp;P 500 · 23 nov</span><h3>SharkNinja entra; sale AES</h3></div>
+    <div class="stack"><p>S&amp;P Dow Jones Indices anunció el lunes 23 que SharkNinja (SN) entrará en el S&amp;P 500 antes de la apertura del miércoles 2 de diciembre en sustitución de AES Corp., cuya compra por un consorcio con Global Infrastructure Partners y EQT Infrastructure está pendiente. En el Nasdaq 100 no hubo anuncios: Nasdaq aún no ha comunicado si Anthropic entra por la regla de entrada rápida.</p><span class="via">Vía S&amp;P Dow Jones Indices · Leverage Shares (Yahoo Finance)</span></div>
+  </div>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">Wall Street · Del 18 al 24 de noviembre</span>
+      <h2>La peor semana de Wall Street desde abril de 2025</h2>
+      <p>El S&amp;P 500 cerró el viernes 20 en 6.910,39 puntos tras caer un 3,70 % en la sesión, su séptima caída seguida, la racha más larga desde febrero de 2020. Perdió un 8,61 % en la semana del 16 al 20 y entró en corrección, más de un 10 % por debajo de su máximo, igual que el Dow Jones. El Nasdaq 100 cedió un 10,43 % y el Nasdaq Composite, en su peor semana desde marzo de 2020, quedó en negativo en el año.</p>
+      <p>El lunes 23 el S&amp;P 500 rebotó un 4,7 %, hasta 7.237,17, con la vuelta de Huang a Nvidia (p. 05), y el martes 24 cerró en 7.201,09 (−0,5 %), un 1,9 % por debajo del martes 17 y un 5,2 % por encima de principios de año. La búsqueda de refugio bajó las rentabilidades: la del bono a 10 años de EE. UU. pasó del 5,10 % del día 17 a cerca del 4,90 %.</p>
+      <span class="via">Vía Reuters (Yahoo Finance) · AP (La Nación) · Zacks · FRED</span>
+    </div>
+    <div class="art"><img src="https://s.yimg.com/lo/mysterio/api/2c83856223ecb0d5ae93fd5a2c8f67a8d0f6601a2f9af82fe4e6ea532d91fbe3/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_webp/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Freuters.com%2Ff279c3fdbba14597c86838728661131b.jpg_up.jpg" alt="Bolsa de Nueva York" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="qt-wrap">
+    <div class="stack">
+      <table class="qt">
+        <caption>Cierre semanal y martes 24</caption>
+        <thead><tr><th>Índice</th><th>Vie 20</th><th>Semana</th><th>Mar 24</th></tr></thead>
+        <tbody>
+          <tr><td>S&amp;P 500</td><td>6.910,39</td><td class="dn">−8,61 %</td><td>7.201,09</td></tr>
+          <tr><td>Nasdaq 100</td><td>25.028,98</td><td class="dn">−10,43 %</td><td>26.214,17</td></tr>
+          <tr><td>MSCI World</td><td>4.460,12</td><td class="dn">−8,08 %</td><td>4.621,41*</td></tr>
+          <tr><td>CSI 300</td><td>3.954,57</td><td class="dn">−1,54 %</td><td>3.958,29*</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Semana del 16 al 20, frente al cierre del viernes 13. *Cierre del lunes 23; sin dato confirmado del martes 24. Variación del MSCI World y del CSI 300: cálculo propio. Fuentes: Reuters, AP, MarketScreener, The Glass Desk y Capp Notes.</p>
+    </div>
+    <div class="stack">
+      <table class="qt">
+        <caption>Bonos a 10 y 30 años</caption>
+        <thead><tr><th>Bono</th><th>Mar 24</th><th>Desde el 17</th></tr></thead>
+        <tbody>
+          <tr><td>EE. UU. 10 años</td><td>≈4,90 %</td><td class="up">≈−20 pb</td></tr>
+          <tr><td>EE. UU. 30 años</td><td>≈5,28 %</td><td class="up">≈−18 pb</td></tr>
+          <tr><td>Bund 10 años</td><td>3,26 %</td><td class="up">−12 pb</td></tr>
+          <tr><td>Bund 30 años</td><td>3,645 %</td><td class="up">≈−10 pb</td></tr>
+        </tbody>
+      </table>
+      <p class="note">EE. UU.: FRED (5,10 % y 5,46 % el día 17; 4,92 % y 5,31 % el 20) y Trading Economics (24). Bund: Trading Economics. Variación, cálculo propio. Una bajada de la rentabilidad encarece el bono.</p>
+    </div>
+  </div>
+  <span class="pnum l">04</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 5: Grandes tecnológicas" aria-hidden="true">
+<div class="t1">
+  <div class="hl-band acc"><h1>Grandes tecnológicas</h1></div>
+  <div class="hl-body">
+    <div class="art hl-hero"><img src="https://imgengine.khaleejtimes.com/khaleejtimes-english/2026-11-09/sk975o4r/GermanyUsAiIndustryNvidia.jpg?width=1200&amp;height=630&amp;q=60&amp;format=auto&amp;ogImage=true&amp;mode=crop&amp;rect=0,0,1200,800" alt="Nvidia" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="hl-lead">
+      <div class="stack"><span class="kick">Nvidia · 23 nov</span><h2>Nvidia devuelve el mando a Jensen Huang</h2><span class="via">Ninguna presentó resultados del 18 al 24</span></div>
+      <div class="stack">
+        <p>El consejo de Nvidia restituyó por unanimidad el lunes 23 a Jensen Huang como presidente, consejero delegado y consejero, con efecto inmediato, once días después de su dimisión; Colette Kress vuelve a la dirección financiera. Según el consejo, tras consultar a altos cargos del Gobierno, la vuelta «no supone riesgo para la seguridad nacional»; los consejeros independientes siguen investigando un posible intento de espionaje extranjero y la empresa busca un director de cumplimiento. El 17 y el 18, su presidente, Harvey Jones, había dicho que no volverían a contratarlo.</p>
+        <p>La acción, que se dejó un 13,8 % el viernes 20, subió un 31,5 % el lunes, casi un billón de dólares de capitalización, y Nvidia volvió a ser la segunda empresa más valiosa del mundo, tras Apple. El martes 24 cayó un 5,9 %. Trump dijo a CNBC que su intervención fue «muy importante». Huang declarará el 3 de diciembre ante el Comité Bancario del Senado.</p>
+        <span class="via">Vía Nvidia (SEC) · Reuters (Yahoo Finance · Investing.com)</span>
+      </div>
+    </div>
+    <div class="cols3">
+      <div class="stack">
+        <div class="art"><img src="https://www.aljazeera.com/wp-content/uploads/2026/11/reuters_6afeffb8-1795096504.jpg?resize=1920%2C1440" alt="Anthropic en el Nasdaq" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Anthropic · 18-24 nov</span>
+        <h3>La mayor salida a bolsa de EE. UU.</h3>
+        <p>Fijó el precio en 83 dólares, por encima del rango de 70-78, y vendió 980 millones de acciones: 81.300 millones de dólares. El jueves 19 abrió a 111,50 $ y cerró a 97,17 $ (+17 %); el martes 24 cerró en 81,91 $, por primera vez bajo el precio de salida.</p>
+        <span class="via">Vía Al Jazeera · Yahoo Finance</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://hermes.media.transform.aol.com/b78c34de41c8d5cb2285c0343e6fee6c8aef497b/w_1200,c_scale,f_auto,q_auto/https://hermes.media.static.aol.com/media/2026/11/24/f9eb6a99-1594-378f-aeb5-307f577321ed/405f4cfc-737a-4572-947d-7f572324e267.jpg" alt="Tesla y SpaceX" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Tesla · SpaceX · 24 nov</span>
+        <h3>Tesla y SpaceX negocian fusionarse</h3>
+        <p>Según el FT, dos comités de consejeros negocian una fusión en acciones valorada en unos 3,5 billones de dólares, con la idea de cerrarla antes de fin de año; el canje no está fijado. SpaceX cerró el 24 a 125,81 $ (−5,65 %), bajo los 135 $ de su salida a bolsa.</p>
+        <span class="via">Vía FT (Yahoo Finance) · Motley Fool</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://image.hkstandard.com.hk/f/1200p0/0x0/100/none/726bf702ab5458326045d1f3a1b2cb9b/2026-07/2026-07-16T120915Z_630032299_RC2TEMA5922I_RTRMADP_3_TSMC-RESULTS.JPG" alt="TSMC" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">TSMC · 19 nov</span>
+        <h3>TSMC frena los chips avanzados para China</h3>
+        <p>Con las nuevas reglas de EE. UU. ya en vigor, frena los pedidos de clientes chinos de 16 nanómetros o menos que no tengan licencia, lo que en general los limita a 28 y 40 nm. Según el FT, Samsung también ha suspendido envíos.</p>
+        <span class="via">Vía Reuters (The Standard)</span>
+      </div>
+    </div>
+  </div>
+  <span class="pnum r">05</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 6: Datos económicos" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l">
+    <h1>Datos económicos</h1>
+    <span class="kick">Fed · Actas · 18 nov</span>
+    <h2>Las actas de la Fed apuntan a otra subida</h2>
+    <p>Las actas de la reunión del 27 y 28 de octubre, en la que la Fed mantuvo los tipos en el 3,75-4,00 % por 10 votos a 2 (Lisa Cook y Beth Hammack querían subir 25 puntos básicos), muestran que «casi todos» los participantes ven probable que haga falta «una nueva subida» y que «un par» plantearon subir más si la inflación sale desfavorable. Algunos calificaron la pausa de decisión muy ajustada.</p>
+    <p>Tras su publicación, la probabilidad de subir al 4,00-4,25 % el 9 de diciembre pasó del 89,7 % al 91,7 %, según CME FedWatch. Christopher Waller pidió el 19 una «acción agresiva» contra la inflación y Cook dijo el 20 que la política «no es suficientemente restrictiva». El dólar marcó máximos del año.</p>
+    <span class="via">Vía Reserva Federal · InvestmentNews · Investing.com</span>
+    <div class="art"><img src="https://cdn-res.keymedia.com/cms/images/in/jame_639306349738366171.png" alt="Reserva Federal" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="sp-r">
+    <h2>Los datos de la semana</h2>
+    <table class="qt sm">
+      <thead><tr><th>Dato</th><th>Public.</th><th>Anterior</th><th>Previsto</th></tr></thead>
+      <tbody>
+        <tr><td>Peticiones de desempleo EE. UU. (sem. al 14)</td><td>203.000</td><td>202.000</td><td>197.000</td></tr>
+        <tr><td>PMI servicios EE. UU. (nov, avance)</td><td>54,7</td><td>57,9</td><td>55,7</td></tr>
+        <tr><td>PMI manufacturas EE. UU. (nov, avance)</td><td>54,5</td><td>54,9</td><td>54,9</td></tr>
+        <tr><td>Confianza del consumidor EE. UU. (nov)</td><td>103,3</td><td>91,9</td><td>92,2</td></tr>
+        <tr><td>IPCA eurozona, anual (oct, final)</td><td>4,0 %</td><td>3,8 %</td><td>4,0 %</td></tr>
+        <tr><td>PMI compuesto eurozona (nov, avance)</td><td>51,7</td><td>51,7</td><td>51,9</td></tr>
+        <tr><td>Euríbor 12 meses (24 nov)</td><td>3,376 %</td><td>3,361 %*</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p class="note">*Valor del 17 de noviembre. Fuentes: Departamento de Trabajo y S&amp;P Global (vía investingLive), Conference Board (vía TheStreet), Eurostat (vía RTTNews), HCOB y Euríbor Diario. En el periodo no se publicó el informe de empleo de EE. UU.</p>
+    <hr>
+    <div class="item"><span class="n">01</span><h3>El BCE prepara su subida</h3><p>Joachim Nagel dijo el 19 que subir en diciembre «enviaría una señal clara». Los 71 economistas del sondeo de Reuters del 12 esperan 25 puntos básicos el 17 de diciembre, con la facilidad de depósito en el 2,75 %.</p><span class="via">Vía Le Private Banker (Reuters)</span></div>
+    <hr>
+    <div class="item"><span class="n">02</span><h3>El euríbor roza su máximo del año</h3><p>El 3,376 % del día 24 queda a tres milésimas del 3,379 % del 25 de septiembre. La media provisional de noviembre es del 3,308 %, frente al 3,239 % de octubre y el 2,217 % de noviembre de 2025.</p><span class="via">Vía Euríbor Diario · Economía Responsable</span></div>
+  </div>
+  <span class="pnum l">06</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 7: Internacional" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Internacional</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://cdn.abcotvs.com/dip/images/20054719_111926-wabc-trump-xi-putin-meeting-ap-img.jpg?w=1600" alt="Trump, Xi y Putin en Shenzhen" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">EE. UU.-China-Rusia · Shenzhen · 19 nov</span>
+      <h2>Trump y Xi se ven en Shenzhen sin nuevo pacto comercial</h2>
+      <p>En su tercera reunión del año, al margen de la cumbre de APEC, Trump y Xi no cerraron ningún acuerdo comercial nuevo; sigue en marcha la propuesta de rebajar aranceles sobre 30.000 millones de dólares de importaciones de cada país. Trump pidió más compras agrícolas, sin cifras, y ambos defendieron que la energía siga pasando por Ormuz. Según Xinhua, Trump dijo que EE. UU. «no apoya la independencia de Taiwán». Volverán a verse en el G20 de Florida, en diciembre.</p>
+      <p>Ese mismo día celebraron con Putin la primera cumbre a tres, de unos 70 minutos: acordaron reformar la ONU, abrir un diálogo para reducir riesgos nucleares y reforzar el suministro de combustibles, sin compromisos comerciales; según AP, la declaración no menciona Ucrania. Las 21 economías de APEC firmaron la declaración «Shenzhen Outlook», que pide un acceso a la energía «ininterrumpido, fiable y asequible».</p>
+      <span class="via">Vía anews · AP (ABC13) · IBTimes UK · Al Jazeera · SCMP</span>
+    </div>
+  </div>
+  <div class="ex-box acc nart two">
+    <div class="stack">
+      <span class="kick">EE. UU. · Aranceles · 24 nov</span>
+      <h3>Washington prepara aranceles a 16 economías</h3>
+      <p>Según dos fuentes citadas por AP, el Gobierno anunciará en los próximos días aranceles más altos a China, la UE y otras 14 economías, fruto de las investigaciones de la Sección 301 sobre subsidios industriales. Los tipos no se conocen y se sumarían a los aranceles del 10 % al 12,5 % que aplica desde julio a 60 socios. Sustituyen a los de abril de 2025 que el Tribunal Supremo anuló en febrero de 2026.</p>
+      <span class="via">Vía AP (OPB)</span>
+    </div>
+    <div class="stack">
+      <span class="kick">UE-Ucrania · Financiación · 18 nov</span>
+      <h3>Bruselas propone prestar 45.000 millones a Ucrania</h3>
+      <p>La Comisión quiere cubrir un hueco de financiación de 70.000 millones en 2027: hasta 25.000 millones para defensa y hasta 20.000 para el presupuesto, con deuda emitida por la UE que Ucrania solo devolvería cuando Rusia pague reparaciones. Se suma al préstamo de 90.000 millones acordado a finales de 2025 y necesita el visto bueno de los Estados miembros y del Parlamento Europeo.</p>
+      <span class="via">Vía Reuters (The Star)</span>
+    </div>
+  </div>
+  <span class="pnum r">07</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 8: Materias primas" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Materias primas</h1><div class="chips"><span class="chip">Oro</span><span class="chip">Plata</span><span class="chip">Petróleo</span></div></div>
+  <div class="tiles">
+    <div class="tile"><span class="k">Oro</span><b>3.537,90 $</b><span class="c dn">≈−9 %</span><i>Contado; 3.552,50 $ el martes 24</i></div>
+    <div class="tile"><span class="k">Plata</span><b>41,12 $</b><span class="c dn">&gt;−15 %</span><i>Contado; 40,79 $ el martes 24</i></div>
+    <div class="tile"><span class="k">Brent</span><b>92,57 $</b><span class="c dn">−3,4 %</span><i>Futuro de enero; 91,40 $ el 24</i></div>
+    <div class="tile"><span class="k">WTI</span><b>83,98 $</b><span class="c dn">−5,2 %</span><i>Futuro de diciembre; 82,05 $ el 24 (enero)</i></div>
+  </div>
+  <p class="note">Cierres del viernes 20 de noviembre y variación en la semana del 16 al 20, según Kitco: el oro, «alrededor de un 9,5 %», su peor semana desde marzo, y la plata, más de un 15 %; en contado, el oro cae un 8,9 % (cálculo propio). El oro tocó 3.502,93 $, mínimo desde septiembre de 2025. Fuentes: Kitco, Yahoo Finance y Rigzone.</p>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Bancos centrales · China · Octubre</span>
+      <h2 class="tag">China compra 26 toneladas de oro en octubre</h2>
+      <p>El Banco Popular de China sumó unas 26 toneladas en octubre, su mayor compra mensual desde octubre de 2023, y lleva 24 meses seguidos comprando, según la actualización del World Gold Council recogida el 22 de noviembre. Sus reservas oficiales llegan a 2.435 toneladas, el 8,1 % de sus reservas de divisas, frente al 8,5 % de septiembre, por la caída del precio.</p>
+      <p>Según el WGC, los bancos centrales compraron 321 toneladas netas en el tercer trimestre, un 42 % más que un año antes, y unas 675 entre enero y septiembre (+6 %). Los datos de octubre del resto de bancos centrales se esperan a principios de diciembre.</p>
+      <span class="via">Vía WGC (Business Today · Kitco · FXStreet)</span>
+    </div>
+    <div class="stack">
+      <div class="art art-main"><img src="https://akm-img-a-in.tosshub.com/businesstoday/images/story/202611/6b01c4d37ecbf-the-october-purchases-lifted-chinas-official-gold-reserves-to-2-435-tonnes--accounting-for-81-of-212034140-16x9.jpg" alt="Reservas de oro de China" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    </div>
+  </div>
+  <div class="rows3">
+    <div class="stack">
+      <div class="art"><img src="https://images.kitco.com/img/extract_0_0_1000_562,width_1200,enlarge,format_jpeg/icms/77b82624-967c-487e-950b-31f0fd2540c8.jpeg" alt="Lingotes de oro" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Oro · 20 nov</span>
+      <h3 class="h-sec">El oro sufre una crisis de liquidez</h3>
+      <p>Kitco atribuye las pérdidas a ventas para conseguir liquidez, con la bolsa en corrección. Según TD Securities, los ETFs aguantan.</p>
+      <span class="via">Vía Kitco</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://d32r1sh890xpii.cloudfront.net/news/1200x675/2026-11-24_gzpjxc5glt.jpg" alt="Petróleo" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">OPEP+ · 29 nov</span>
+      <h3 class="h-sec">Irak rechaza la auditoría de la OPEP+</h3>
+      <p>Las cuotas de 2027 saldrán de una auditoría de capacidad. Irak dice tener unos 6 millones de barriles diarios; la auditoría le da menos de 5.</p>
+      <span class="via">Vía Rigzone (BMI) · OilPrice</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://s.yimg.com/lo/mysterio/api/3a8a34d26e2c3deda3285ec2a2329738d4717d7ca18d78a563552d424466895e/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_webp/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fusa_today_money_325%2Fabcf6cc997111711d48abea14c19af83.png_up.jpg" alt="Metales preciosos" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Plata · Silver Institute · 18 nov</span>
+      <h3 class="h-sec">Sexto año seguido de déficit de plata</h3>
+      <p>Prevé un déficit de 35 millones de onzas en 2026. La demanda baja un 5 %, hasta 1.080 millones, y la oferta minera, un 0,5 %.</p>
+      <span class="via">Vía Silver Institute (FXStreet)</span>
+    </div>
+  </div>
+  <span class="pnum l">08</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 9: España" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">España</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">IBEX 35 · Del 18 al 24 de noviembre</span>
+      <h2>El IBEX 35 vive su peor semana desde marzo</h2>
+      <p>El selectivo cerró el viernes 20 en 18.873,1 puntos, con una caída del 5,73 % en la semana del 16 al 20, arrastrado por Wall Street, las dudas sobre la inteligencia artificial y Nvidia y la tensión en Oriente Medio. Solo subieron siete valores, con Redeia (+1,76 %) y Enagás (+0,8 %) a la cabeza; ArcelorMittal (−5,66 %), Rovi (−4,54 %) y ACS (−4,5 %) fueron los peores del viernes.</p>
+      <h3>El martes</h3>
+      <p>Tras rebotar el lunes 23 hasta 19.181,1, cerró el martes 24 en 19.015,8 (−0,86 %), un 3,11 % por debajo del martes 17. ArcelorMittal (−7,65 %), Acerinox (−4,36 %) y Solaria (−4,28 %) encabezaron las caídas, y Cellnex (+3,02 %) y Telefónica (+2,56 %), las subidas. El bono a 10 años cerró en el 3,868 % y la prima de riesgo, en 60,6 puntos básicos.</p>
+      <span class="via">Vía Valencia Plaza · Teleceuta</span>
+    </div>
+    <div class="art"><img src="https://d31u1w5651ly23.cloudfront.net/articulos/articulos-1964127.jpg" alt="Bolsa de Madrid" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-cols two">
+    <div class="stack">
+      <div class="art"><img src="https://teleceuta.fra1.digitaloceanspaces.com/media/2026/11/24175012/Ibex-35-y-Euribor-12.jpg" alt="IBEX 35" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Precios · INE · 24 nov</span>
+      <h3>Los precios industriales suben un 19,9 %</h3>
+      <p>Es la tasa anual de octubre, la más alta desde noviembre de 2022, empujada por la energía: los precios subieron un 1,7 % en el mes y, sin energía, un 4,0 % en el año. Ese mismo día el INE publicó que la cifra de negocios de las empresas creció un 11,4 % interanual en septiembre.</p>
+      <span class="via">Vía INE (Valencia Plaza · Demócrata)</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://static.merca2.es/wp-content/uploads/2026/10/ibex-35-elecciones-29n-prima-r-ibex-35-29-n-1-675x450.webp" alt="Elecciones del 29-N y el IBEX 35" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Elecciones · 29 nov</span>
+      <h3>El IBEX, ante las generales del 29-N</h3>
+      <p>España vota el domingo 29 en las elecciones convocadas por Pedro Sánchez el 5 de octubre. Según datos de BME recogidos por Merca2, el IBEX bajó en la primera sesión tras 10 de las 11 generales celebradas desde 1993, con una caída media del 1,93 %, aunque el análisis advierte de que la muestra es pequeña.</p>
+      <span class="via">Vía Merca2 (BME) · Ministerio del Interior</span>
+    </div>
+  </div>
+  <span class="pnum r">09</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 10: Bitcoin" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l">
+    <h1>Bitcoin</h1>
+    <div class="price acc"><b>60.458,70 $</b> el martes 24 de noviembre · <b>−6,8 %</b> en siete días. Vía Fortune</div>
+    <span class="kick">Regulación · UE · España · 19 nov</span>
+    <h2>Bruselas abre dos expedientes a España por las criptomonedas</h2>
+    <p>La Comisión Europea envió a España un dictamen motivado por no trasladar las normas de transparencia fiscal sobre criptoactivos: tiene dos meses para cumplir antes de que el caso pueda llegar al Tribunal de Justicia de la UE con petición de sanciones. La República Checa está en la misma fase.</p>
+    <p>También le mandó una carta de emplazamiento por no adaptar su ley a las normas europeas de dinero electrónico y de emisión y servicios de criptoactivos, cuyo plazo venció el 30 de diciembre de 2024, y por no notificar las medidas transfronterizas. Tiene dos meses para responder; los expedientes los heredará el Gobierno que salga del 29-N.</p>
+    <span class="via">Vía Demócrata · Zona Movilidad</span>
+    <div class="art"><img src="https://www.democrata.es/uploads/s1/35/65/24/6/fotonoticia-20261119133941-1920.jpeg" alt="Comisión Europea" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="sp-r">
+    <h2>La semana del bitcoin</h2>
+    <div class="item"><span class="n">01</span><h3>Mínimo desde septiembre de 2024</h3><p>El sábado 21 bajó hasta unos 55.100 dólares y el domingo volvió a unos 60.400. Las fuentes citan como posibles factores la subida de tipos que se espera de la Fed, la caída del Nasdaq del viernes, salidas de 1.250 millones de los ETFs entre el 16 y el 20, 2.700 millones en liquidaciones en 24 horas y la presión sobre Strategy. El índice de miedo y codicia sigue en 13.</p><span class="via">Vía crypto.news · Fortune</span></div>
+    <hr>
+    <div class="art"><img src="https://fortune.com/img-assets/wp-content/uploads/2026/11/Price-of-Bitcoin-Nov-24.jpg?resize=1200,600" alt="Precio del bitcoin" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="item"><span class="n">02</span><h3>Bitcoin Core corrige un fallo</h3><p>Las versiones 30.5 y 31.3, del día 20, cierran la vulnerabilidad CVE-2026-117348, de gravedad media, que permitía bloquear un nodo con anuncios duplicados de transacciones huérfanas. La detectó un escaneo automático con un modelo de lenguaje.</p><span class="via">Vía The Daily Hodl</span></div>
+    <hr>
+    <div class="item"><span class="n">03</span><h3>Las sanciones a Rusia llegan a las cripto</h3><p>El 22.º paquete que propuso la Comisión el 23 endurece los controles sobre plataformas de criptoactivos y redes de pago ligadas a Rusia y saca a 60 bancos rusos más de SWIFT.</p><span class="via">Vía Infobae</span></div>
+  </div>
+  <span class="pnum l">10</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 11: Tesoreras de bitcoin" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Tesoreras de bitcoin</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://www.tbstat.com/cdn-cgi/image/width=1600,height=900,fit=cover,format=jpeg,quality=80/wp/uploads/2026/11/GettyImages-1321733384-scaled.jpg" alt="Michael Saylor, de Strategy" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Strategy (MSTR) · 8-K del 23 nov</span>
+      <h2>Strategy compra 457 BTC y sigue recomprando STRC</h2>
+      <p>Entre el 16 y el 22 de noviembre compró 457 bitcoins por unos 29,6 millones de dólares, a 64.898 dólares de media, y su cartera llega a 851.305 BTC, con un coste de unos 64.230 millones y un precio medio de 75.446 dólares. Lo financió vendiendo en el mercado (ATM) 1.925.676 acciones MSTR por 176,7 millones netos; le quedan unos 17.900 millones disponibles en ese programa.</p>
+      <p>Recompró 2.183.747 preferentes STRC por 211,8 millones, siete veces lo gastado en bitcoin, y elevó de 3.000 a 4.000 millones el límite para recomprar preferentes. Pagó 17,6 millones de dividendos con su reserva en dólares, que queda en 3.730 millones, más 1.090 millones en caja. La acción cayó un 30,6 % en la semana y cerró el viernes 20 a 77,80 dólares, mínimo desde febrero de 2024.</p>
+      <span class="via">Vía Strategy (SEC) · The Block · Cointelegraph</span>
+    </div>
+  </div>
+  <div class="ex-box acc nart two">
+    <div class="stack">
+      <span class="kick">Metaplanet · 19 nov</span>
+      <h3>Metaplanet convoca una junta para reducir capital</h3>
+      <p>Celebrará una junta extraordinaria virtual el 18 de diciembre para votar una reducción del capital social y de las reservas de capital, sin importe indicado. No anunció compras ni ventas de bitcoin: su última cifra son 44.000 BTC a 30 de septiembre. Recompró unos 109 millones de acciones entre el 14 de octubre y el 12 de noviembre por 28.300 millones de yenes, y sale del MSCI Japan Small Cap tras el cierre del 30.</p>
+      <span class="via">Vía Metaplanet · AD HOC NEWS</span>
+    </div>
+    <div class="stack">
+      <span class="kick">MARA Holdings · 18 nov</span>
+      <h3>MARA mueve 366 BTC</h3>
+      <p>Lookonchain detectó una transferencia de 366 BTC, unos 23,3 millones de dólares, que no está confirmada como venta. En 2026, MARA ha declarado ventas de unos 40.581 BTC por 3.030 millones, a 74.446 dólares de media, y tenía 34.012 BTC a finales de septiembre. Ha devuelto 750 millones de préstamos respaldados por bitcoin, con lo que liberó 17.477 BTC de garantía.</p>
+      <span class="via">Vía Altcoin Buzz · 36Crypto</span>
+    </div>
+  </div>
+  <span class="pnum r">11</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 12: Guerras y tensiones" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">Guerras y tensiones</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">EE. UU.-Irán · Ormuz · 21-24 nov</span>
+      <h2>Irán aprieta el cierre de Ormuz</h2>
+      <p>El 21, la agencia británica UKMTO informó de dos petroleros alcanzados por proyectiles cerca de Khasab (Omán), sin víctimas, e Irán atacó en dos oleadas cuatro bases de EE. UU. en Baréin. El 24, el jefe del Ejército iraní, Hatami, ordenó cerrar el estrecho «cada día más» hasta que EE. UU. acepte sus siete condiciones. La Guardia Revolucionaria dice que tres petroleros chocaron con minas; el centro marítimo JMIC no lo confirma.</p>
+      <p>Trump dijo el 23 que los ataques contra Irán podrían reanudarse después de Año Nuevo, y Catar intenta reactivar las conversaciones: su primer ministro se reunió el 24 con Rubio y Vance en Washington. En los mercados, el crudo encadenó su tercera semana a la baja hasta el 20 porque las exportaciones de Oriente Medio se han recuperado (p. 08); el martes 24 subió un 2,3 % tras los nuevos ataques a petroleros.</p>
+      <span class="via">Vía Euronews · Reuters (The Edge) · Rigzone</span>
+    </div>
+    <div class="art"><img src="https://images.euronews.com/articles/stories/10/00/54/79/1200x675_cmsv2_d09bc77c-4395-5a65-8782-b47673e3e794-10005479.jpg" alt="El estrecho de Ormuz" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-row">
+    <div class="art"><img src="https://euromaidanpress.com/wp-content/uploads/2026/11/MYa7m-russian-refineries-and-oil-sites-ukraine-struck-30-october-23-november-2026-.png" alt="Mapa de refinerías rusas atacadas" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Ucrania-Rusia · Refinerías · 19-23 nov</span>
+      <h3>Ucrania golpea 15 refinerías rusas en noviembre</h3>
+      <p>El 23, drones ucranianos alcanzaron la refinería de Lukoil en Perm, la de Novoshakhtinsk, que paró, y la estación de bombeo de Kaleikino, que alimenta el oleoducto Druzhba hacia Hungría y Eslovaquia. Según Bloomberg, en noviembre han sido atacadas 15 refinerías con más de 3,6 millones de barriles diarios de capacidad; el 17 se procesaban unos 2,7 millones de los 5,5 posibles.</p>
+      <span class="via">Vía Euromaidan Press · Meduza</span>
+    </div>
+  </div>
+  <div class="pf-cols two">
+    <div class="stack">
+      <span class="kick">Ucrania-Rusia · Kerch · 19 nov</span>
+      <h3>Putin cierra la puerta a negociar</h3>
+      <p>Tras un nuevo ataque al puente de Crimea, Putin dijo que «no habrá negociaciones» y rechazó treguas en la energía y el mar Negro. En Berlín, Zelenski se reunió con la «coalición de voluntarios» y los negociadores de EE. UU.; Trump asegura que no pactará con Moscú a espaldas de Kiev.</p>
+      <span class="via">Vía The National · ISW</span>
+    </div>
+    <div class="stack">
+      <span class="kick">Yemen-Arabia Saudí · 19-23 nov</span>
+      <h3>Los hutíes amenazan los puertos saudíes</h3>
+      <p>Amenazaron Yeda y todos los puertos saudíes del mar Rojo y pidieron a las navieras que sacaran sus barcos; la coalición saudí respondió con una operación en Hodeida, Saná, Saada y Taiz. El 19, los hutíes alcanzaron el rascacielos más alto de Riad.</p>
+      <span class="via">Vía Al Jazeera</span>
+    </div>
+  </div>
+  <span class="pnum l">12</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 13: Más noticias" aria-hidden="true">
+<div class="t1 mn">
+  <div class="mn-head"><h1 class="h-page">Más noticias</h1><p>El resto de la semana, en una línea.</p></div>
+  <div class="dbl"></div>
+  <div class="mn-list">
+      <div class="mn-row"><span class="kick">Tecnológicas</span><div><b>AMD se hunde un 13 %</b><span>Fue el viernes 20, en la venta masiva de tecnológicas en la que el Nasdaq perdió un 5,2 % y el VIX llegó a unos 36 puntos.</span><i>Vía Yahoo Finance</i></div></div>
+      <div class="mn-row"><span class="kick">Tecnológicas</span><div><b>Anthropic, el gran cliente de la IA de SpaceX</b><span>Tiene compromisos de hasta 120.500 millones de dólares con la división de inteligencia artificial de SpaceX hasta 2029.</span><i>Vía Motley Fool</i></div></div>
+      <div class="mn-row"><span class="kick">Tecnológicas</span><div><b>TSMC cobra 5.100 millones en subvenciones</b><span>Recibió 167.586 millones de dólares taiwaneses de EE. UU., Japón, Alemania y China en los nueve primeros meses del año.</span><i>Vía Taipei Times</i></div></div>
+      <div class="mn-row"><span class="kick">Datos</span><div><b>Las ventas pendientes de viviendas caen un 4,7 %</b><span>Es el dato de octubre en EE. UU., publicado el día 18; en tasa interanual bajan un 16,7 %.</span><i>Vía National Association of Realtors</i></div></div>
+      <div class="mn-row"><span class="kick">Datos</span><div><b>Suben las peticiones continuadas de desempleo</b><span>Llegaron a 1,763 millones en la semana al 7 de noviembre, frente a 1,710 millones previstos y 1,693 millones la anterior.</span><i>Vía investingLive</i></div></div>
+      <div class="mn-row"><span class="kick">Materias primas</span><div><b>Más crudo en los tanques de EE. UU.</b><span>La EIA informó el día 18 de un aumento inesperado de las existencias y de una producción de 14,032 millones de barriles diarios.</span><i>Vía Newsquawk</i></div></div>
+      <div class="mn-row"><span class="kick">Materias primas</span><div><b>Ormuz, por debajo de octubre</b><span>Según Kpler, por el estrecho pasaron unos 9,5 millones de barriles diarios en los diez días hasta el 19, frente a 12,2 millones en octubre.</span><i>Vía Goldinvest (Kpler)</i></div></div>
+      <div class="mn-row"><span class="kick">Bitcoin</span><div><b>Noviembre, récord de salidas de los ETFs</b><span>Los ETFs de bitcoin al contado suman unos 4.710 millones de salidas en el mes, el mayor registrado; el día 23 fue el quinto seguido en negativo.</span><i>Vía Fortune</i></div></div>
+      <div class="mn-row"><span class="kick">Bitcoin</span><div><b>El reto cuántico, sin resolver</b><span>Más de 6 millones de BTC, el 31,2 % de la oferta, tienen la clave pública visible; las propuestas BIP 360 y BIP 361 siguen en borrador.</span><i>Vía CoinDesk</i></div></div>
+      <div class="mn-row"><span class="kick">Guerras</span><div><b>Trump invita a Putin al G20</b><span>Lo hizo tras la cumbre de Shenzhen; fue su primer encuentro en persona desde Anchorage, en agosto de 2025, sin resultados anunciados.</span><i>Vía Al Jazeera · Oman Observer</i></div></div>
+  </div>
+  <span class="pnum r">13</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 14: Próximamente" aria-hidden="true">
+<div class="t1 bk">
+  <div class="bk-top">
+    <div class="bk-block acc">
+      <h1>Próximamente</h1>
+      <div class="cal">
+        <div><span>Mié 25 nov · 14:30</span><p><b>PCE de octubre y segunda estimación del PIB del tercer trimestre de EE. UU.</b><i>BEA, Washington · Datos económicos</i></p></div>
+        <div><span>Vie 27 nov · 09:00</span><p><b>IPC adelantado de noviembre en España</b><i>INE, Madrid · Datos económicos</i></p></div>
+        <div><span>Dom 29 nov</span><p><b>Reunión de la OPEP+: los ocho países con recortes voluntarios y el comité de seguimiento</b><i>OPEP · Materias primas</i></p></div>
+        <div><span>Lun 30 nov · Cierre</span><p><b>Strategy sale de los índices MSCI USA y Metaplanet del MSCI Japan Small Cap</b><i>MSCI · Tesoreras de bitcoin</i></p></div>
+        <div><span>Más adelante</span><p><b>SharkNinja entra en el S&amp;P 500 el 2 de diciembre; Huang declara ante el Senado el 3; la Fed decide el 9; Nasdaq diría el 11 si Anthropic entra en el Nasdaq 100; el BCE decide el 17 y Metaplanet celebra su junta el 18</b><i>Fuera de la semana · Para apuntar</i></p></div>
+      </div>
+      <p class="bk-note">Horas peninsulares de España. El jueves 26 Wall Street cierra por Acción de Gracias y el viernes 27 cierra a las 19:00; el domingo 29 hay elecciones generales en España. Del 25 de noviembre al 1 de diciembre no hay resultados de las siete magníficas ni de TSMC, decisiones de la Fed o del BCE ni datos de empleo. Fuentes de las fechas: BEA, Investing.com, INE, OPEP, MSCI, FINRA, S&amp;P Dow Jones Indices y Ministerio del Interior. Cada noticia de Economía y Finanzas es un resumen escrito para esta edición, con sus fuentes citadas, y no constituye una recomendación de inversión; las imágenes pertenecen a los medios enlazados.</p>
+    </div>
+    <div class="bk-strip"></div>
+  </div>
+    <div class="art bk-art" role="img" aria-label="Ilustración: un cine al atardecer con un rótulo que dice Nos vemos el miércoles">
+    <svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="800" height="480" fill="#F3EEDC"/><rect y="150" width="800" height="120" fill="#E2D6AE"/><rect y="270" width="800" height="210" fill="#4F6E3A"/>
+      <circle cx="640" cy="230" r="70" fill="#FDFCF7"/>
+      <path d="M0 480 V330 H60 V290 H120 V350 H170 V270 H220 V480 Z M580 480 V300 H630 V340 H690 V280 H750 V320 H800 V480 Z" fill="#3A2F14"/>
+      <rect x="250" y="150" width="300" height="330" fill="#9A7B22" stroke="#2A2210" stroke-width="6"/>
+      <path d="M240 150 L400 90 L560 150 Z" fill="#2A2210"/>
+      <rect x="226" y="210" width="348" height="84" fill="#FDFCF7" stroke="#2A2210" stroke-width="6"/>
+      <g fill="#4F6E3A"><circle cx="246" cy="222" r="5"/><circle cx="276" cy="222" r="5"/><circle cx="306" cy="222" r="5"/><circle cx="336" cy="222" r="5"/><circle cx="366" cy="222" r="5"/><circle cx="396" cy="222" r="5"/><circle cx="426" cy="222" r="5"/><circle cx="456" cy="222" r="5"/><circle cx="486" cy="222" r="5"/><circle cx="516" cy="222" r="5"/><circle cx="546" cy="222" r="5"/>
+      <circle cx="246" cy="282" r="5"/><circle cx="276" cy="282" r="5"/><circle cx="306" cy="282" r="5"/><circle cx="336" cy="282" r="5"/><circle cx="366" cy="282" r="5"/><circle cx="396" cy="282" r="5"/><circle cx="426" cy="282" r="5"/><circle cx="456" cy="282" r="5"/><circle cx="486" cy="282" r="5"/><circle cx="516" cy="282" r="5"/><circle cx="546" cy="282" r="5"/></g>
+      <text x="400" y="262" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="20" fill="#2A2210">NOS VEMOS EL MIÉRCOLES</text>
+      <g fill="#2A2210"><rect x="300" y="350" width="60" height="130"/><rect x="440" y="350" width="60" height="130"/><rect x="370" y="330" width="60" height="150" fill="#4F6E3A" stroke="#2A2210" stroke-width="5"/></g>
+      <rect y="462" width="800" height="18" fill="#2A2210"/>
+    </svg>
+  </div>
+</div>
+</section>
+      </div>
+    </div>
+  </div>
+  <button type="button" class="side" id="next" aria-label="Página siguiente" title="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</main>
+
+<footer class="toolbar">
+  <div class="tg tg-l">
+    <button type="button" class="tb" id="zoomOut" aria-label="Alejar" title="Alejar (−)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <span class="zoomval" id="zoomVal">100%</span>
+    <button type="button" class="tb" id="zoomIn" aria-label="Acercar" title="Acercar (+)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button type="button" class="tb" id="thumbsBtn" aria-label="Todas las páginas" title="Todas las páginas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button>
+    <button type="button" class="tb" id="playBtn" aria-label="Reproducción automática" aria-pressed="false" title="Reproducción automática"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  </div>
+  <div class="tg tg-c">
+    <button type="button" class="tb" id="firstBtn" aria-label="Primera página" title="Primera página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M18 6l-7 6 7 6"/></svg></button>
+    <button type="button" class="tb" id="prevBtn" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <label class="pager"><input type="text" id="pageInput" inputmode="numeric" autocomplete="off" aria-label="Página actual: escribe un número y pulsa Intro"><span id="total">/ 14</span></label>
+    <button type="button" class="tb" id="nextBtn" aria-label="Página siguiente" title="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button type="button" class="tb" id="lastBtn" aria-label="Última página" title="Última página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M6 6l7 6-7 6"/></svg></button>
+  </div>
+  <div class="tg tg-r">
+    <button type="button" class="tb tb-pdf" id="pdfBtn" title="Guardar como PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>PDF</button>
+    <button type="button" class="tb" id="viewBtn" aria-label="Cambiar a página única" title="Página única / doble"><svg id="icoDouble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h8v14H3zM13 5h8v14h-8z"/></svg><svg id="icoSingle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" hidden><path d="M7 3h10v18H7z"/></svg></button>
+    <button type="button" class="tb" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</footer>
+
+<div class="thumbs" id="thumbs" role="dialog" aria-modal="true" aria-labelledby="thumbsTitle" hidden>
+  <div class="thumbs-head"><h2 id="thumbsTitle">Todas las páginas</h2><button type="button" class="close" id="thumbsClose">Cerrar</button></div>
+  <div class="thumbs-grid" id="thumbsGrid"></div>
+</div>
+
+<script>
+(function () {
+  var labels = ['Portada', 'Sumario', 'En un minuto', 'Índices', 'Grandes tecnológicas', 'Datos económicos', 'Internacional', 'Materias primas', 'España', 'Bitcoin', 'Tesoreras de bitcoin', 'Guerras y tensiones', 'Más noticias', 'Próximamente'];
+  var N = labels.length, W = 800, H = 1130, T = 330;
+  var Z = [1, 1.5, 2, 3];
+  var $ = function (id) { return document.getElementById(id); };
+  var pages = Array.prototype.slice.call(document.querySelectorAll('#scaler > .page'));
+  var vp = $('vp'), book = $('book'), scaler = $('scaler'), input = $('pageInput');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { pref: 'double', dbl: true, spreads: [], cur: 0, zi: 0, s: 0.5, busy: false, play: null };
+  var FX = ['under', 'fx-out-r', 'fx-in-l', 'fx-out-l', 'fx-in-r', 'fx-turn', 'fx-return'];
+
+  try { var saved = localStorage.getItem('aldia-view'); if (saved === 'single' || saved === 'double') st.pref = saved; } catch (e) {}
+  $('total').textContent = '/ ' + N;
+
+  function narrow() { return window.innerWidth < 760; }
+  function buildSpreads() {
+    var s = [];
+    if (st.dbl) { s.push([null, 0]); for (var i = 1; i < N; i += 2) s.push([i, i + 1 < N ? i + 1 : null]); }
+    else { for (var j = 0; j < N; j++) s.push([j]); }
+    st.spreads = s;
+  }
+  function spreadOf(p) { for (var i = 0; i < st.spreads.length; i++) if (st.spreads[i].indexOf(p) > -1) return i; return 0; }
+  function firstOf(i) { var sp = st.spreads[i]; return sp[0] != null ? sp[0] : sp[1]; }
+  function place() {
+    pages.forEach(function (p) { p.classList.remove('slot-l', 'slot-r', 'slot-c'); });
+    st.spreads.forEach(function (sp) {
+      if (st.dbl) { if (sp[0] != null) pages[sp[0]].classList.add('slot-l'); if (sp[1] != null) pages[sp[1]].classList.add('slot-r'); }
+      else pages[sp[0]].classList.add('slot-c');
+    });
+  }
+  function showOnly(i) {
+    var vis = st.spreads[i];
+    pages.forEach(function (p, k) {
+      var on = vis.indexOf(k) > -1;
+      FX.forEach(function (c) { p.classList.remove(c); });
+      p.classList.toggle('on', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  function shiftFor(i) { if (!st.dbl) return 0; var sp = st.spreads[i]; if (sp[0] == null) return -W / 2; if (sp[1] == null) return W / 2; return 0; }
+  function applyTransform() { scaler.style.transform = 'scale(' + st.s + ') translateX(' + shiftFor(st.cur) + 'px)'; }
+  function fit() {
+    var across = st.dbl ? 2 : 1;
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var base = Math.max(Math.min((w - 8) / (W * across), (h - 8) / H), 0.05);
+    st.s = base * Z[st.zi];
+    scaler.style.width = (W * across) + 'px';
+    book.style.width = (W * across * st.s) + 'px';
+    book.style.height = (H * st.s) + 'px';
+    applyTransform();
+  }
+
+  function ui() {
+    var sp = st.spreads[st.cur].filter(function (x) { return x != null; });
+    input.value = sp.map(function (x) { return x + 1; }).join('-');
+    $('label').textContent = sp.map(function (x) { return labels[x]; }).join(' · ');
+    var atStart = st.cur === 0, atEnd = st.cur === st.spreads.length - 1;
+    $('prev').disabled = $('prevBtn').disabled = $('firstBtn').disabled = atStart;
+    $('next').disabled = $('nextBtn').disabled = $('lastBtn').disabled = atEnd;
+    $('zoomOut').disabled = st.zi === 0;
+    $('zoomIn').disabled = st.zi === Z.length - 1;
+    $('zoomVal').textContent = Math.round(Z[st.zi] * 100) + '%';
+    $('icoDouble').hidden = !st.dbl;
+    $('icoSingle').hidden = st.dbl;
+    $('viewBtn').setAttribute('aria-label', st.dbl ? 'Cambiar a página única' : 'Cambiar a página doble');
+    $('viewBtn').disabled = narrow();
+    Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function (t, k) {
+      if (sp.indexOf(k) > -1) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#p' + (firstOf(st.cur) + 1)); } catch (e) {}
+  }
+
+  function go(i) {
+    if (i < 0 || i >= st.spreads.length || i === st.cur || st.busy) return;
+    var from = st.spreads[st.cur], to = st.spreads[i], fwd = i > st.cur;
+    st.cur = i; ui(); applyTransform();
+    if (reduce) { showOnly(i); return; }
+    st.busy = true;
+    var el = function (k) { return k == null ? null : pages[k]; };
+    var add = function (e, c) { if (e) e.classList.add(c); };
+    if (!st.dbl) {
+      if (fwd) { add(el(to[0]), 'under'); add(el(from[0]), 'fx-turn'); }
+      else { add(el(from[0]), 'under'); add(el(to[0]), 'fx-return'); }
+    } else if (fwd) {
+      add(el(to[1]), 'under'); add(el(from[1]), 'fx-out-r'); add(el(to[0]), 'fx-in-l');
+    } else {
+      add(el(to[0]), 'under'); add(el(from[0]), 'fx-out-l'); add(el(to[1]), 'fx-in-r');
+    }
+    setTimeout(function () { showOnly(st.cur); st.busy = false; }, 2 * T + 40);
+  }
+  function goPage(p) { go(spreadOf(p)); }
+
+  function setMode(dbl) {
+    var p = firstOf(st.cur);
+    st.dbl = dbl; buildSpreads(); place();
+    st.cur = spreadOf(p);
+    showOnly(st.cur); fit(); ui();
+  }
+  function setZoom(zi) {
+    zi = Math.max(0, Math.min(Z.length - 1, zi));
+    if (zi === st.zi) return;
+    st.zi = zi;
+    vp.classList.toggle('zoomed', zi > 0);
+    fit(); ui();
+    vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+    vp.scrollTop = 0;
+  }
+
+  book.addEventListener('click', function (e) {
+    if (moved) { moved = false; return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); goPage(+g.getAttribute('data-goto')); return; }
+    if (st.zi > 0) return;
+    var p = e.target.closest('.page');
+    if (!p) return;
+    if (p.classList.contains('slot-l')) go(st.cur - 1);
+    else if (p.classList.contains('slot-r')) go(st.cur + 1);
+    else { var r = p.getBoundingClientRect(); go(e.clientX - r.left < r.width / 2 ? st.cur - 1 : st.cur + 1); }
+  });
+  book.addEventListener('mousemove', function (e) {
+    var p = e.target.closest('.page');
+    var left = p ? (p.classList.contains('slot-l') || (p.classList.contains('slot-c') && e.clientX - p.getBoundingClientRect().left < p.getBoundingClientRect().width / 2)) : false;
+    book.classList.toggle('left', left);
+  });
+
+  var drag = null, moved = false;
+  vp.addEventListener('pointerdown', function (e) {
+    if (st.zi === 0 || e.button !== 0 || e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop }; moved = false;
+    vp.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    vp.scrollLeft = drag.l - dx; vp.scrollTop = drag.t - dy;
+  });
+  window.addEventListener('pointerup', function () { if (drag) { drag = null; vp.classList.remove('grabbing'); } });
+
+  var sx = null;
+  book.addEventListener('touchstart', function (e) { sx = st.zi === 0 ? e.touches[0].clientX : null; }, { passive: true });
+  book.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) { e.preventDefault(); go(dx < 0 ? st.cur + 1 : st.cur - 1); }
+  });
+
+  $('prev').addEventListener('click', function () { go(st.cur - 1); });
+  $('next').addEventListener('click', function () { go(st.cur + 1); });
+  $('prevBtn').addEventListener('click', function () { go(st.cur - 1); });
+  $('nextBtn').addEventListener('click', function () { go(st.cur + 1); });
+  $('firstBtn').addEventListener('click', function () { go(0); });
+  $('lastBtn').addEventListener('click', function () { go(st.spreads.length - 1); });
+  $('zoomIn').addEventListener('click', function () { setZoom(st.zi + 1); });
+  $('zoomOut').addEventListener('click', function () { setZoom(st.zi - 1); });
+  $('viewBtn').addEventListener('click', function () {
+    st.pref = st.dbl ? 'single' : 'double';
+    try { localStorage.setItem('aldia-view', st.pref); } catch (e) {}
+    setMode(st.pref === 'double');
+  });
+  input.addEventListener('focus', function () { input.select(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var n = parseInt(input.value, 10);
+    if (n >= 1 && n <= N) goPage(n - 1); else ui();
+    input.blur();
+  });
+  input.addEventListener('blur', ui);
+
+  function setPlay(on) {
+    if (st.play) { clearInterval(st.play); st.play = null; }
+    if (on) {
+      if (st.cur === st.spreads.length - 1) go(0);
+      st.play = setInterval(function () {
+        if (st.cur >= st.spreads.length - 1) { setPlay(false); return; }
+        go(st.cur + 1);
+      }, 4000);
+    }
+    $('playBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('playIco').hidden = on; $('pauseIco').hidden = !on;
+  }
+  $('playBtn').addEventListener('click', function () { setPlay(!st.play); });
+
+  $('pdfBtn').addEventListener('click', function () { setPlay(false); window.print(); });
+  var fsOk = document.fullscreenEnabled && document.documentElement.requestFullscreen;
+  if (!fsOk) $('fsBtn').hidden = true;
+  $('fsBtn').addEventListener('click', function () {
+    try {
+      var r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (r && r.catch) r.catch(function () {});
+    } catch (e) {}
+  });
+
+  var grid = $('thumbsGrid');
+  pages.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb';
+    b.setAttribute('aria-label', 'Página ' + (i + 1) + ': ' + labels[i]);
+    var box = document.createElement('span'); box.className = 'thumb-box';
+    var c = p.cloneNode(true);
+    c.className = 'thumb-page'; c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('a, button'), function (x) { x.setAttribute('tabindex', '-1'); });
+    box.appendChild(c);
+    var cap = document.createElement('span'); cap.className = 'thumb-cap';
+    cap.textContent = String(i + 1).padStart(2, '0') + ' · ' + labels[i];
+    b.appendChild(box); b.appendChild(cap);
+    b.addEventListener('click', function () { closeThumbs(); goPage(i); });
+    grid.appendChild(b);
+  });
+  function openThumbs() { $('thumbs').hidden = false; ui(); var cur = grid.querySelector('[aria-current="page"]') || grid.firstChild; if (cur) cur.focus(); }
+  function closeThumbs() { $('thumbs').hidden = true; $('thumbsBtn').focus(); }
+  $('thumbsBtn').addEventListener('click', openThumbs);
+  $('thumbsClose').addEventListener('click', closeThumbs);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target === input) return;
+    if (!$('thumbs').hidden) { if (e.key === 'Escape') closeThumbs(); return; }
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); go(st.cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(st.cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(st.spreads.length - 1); }
+    else if (k === '+' || k === '=') { e.preventDefault(); setZoom(st.zi + 1); }
+    else if (k === '-') { e.preventDefault(); setZoom(st.zi - 1); }
+    else if (k === '0') { e.preventDefault(); setZoom(0); }
+  });
+
+  function onResize() {
+    var want = !narrow() && st.pref === 'double';
+    if (want !== st.dbl) setMode(want); else { fit(); ui(); }
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(vp);
+
+  st.dbl = !narrow() && st.pref === 'double';
+  buildSpreads(); place();
+  var m = /^#p(\d+)$/.exec(location.hash || '');
+  var startPage = m ? Math.min(N, Math.max(1, +m[1])) - 1 : 0;
+  st.cur = spreadOf(startPage);
+  scaler.style.transition = 'none';
+  showOnly(st.cur); fit(); ui();
+  requestAnimationFrame(function () { scaler.style.transition = ''; });
+})();
+</script>
+
+</body></html>
