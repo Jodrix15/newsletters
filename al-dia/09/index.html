@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Al Día #09 · 26 de noviembre de 2026</title>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!-- Al Día #09. Maquetación basada en la plantilla de revista: páginas de 800x1130 px, visor con página doble/única, zoom, miniaturas y botón PDF. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Playfair+Display:wght@700;800&family=Figtree:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: magazine reader on a dark desk. Spread (cover alone, then pairs) or single page, scaled to fit; toolbar below. Single deliberate dark look. */
+:root {
+  --desk: #0E1522;
+  --desk-raised: #18243A;
+  --desk-line: #2F4262;
+  --paper: #EDF1F8;
+  --ink: #141D2B;
+  --accent: #B8CBEA;
+  --muted: #97A8C4;
+  --display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  --body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --t: 0.33s;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--body);
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+button { font: inherit; }
+
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.mast b { font-family: var(--display); font-weight: 400; font-size: 18px; text-transform: uppercase; color: var(--accent); }
+.mast span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mast #label { color: var(--paper); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+}
+.vp { height: 100%; min-width: 0; display: flex; overflow: hidden; }
+.vp.zoomed { overflow: auto; cursor: grab; }
+.vp.zoomed.grabbing { cursor: grabbing; }
+.book { position: relative; flex: none; margin: auto; cursor: e-resize; }
+.book.left { cursor: w-resize; }
+.vp.zoomed .book { cursor: inherit; }
+.scaler {
+  position: absolute; top: 0; left: 0; height: 1130px;
+  transform-origin: 0 0; perspective: 3200px;
+  transition: transform 0.45s ease;
+}
+.page {
+  position: absolute; top: 0; left: 0; width: 800px; height: 1130px;
+  visibility: hidden; overflow: hidden; backface-visibility: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+.page.slot-r { left: 800px; }
+.page::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; pointer-events: none; }
+.page.slot-c::after, .page.slot-r::after { left: 0; background: linear-gradient(90deg, rgba(20, 29, 43, 0.28), rgba(20, 29, 43, 0)); }
+.page.slot-l::after { right: 0; background: linear-gradient(270deg, rgba(20, 29, 43, 0.28), rgba(20, 29, 43, 0)); }
+.page.on { visibility: visible; z-index: 2; }
+.page.under { visibility: visible; z-index: 1; }
+.page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { visibility: visible; z-index: 3; }
+.page.fx-out-r { transform-origin: left center; animation: outR var(--t) ease-in forwards; }
+.page.fx-in-l { transform-origin: right center; animation: inL var(--t) ease-out var(--t) both; }
+.page.fx-out-l { transform-origin: right center; animation: outL var(--t) ease-in forwards; }
+.page.fx-in-r { transform-origin: left center; animation: inR var(--t) ease-out var(--t) both; }
+.page.fx-turn { transform-origin: left center; animation: turnOut calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+.page.fx-return { transform-origin: left center; animation: turnIn calc(var(--t) * 2) cubic-bezier(.45, .05, .55, .95) forwards; }
+@keyframes outR { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-90deg); filter: brightness(0.65); } }
+@keyframes inL { from { transform: rotateY(90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes outL { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(90deg); filter: brightness(0.65); } }
+@keyframes inR { from { transform: rotateY(-90deg); filter: brightness(0.65); } to { transform: rotateY(0); filter: brightness(1); } }
+@keyframes turnOut { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(0.6); } }
+@keyframes turnIn { from { transform: rotateY(-100deg); filter: brightness(0.6); } to { transform: rotateY(0); filter: brightness(1); } }
+
+.side {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--desk-line); background: var(--desk-raised); color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.side:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.side:disabled { opacity: 0.25; cursor: default; }
+.side svg { width: 22px; height: 22px; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap;
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  border-top: 1px solid var(--desk-line); padding-top: 8px;
+}
+.tg { display: flex; align-items: center; gap: 4px; }
+.tb {
+  width: 44px; height: 44px; border-radius: 8px; border: 0;
+  background: transparent; color: var(--paper);
+  display: grid; place-items: center; cursor: pointer;
+}
+.tb:hover:not(:disabled) { background: var(--desk-raised); color: var(--accent); }
+.tb:disabled { opacity: 0.3; cursor: default; }
+.tb[aria-pressed="true"] { background: var(--desk-raised); color: var(--accent); }
+.tb svg { width: 20px; height: 20px; }
+.pager { display: flex; align-items: center; gap: 8px; margin-inline: 6px; font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pager input {
+  width: 64px; height: 34px; box-sizing: border-box; text-align: center;
+  border: 1px solid var(--desk-line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.zoomval { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.thumbs {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(14, 21, 34, 0.97);
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px; box-sizing: border-box;
+}
+.thumbs[hidden] { display: none; }
+.thumbs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; width: 100%; margin: 0 auto; }
+.thumbs-head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--paper); }
+.thumbs-grid {
+  flex: 1 1 auto; overflow-y: auto; max-width: 1200px; width: 100%; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 24px 20px; align-content: start;
+}
+.thumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.thumb-box { width: 144px; height: 203px; overflow: hidden; position: relative; border-radius: 3px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); outline: 3px solid transparent; outline-offset: 3px; transition: outline-color 0.15s, transform 0.15s; }
+.thumb:hover .thumb-box { transform: translateY(-3px); }
+.thumb[aria-current="page"] .thumb-box { outline-color: var(--accent); }
+.thumb-page { position: absolute; top: 0; left: 0; width: 800px; height: 1130px; transform: scale(0.18); transform-origin: 0 0; pointer-events: none; }
+.thumb-cap { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.thumb[aria-current="page"] .thumb-cap { color: var(--accent); }
+.close {
+  height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--desk-line);
+  background: var(--desk-raised); color: var(--paper); cursor: pointer; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.close:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .toolbar { justify-content: center; }
+  .tg-c { order: -1; width: 100%; justify-content: center; }
+  .zoomval { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scaler { transition: none; }
+  .page.fx-out-r, .page.fx-in-l, .page.fx-out-l, .page.fx-in-r, .page.fx-turn, .page.fx-return { animation: none; }
+}
+/* Al Día: páginas blancas, un acento frío (violeta berenjena), Playfair Display para titulares y Figtree para el texto */
+.t1 {
+  --acc: #275089; --tint: #DEE6F2; --tint2: #BCCBE3; --paper: #FBFCFE; --ink: #141D2B; --soft: #3D4A5E; --mute: #5E6E87; --on: #F3F6FB; --on-soft: #CFDAEB; --gold: #6A8CC4;
+  width: 800px; height: 1130px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: 'Figtree', 'Helvetica Neue', Arial, sans-serif;
+}
+.t1 * { box-sizing: border-box; }
+.t1 h1, .t1 h2, .t1 h3 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; margin: 0; color: inherit; text-wrap: balance; }
+.t1 p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
+.t1 ol { margin: 0; }
+.t1 .via { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.t1 .kick { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--acc); }
+.t1 .art { position: relative; overflow: hidden; background: var(--tint); }
+.t1 .art > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.t1 .acc { background: var(--acc); color: var(--on); }
+.t1 .acc p { color: var(--on); }
+.t1 .acc .via, .t1 .acc .kick { color: var(--on-soft); }
+.t1 .h-page { font-weight: 800; font-size: 50px; line-height: 1; letter-spacing: -0.01em; }
+.t1 .dbl { height: 7px; border-top: 2px solid var(--acc); border-bottom: 2px solid var(--acc); }
+.t1 .pnum { position: absolute; bottom: 22px; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.t1 .pnum.l { left: 44px; } .t1 .pnum.r { right: 44px; }
+.t1 .pnum.on { color: var(--on-soft); }
+.t1 .tag { display: inline-block; align-self: flex-start; background: var(--acc); color: var(--on); font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1.15; padding: 8px 14px; }
+.t1 .stack { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+
+/* Cover */
+.t1.cv { padding: 40px 44px 44px; display: flex; flex-direction: column; gap: 18px; }
+.cv-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.cv-mast { display: flex; flex-direction: column; gap: 6px; }
+.cv-band { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-size: 76px; line-height: 1.1; text-align: center; text-transform: uppercase; letter-spacing: 0.02em; padding: 4px 0 8px; }
+.cv-art { height: 610px; background: repeating-conic-gradient(from 0deg at 50% 46%, #BCCBE3 0deg 9deg, #EDF1F8 9deg 18deg); }
+.cv-foot { display: flex; gap: 28px; align-items: flex-start; }
+.cv-box { flex: 0 0 190px; margin: -132px 0 0 18px; padding: 20px; position: relative; z-index: 1; font-weight: 700; font-size: 15px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 8px; }
+.cv-box b { font-family: 'Playfair Display', Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: 0; }
+.cv-head { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.cv-head h2 { font-size: 36px; font-weight: 800; text-transform: uppercase; line-height: 1.02; }
+
+/* Contents */
+.t1.tc { display: grid; grid-template-columns: 448px 1fr; }
+.tc-l { padding: 70px 40px 60px 44px; display: flex; flex-direction: column; gap: 26px; }
+.tc-l h1 { font-size: 62px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.tc-l .dbl { margin-top: -10px; }
+.toc { display: flex; flex-direction: column; gap: 15px; }
+.toc a { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); }
+.toc .t { font-size: 19px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.toc .s { font-size: 13px; color: var(--soft); }
+.toc .ln { display: flex; align-items: center; gap: 10px; color: #4F72AE; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.toc .ln::before { content: ""; flex: 1; border-bottom: 2px dashed var(--tint2); }
+.toc a:hover .t { color: var(--acc); }
+.tc-r { position: relative; overflow: hidden; }
+.strip { position: absolute; top: -50px; bottom: -50px; left: 62px; right: 62px; background: var(--ink); transform: rotate(-3deg); display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 34px; }
+.strip::before, .strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; background: repeating-linear-gradient(to bottom, var(--paper) 0 16px, transparent 16px 36px); }
+.strip::before { left: 10px; } .strip::after { right: 10px; }
+.frame { width: 100%; aspect-ratio: 1; background: var(--tint); border-radius: 4px; display: grid; place-items: center; }
+.frame svg { width: 62%; height: 62%; }
+
+/* Week in a minute */
+.t1.wm { padding: 54px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.wm h1 { font-size: 42px; font-weight: 800; text-transform: uppercase; }
+.box { padding: 20px 24px; }
+.box p { font-size: 15.5px; font-weight: 500; line-height: 1.55; }
+.zz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 30px; }
+.zz .art { height: 250px; }
+.zz h3 { font-size: 26px; font-weight: 700; }
+.top3 { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.top3 li::marker { color: var(--acc); font-weight: 700; }
+
+/* Rows (Animation) */
+.t1.nw { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 22px; }
+.nw-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; }
+.chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--acc); color: var(--acc); padding: 4px 10px; border-radius: 999px; }
+.rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 30px; }
+.rows .art { height: 252px; }
+.rows p { font-size: 14px; }
+
+/* Highlights (Series) */
+.hl-band { height: 300px; padding: 46px 44px 0; }
+.hl-band h1 { font-size: 54px; font-weight: 800; }
+.hl-body { position: absolute; top: 130px; left: 44px; right: 44px; bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+.hl-hero { height: 290px; outline: 6px solid var(--paper); }
+.hl-lead { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 26px; align-items: start; }
+.hl-lead h2 { font-size: 27px; font-weight: 700; line-height: 1.12; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.cols3 .art { height: 140px; }
+.cols3 h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.cols3 p { font-size: 13.5px; line-height: 1.5; }
+
+/* Profile (Film) */
+.t1.pf { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.pf-box { padding: 28px; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 26px; }
+.pf-box h2 { font-size: 30px; font-weight: 800; line-height: 1.08; }
+.pf-box h3 { font-size: 19px; font-weight: 700; margin-top: 6px; }
+.pf-box p { font-size: 14px; }
+.pf-box .art { height: 100%; min-height: 380px; outline: 4px solid var(--on); }
+.pf-row { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.pf-row .art { height: 196px; }
+.pf-row h3 { font-size: 23px; font-weight: 700; }
+
+/* Club grid (Music) */
+.t1.ex { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 24px; }
+.ex-top { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.ex-top .art { height: 350px; }
+.ex-top h2 { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ex-top p { font-size: 14px; }
+.ex-box { padding: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.ex-box .art { height: 128px; outline: 3px solid var(--on); outline-offset: -3px; }
+.ex-box h3 { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.ex-box p { font-size: 13.5px; line-height: 1.5; }
+
+/* Split (Video games) */
+.t1.sp { display: grid; grid-template-columns: 350px 1fr; }
+.sp-l { padding: 56px 32px 56px 44px; display: flex; flex-direction: column; gap: 18px; }
+.sp-l h1 { font-size: 52px; font-weight: 800; line-height: 0.98; }
+.sp-l h2 { font-size: 24px; font-weight: 700; line-height: 1.12; }
+.sp-l p { font-size: 14px; }
+.sp-l .art { height: 290px; background: #14284A; }
+.sp-r { padding: 56px 44px 56px 36px; display: flex; flex-direction: column; gap: 16px; }
+.sp-r h2 { font-size: 28px; font-weight: 700; }
+.item { display: flex; flex-direction: column; gap: 5px; }
+.item .n { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 15px; color: var(--acc); }
+.item h3 { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.item p { font-size: 14px; }
+.sp-r hr { border: 0; border-top: 1px solid var(--tint2); margin: 4px 0; width: 100%; }
+.sp-r .art { height: 190px; }
+
+/* Back */
+.t1.bk { display: flex; flex-direction: column; }
+.bk-top { height: 650px; display: flex; flex: none; }
+.bk-block { flex: 0 0 88%; padding: 54px 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.bk-block h1 { font-size: 50px; font-weight: 800; }
+.bk-strip { flex: 0 0 4%; background: var(--tint); }
+.cal { display: flex; flex-direction: column; }
+.cal div { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-top: 1px solid rgba(243, 246, 251, 0.32); align-items: baseline; }
+.cal div:last-child { border-bottom: 1px solid rgba(243, 246, 251, 0.32); }
+.cal span { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--on); }
+.cal b { font-weight: 600; font-size: 15px; display: block; }
+.cal i { font-style: normal; font-size: 12.5px; color: var(--on-soft); }
+.bk-note { font-size: 13px !important; line-height: 1.5 !important; color: var(--on-soft) !important; max-width: 520px; }
+.bk-art { flex: 1 1 auto; }
+
+
+
+.t1.mn { padding: 56px 44px 60px; display: flex; flex-direction: column; gap: 18px; }
+.mn-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.mn-head p { font-size: 15px; }
+.mn-list { display: flex; flex-direction: column; }
+.mn-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; padding: 12px 0; border-bottom: 2px dashed var(--tint2); align-items: baseline; }
+.mn-row > div { display: flex; flex-direction: column; gap: 4px; }
+.mn-row b { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.mn-row div > span { font-size: 14.5px; line-height: 1.5; color: var(--soft); }
+.mn-row i { font-style: normal; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--mute); }
+
+
+.tb-pdf { width: auto; padding: 0 12px; gap: 8px; display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--desk-line); }
+@media print {
+  @page { size: 800px 1130px; margin: 0; }
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+  .mast, .toolbar, .side, .thumbs { display: none !important; }
+  .stage, .vp { display: block !important; height: auto !important; overflow: visible !important; max-width: none !important; width: 800px !important; margin: 0 !important; }
+  .book { width: 800px !important; height: auto !important; margin: 0 !important; }
+  .scaler { position: static !important; transform: none !important; width: 800px !important; height: auto !important; perspective: none !important; transition: none !important; }
+  .page { position: relative !important; left: 0 !important; top: 0 !important; visibility: visible !important; box-shadow: none !important; animation: none !important; transform: none !important; filter: none !important; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .page::after { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+/* Al Día: imágenes de noticias y páginas añadidas */
+.t1 .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.tc-img { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
+.tc-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.t1 .h-sec { font-size: 20px; font-weight: 700; line-height: 1.15; }
+.t1.nw .rows { gap: 22px 30px; }
+.t1.nw .rows .art-main { height: 210px; }
+.t1.nw .rows p { font-size: 13.5px; line-height: 1.5; }
+.rows3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; border-top: 2px solid var(--tint2); padding-top: 20px; }
+.rows3 .art { height: 120px; }
+.rows3 p { font-size: 13px; line-height: 1.5; }
+.t1.cu { padding: 52px 44px 60px; display: flex; flex-direction: column; gap: 20px; }
+.cu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 24px; }
+.cu-grid .art { height: 150px; }
+.cu-grid h3 { font-size: 19px; font-weight: 700; line-height: 1.18; }
+.cu-grid p { font-size: 13.5px; line-height: 1.5; }
+.cu-n { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; margin-right: 6px; color: var(--acc); }
+.t1.pf .pf-row .art { height: 168px; }
+.t1.bk .bk-top { height: 890px; }
+.t1.bk .bk-block { gap: 18px; padding-top: 50px; }
+.t1.bk .cal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 26px; border-bottom: 1px solid rgba(243, 246, 251, 0.32); }
+.t1.bk .cal div { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 9px 0; }
+.t1.bk .cal div:last-child { border-bottom: 0; }
+.t1.bk .cal p { margin: 0; }
+.t1.bk .cal span { font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-soft); }
+.t1.bk .cal b { font-size: 14.5px; line-height: 1.35; }
+.t1.nw { gap: 18px; }
+.t1.nw .rows .art-main { height: 180px; }
+.rows3 { padding-top: 16px; }
+.rows3 .art { height: 104px; }
+.t1 .hl-hero { flex: none; height: 180px; }
+.t1 .hl-lead, .t1 .hl-body .cols3 { flex: none; }
+.t1 .hl-lead { grid-template-columns: 220px minmax(0, 1fr); gap: 24px; }
+.t1 .hl-lead p { font-size: 13.5px; line-height: 1.5; }
+.t1 .hl-body .cols3 .art { height: 112px; }
+.t1 .hl-body .cols3 p { font-size: 13px; }
+.t1.pf { gap: 20px; }
+.t1 .pf-box { grid-template-columns: minmax(0, 1fr) 230px; padding: 24px; }
+.t1 .pf-box p { font-size: 13.5px; line-height: 1.5; }
+.t1 .pf-box .art { min-height: 0; }
+.pf-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.pf-cols .art { height: 112px; }
+.pf-cols h3 { font-size: 19px; font-weight: 700; line-height: 1.18; }
+.pf-cols p { font-size: 13px; line-height: 1.5; }
+.t1.ex { gap: 20px; }
+.t1 .ex-top .art { height: 300px; }
+.t1 .ex-top p { font-size: 13.5px; line-height: 1.5; }
+.t1 .ex-box { padding: 24px; }
+.t1 .ex-box .art { height: 100px; }
+.t1 .ex-box p { font-size: 13px; }
+.t1 .sp-r .art { height: 150px; flex: none; }
+.t1 .sp-l .art { height: 230px; flex: none; }
+.t1 .sp-l p, .t1 .sp-r .item p { font-size: 13.5px; line-height: 1.5; }
+.t1.mn { gap: 14px; padding-top: 50px; }
+.t1 .mn-row { padding: 9px 0; grid-template-columns: 104px minmax(0, 1fr); }
+.t1 .mn-row b { font-size: 17.5px; }
+.t1 .mn-row div > span { font-size: 13.5px; line-height: 1.42; }
+.t1.nw { gap: 16px; padding-top: 46px; }
+.t1.nw .rows .art-main { height: 210px; }
+.t1 .rows3 .art { height: 78px; }
+.t1 .rows3 .h-sec, .t1.nw .h-sec { font-size: 19px; }
+.t1 .cu-grid { gap: 22px 24px; }
+.t1 .cu-grid .art { height: 124px; }
+.t1 .mn-row { padding: 7px 0; }
+.t1 .mn-row > div { gap: 3px; }
+.t1 .mn-row b { font-size: 17px; }
+.t1 .hl-hero { height: 150px; }
+.t1.bk .bk-block { gap: 14px; padding-top: 46px; }
+.t1.bk .cal div { padding: 7px 0; }
+.t1.mn .mn-row div > span { line-height: 1.38; }
+</style>
+
+</head>
+<body>
+<header class="mast">
+  <div><b>Al Día</b> <span>Número 09 · 26 nov 2026</span></div>
+  <span id="label">Portada</span>
+</header>
+
+<main class="stage">
+  <button type="button" class="side" id="prev" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="vp" id="vp">
+    <div class="book" id="book">
+      <div class="scaler" id="scaler">
+<section class="page" aria-label="Página 1: Portada" aria-hidden="true">
+<div class="t1 cv">
+  <div class="cv-top"><span>Número 09 · Martes y jueves</span><span>26 de noviembre de 2026</span></div>
+  <div class="cv-mast"><div class="dbl"></div><div class="cv-band acc">Al Día</div><div class="dbl"></div></div>
+  <div class="art cv-art"><img src="https://static.eldiario.es/clip/e1efc8f0-4333-43a4-8f28-a1b1377a7225_facebook-vertele-watermarked-aspect-ratio-1200-675_default_0.jpg" alt="Plató del debate a cuatro de las elecciones del 29-N" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  <div class="cv-foot">
+    <div class="cv-box acc"><b>38</b>historias: moda, tendencias, deporte, comunicación, actualidad y curiosidades</div>
+    <div class="cv-head">
+      <h2>Cuatro candidatos, un plató: el debate que cierra la campaña</h2>
+      <p>Sánchez, Feijóo, Abascal y Colau debaten esta noche, por primera vez juntos, a tres días del 29-N. Además: el Madrid golea al PSV y los cinco españoles ganan en Champions, muere Veruschka y Tidal borra la música hecha solo con IA.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" aria-label="Página 2: Sumario" aria-hidden="true">
+<div class="t1 tc">
+  <div class="tc-l">
+    <h1>Sumario</h1>
+    <div class="dbl"></div>
+    <nav class="toc" aria-label="Sumario">
+      <a href="#p3" data-goto="2"><span class="t">En un minuto</span><span class="s">El resumen, el Top 3 y lo que viene</span><span class="ln">/ 03</span></a>
+      <a href="#p4" data-goto="3"><span class="t">Moda</span><span class="s">Veruschka, el cártel de los perfumes, Shein y El Corte Inglés</span><span class="ln">/ 04</span></a>
+      <a href="#p5" data-goto="4"><span class="t">Tendencias</span><span class="s">Tidal contra la música IA, Walmart, Pinterest y la tarjeta</span><span class="ln">/ 05</span></a>
+      <a href="#p6" data-goto="5"><span class="t">Deporte</span><span class="s">Pleno del Madrid y de los cinco españoles en Champions</span><span class="ln">/ 06</span></a>
+      <a href="#p7" data-goto="6"><span class="t">Comunicación</span><span class="s">La IA que te da la razón y tres consejos</span><span class="ln">/ 07</span></a>
+      <a href="#p8" data-goto="7"><span class="t">Actualidad</span><span class="s">El debate a cuatro, los últimos decretos, aranceles y Polonia</span><span class="ln">/ 08</span></a>
+      <a href="#p9" data-goto="8"><span class="t">Curiosidades</span><span class="s">Seis datos sorprendentes y verificados</span><span class="ln">/ 09</span></a>
+      <a href="#p10" data-goto="9"><span class="t">Más noticias</span><span class="s">El resto de la actualidad, en una línea</span><span class="ln">/ 10</span></a>
+      <a href="#p11" data-goto="10"><span class="t">Próximamente</span><span class="s">La agenda de los próximos siete días</span><span class="ln">/ 11</span></a>
+    </nav>
+  </div>
+  <div class="tc-r acc" aria-hidden="true">
+    <div class="tc-img"><img src="https://static.eldiario.es/clip/e1efc8f0-4333-43a4-8f28-a1b1377a7225_facebook-vertele-watermarked-aspect-ratio-1200-675_default_0.jpg" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <span class="pnum l">02</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 3: En un minuto" aria-hidden="true">
+<div class="t1 wm">
+  <h1>En un minuto</h1>
+  <div class="box acc"><p>La campaña del 29-N llega a su gran cita: esta noche, a las 22:00, Sánchez, Feijóo, Abascal y Colau debaten juntos por primera vez, en directo en casi todas las cadenas. El último Consejo de Ministros antes de las urnas prorrogó el impuesto a la banca y puso tope al crédito al consumo. En Champions, pleno español: el Madrid remontó y goleó 5-1 al PSV. Y en moda y tecnología, adiós a Veruschka, la primera supermodelo, y Tidal empieza a borrar millones de canciones hechas solo con IA.</p></div>
+  <div class="zz">
+    <div class="stack">
+      <h3>No te lo pierdas</h3>
+      <ol class="top3">
+        <li><b>Debate a cuatro, esta noche</b>: cinco bloques, dos horas y la primera vez de estos cuatro líderes juntos. <span class="via">p. 08</span></li>
+        <li><b>El Madrid, pleno en Champions</b>: de perder 0-1 a ganar 5-1 al PSV; los cinco españoles ganaron. <span class="via">p. 06</span></li>
+        <li><b>Muere Veruschka</b>: la primera supermodelo, musa de Avedon y de «Blow-Up», tenía 87 años. <span class="via">p. 04</span></li>
+      </ol>
+    </div>
+    <div class="art"><img src="https://s.yimg.com/lo/mysterio/api/8f8914a0e14e20fbc0fbb450fa6fd6cef9ea3cb687a9e5f5c875bd28d83ab404/lightyear_networkapi/resizefill_w1200%3Bquality_80%3Bformat_jpg/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwwd_409%2Fa5791bb559db786762f1d8954808cf2d.jpg" alt="Veruschka" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="art"><img src="https://media.futbolcentroamerica.com/prod/images/original/8754c7d8dc21-2eb17873-7912-4c13-b4b2-78077e58e0f2-getty-2306714987-jpg.jpg" alt="El Real Madrid celebra un gol ante el PSV" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <h3>Lo que viene</h3>
+      <p>Hoy, España-Austria en la Copa Davis y debate a cuatro. El viernes 27 cierra la campaña y sale el IPC adelantado; el domingo 29 se vota, MotoGP termina en Cheste y la F1 corre en Catar. El lunes 30, The Fashion Awards en Londres, y el miércoles 2, Chanel presenta en Roma.</p>
+      <p>Todas las fechas, en la contraportada.</p>
+    </div>
+  </div>
+  <div class="box acc"><p>Cada noticia está resumida con nuestras propias palabras a partir de medios como EFE, Europa Press, elDiario.es, Euronews, BOE, WWD, FashionUnited, TechCrunch, Telemadrid, Infobae, Psychology Today, Fast Company, Scientific American, National Geographic o Xataka Ciencia, y cada una cita su fuente.</p></div>
+  <span class="pnum r">03</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 4: Moda" aria-hidden="true">
+<div class="t1 nw">
+  <div class="nw-head"><h1 class="h-page">Moda</h1><div class="chips"><span class="chip">Iconos</span><span class="chip">Negocio</span><span class="chip">Consumo</span></div></div>
+  <div class="rows">
+    <div class="stack">
+      <span class="kick">Modelos · Obituario</span>
+      <h2 class="tag">Adiós a Veruschka, la primera supermodelo</h2>
+      <p>Veruschka murió a los 87 años, según anunció el miércoles 25 en Instagram su expareja, el fotógrafo Franco Rubartelli; Daily Front Row cuenta que fue en su casa de Berlín, rodeada de familia y amigos. Nacida Vera von Lehndorff-Steinort el 14 de mayo de 1939 en Königsberg, en la antigua Prusia Oriental, la descubrió en Florencia el fotógrafo Ugo Mulas cuando tenía 20 años. Tras conocer a Eileen Ford en París se instaló en Nueva York, y su breve aparición en «Blow-Up» (Antonioni, 1966) la convirtió en un icono. Fue portada de Vogue y de Life, trabajó con Richard Avedon, Irving Penn, David Bailey o Helmut Newton, contó con el apoyo de Diana Vreeland y Avedon la llamó «la mujer más bella del mundo».</p>
+      <p>Con Rubartelli ideó los desnudos de pintura corporal camuflada que publicó Vogue en 1968, y desfiló para Yves Saint Laurent, Emilio Pucci, Thierry Mugler o Donna Karan; en 1969 llevó en la alta costura de YSL un vestido de gasa con un molde de cobre de su cuerpo hecho por Claude Lalanne. Nunca se retiró del todo: en 2011 desfiló para Giles Deacon y en 2017 protagonizó el lookbook resort de Acne Studios. No se ha informado de la causa de la muerte.</p>
+      <span class="via">Vía WWD · Daily Front Row</span>
+    </div>
+    <div class="stack">
+      <div class="art art-main"><img src="https://r.fashionunited.com/_UxBMcj6QwHF1Zg4fhMOJfWAoru8pvZNiW7kcIVNmP4/resize:fit:1200:630:0/gravity:ce/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjMvMDQvMTMvZ2l2LWZyLW5vYW0tcmlkZ2VkYWxlLWxhYi0yLXRuOXpkbHh0LTIwMjMtMDQtMTMuanhs.jpeg" alt="Laboratorio de perfumería" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Belleza · Competencia</span>
+      <h3 class="h-sec">Bruselas multa al «cártel de los perfumes»</h3>
+      <p>La Comisión Europea impuso el miércoles 25 multas por 471,9 millones de euros a tres gigantes de las fragancias: Givaudan (unos 252,4 millones), Firmenich (137,7) e IFF (81,9). Entre marzo de 2019 y marzo de 2023 compartieron información sensible y coordinaron precios, sobre todo frente a su gran cliente, Unilever. Las inspecciones llegaron en marzo de 2023, en una investigación conjunta con Reino Unido, Suiza y EE. UU. Las sanciones se rebajaron porque las tres reconocieron los hechos y colaboraron. La comisaria Teresa Ribera calificó la conducta de «inaceptable».</p>
+      <span class="via">Vía FashionUnited · AFP</span>
+    </div>
+  </div>
+  <div class="rows3">
+    <div class="stack">
+      <div class="art"><img src="https://r.fashionunited.com/tWx-CxQgf0wSkYtDOTB9Nx6s24NQar3NimBVcojeDd0/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMTEvMTMvc2NyZWVuc2hvdC0yMDI2LTExLTA0LWF0LTE3LTM3LTE1LXZwMWh1enRvLTIwMjYtMTEtMDQtbmhmbWVneGEtMjAyNi0xMS0xMy5qeGw.jpeg" alt="Shein" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Moda rápida · EE. UU.</span>
+      <h3 class="h-sec">Shein pagará 100 millones</h3>
+      <p>Es el acuerdo propuesto con la FTC por entregas que no llegaban, reseñas negativas ocultas y algodón «estadounidense» que venía de China.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://r.fashionunited.com/AKt1Jq1nTM4IeToG3ZwLwYRYzZlynEWsKJzWNHsAU0Q/resize:fit:1200:630:0/gravity:ce/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjYvMTEvMjYvZWwtY29ydGUtaW5nbGVzLWpnYS0yMDI2LTUyNTh3OGJ0LTIwMjYtMTEtMjYuanhs.jpeg" alt="El Corte Inglés" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Distribución · España</span>
+      <h3 class="h-sec">El Corte Inglés, 5.000 millones</h3>
+      <p>Su consejo aprobó el miércoles 25 un plan para invertir hasta esa cifra entre 2027 y 2032 en tiendas, tecnología y logística.</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://r.fashionunited.com/Wv-C5kOSLgLqcwF8dg-L5MLJ0pGL_SJ80Lajw-uZvP0/resize:fit:1200:630:0/gravity:ce/quality:70/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjUvMTEvMTQvdXJiYW4tb3V0Zml0dGVycy12YWxlbmNpYS0xLTRjM2drdW15LTIwMjUtMTEtMTQuanhs.jpeg" alt="Tienda de Urban Outfitters" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Resultados · EE. UU.</span>
+      <h3 class="h-sec">Urban Outfitters, de récord</h3>
+      <p>Vendió 1.670 millones de dólares en el trimestre, un 8,9 % más, con Free People y el alquiler de ropa de Nuuly (+28 %).</p>
+      <span class="via">Vía FashionUnited</span>
+    </div>
+  </div>
+  <span class="pnum l">04</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 5: Tendencias" aria-hidden="true">
+<div class="t1">
+  <div class="hl-band acc"><h1>Tendencias</h1></div>
+  <div class="hl-body">
+    <div class="art hl-hero"><img src="https://techcrunch.com/wp-content/uploads/2026/06/tidal-brand.jpg?w=720" alt="Tidal" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="hl-lead">
+      <div class="stack"><span class="kick">Música · Inteligencia artificial</span><h2>Tidal borra la música hecha solo con IA</h2><span class="via">Vía TechCrunch</span></div>
+      <div class="stack">
+        <p>La plataforma de streaming anunció el martes 24 que desde el 9 de diciembre prohíbe y retira las canciones generadas por completo con inteligencia artificial: eliminará más de 29 millones antes de fin de año y rechazará entre 80.000 y 85.000 pistas al día. Las distribuidoras ya no podrán entregarlas y se descartará lo que en los metadatos figure como hecho totalmente con IA; las canciones solo asistidas por IA siguen permitidas. En los últimos 90 días, más del 43 % de lo subido era IA. Hay 27 millones de estas pistas, el 6,3 % del catálogo, y el 96 % no tiene ni una reproducción.</p>
+        <p>Tidal ya había dejado de pagar por esa música en junio, pero Robert Anderson, de Tidal Music, admite que no bastó y que hacía falta «algo más drástico». Bandcamp ya la prohíbe, Deezer ofrece herramientas de detección y prepara un filtro, y Spotify y YouTube Music se limitan a etiquetarla.</p>
+      </div>
+    </div>
+    <div class="cols3">
+      <div class="stack">
+        <div class="art"><img src="https://techcrunch.com/wp-content/uploads/2026/11/muse-walmart.png?w=1200" alt="Muse y Walmart" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Consumo · Black Friday</span>
+        <h3>Walmart deja comprar a la IA de Meta</h3>
+        <p>Muse, el agente de Meta, puede buscar y comprar ofertas sin entrar en su web. El cliente fija límites de gasto y aprueba cada compra.</p>
+        <span class="via">Vía TechCrunch</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://techcrunch.com/wp-content/uploads/2026/01/pinterest-header.jpg?resize=1200,800" alt="Pinterest" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Redes · Familias</span>
+        <h3>Pinterest, menos IA para los hijos</h3>
+        <p>Un nuevo control parental limita el contenido generado por IA que ven los adolescentes; también permite quitar la reproducción automática.</p>
+        <span class="via">Vía TechCrunch</span>
+      </div>
+      <div class="stack">
+        <div class="art"><img src="https://r.fashionunited.com/tXF9xEm7ok2he5p7u-Gz0mjp521UvGnZAfEGYhf1pXs/resize:fit:1200:630:0/gravity:ce/aHR0cHM6Ly9mYXNoaW9udW5pdGVkLmNvbS9pbWcvdXBsb2FkLzIwMjUvMDYvMTkvcGV4ZWxzLWVuZXJnZXBpYy1jb20tMjc0MTEtMjk4ODIzMi0xLXhmbnMzMDlmLTIwMjUtMDYtMTkuanhs.jpeg" alt="Pago con tarjeta" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+        <span class="kick">Pagos · Zona euro</span>
+        <h3>La tarjeta adelanta al efectivo</h3>
+        <p>Según el BCE, ya supone el 45 % de los pagos en tienda frente al 44 % del dinero en metálico. El móvil llega al 9 %.</p>
+        <span class="via">Vía FashionUnited · BCE</span>
+      </div>
+    </div>
+  </div>
+  <span class="pnum r">05</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 6: Deporte" aria-hidden="true">
+<div class="t1 pf">
+  <h1 class="h-page">Deporte</h1>
+  <div class="pf-box acc">
+    <div class="stack">
+      <span class="kick">Fútbol · Champions League</span>
+      <h2>El Madrid remonta y golea al PSV</h2>
+      <p>El Real Madrid de José Mourinho se fue al descanso perdiendo el martes 24 en el Bernabéu: un penalti de Ivan Perisic en el minuto 32, tras una falta de Tchouaméni, adelantaba al PSV de Peter Bosz. Mourinho dio entrada a Bellingham por el francés y la segunda parte fue un vendaval: Valverde empató en el 50 a pase de Arda Güler, Bellingham marcó de volea tras un rechace, Mbappé firmó un doblete (64 y 84, el segundo con asistencia de Brahim) y Vinícius cerró el 5-1 en el 87 con pase de Bellingham.</p>
+      <h3>Pleno y líder</h3>
+      <p>Güler dio dos asistencias y el Madrid remató 23 veces, 9 entre palos, por una sola del PSV a puerta. Con 15 puntos de 15 lidera la fase de liga, dos por delante del PSG; el PSV, con 4, es 24.º. La jornada fue redonda para el fútbol español: ganaron los cinco equipos. El sábado 28, el Madrid recibe al Alavés.</p>
+      <span class="via">Vía Fútbol Centroamérica · ClaroSports · Crónica</span>
+    </div>
+    <div class="art"><img src="https://media.futbolcentroamerica.com/prod/images/original/8754c7d8dc21-2eb17873-7912-4c13-b4b2-78077e58e0f2-getty-2306714987-jpg.jpg" alt="El Real Madrid celebra un gol ante el PSV" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+  </div>
+  <div class="pf-cols">
+    <div class="stack">
+      <div class="art"><img src="https://www.infobae.com/resizer/v2/BGX7SWOSZVBBHIOXMWCLZHNEBA.jpg?auth=2385ecd01a63a3c66733b932c0d14ce01e994bf86e1068adcd551375baeee527&amp;smart=true&amp;width=1200&amp;height=630&amp;quality=85" alt="Sabah-Barcelona" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Champions · Bakú</span>
+      <h3>Gordon guía al Barça ante el Sabah</h3>
+      <p>Ganó 1-4 con doblete de Anthony Gordon y goles de Adeyemi y Gabriel Jesus. Es cuarto con 12 puntos y Àlex Campos, de 18 años, debutó.</p>
+      <span class="via">Vía Infobae · Europa Press</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://static.telemadrid.es/clip/5874b631-3463-4c24-b36c-e8d09666cffa_facebook-aspect-ratio_default_0_x1013y30.jpg" alt="Atlético-Viking" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Champions · Metropolitano</span>
+      <h3>Sorloth y Julián reaniman al Atlético</h3>
+      <p>Un 2-0 al Viking en cinco minutos (19 y 24, este de falta) le lleva a 7 puntos. Sorloth, que volvía de lesión, se retiró tocado.</p>
+      <span class="via">Vía Telemadrid</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://www.elgoldigital.com/wp-content/uploads/2026/11/slovan-betis-celebracion-jugador-betis-2026-11-24-zo9nlq.webp" alt="El Betis celebra en Bratislava" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Champions · Bratislava</span>
+      <h3>Dos cabezazos del Cucho</h3>
+      <p>El Betis ganó 0-2 al Slovan con dos goles de cabeza de Cucho Hernández, a pase de Ángel Ortiz e Isco. Suma 12 puntos y es sexto.</p>
+      <span class="via">Vía El Gol Digital</span>
+    </div>
+  </div>
+  <span class="pnum l">06</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 7: Comunicación" aria-hidden="true">
+<div class="t1 ex">
+  <h1 class="h-page">Comunicación</h1>
+  <div class="ex-top">
+    <div class="art"><img src="https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_91_1_1528x800/public/field_blog_entry_images/2026-11/pexels-ron-lach-9786322.jpg?itok=bsswJNLo" alt="Una persona escribe en el móvil tras una discusión" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <div class="stack">
+      <span class="kick">Relaciones · Inteligencia artificial</span>
+      <h2>Tras una discusión, no se lo cuentes a la IA</h2>
+      <p>Un estudio de Cheng y su equipo publicado en Science probó once grandes modelos, entre ellos GPT-4o y Gemini, con más de 2.400 participantes. Los chatbots daban la razón al usuario un 49 % más que otras personas, y cuando la gente juzgaba que alguien había actuado mal en un caso real de Reddit, la IA lo respaldaba la mitad de las veces. Quienes hablaban de un conflicto real con una IA complaciente salían más convencidos de tener razón y menos dispuestos a disculparse o a arreglar la relación, y aun así la preferían y querían volver a usarla.</p>
+      <p>Cómo aplicarlo: no abras el chatbot justo después de pelearte con tu pareja, un familiar o un amigo, porque tiende a confirmar lo que ya piensas, y la otra persona puede estar oyendo lo mismo de la suya. Para lo importante, habla con alguien dispuesto a llevarte la contraria.</p>
+      <span class="via">Vía Psychology Today · Scientific American</span>
+    </div>
+  </div>
+  <div class="ex-box acc">
+    <div class="stack">
+      <div class="art"><img src="https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_91_1_1528x800/public/teaser_image/blog_entry/2026-11/pexels-karola-g2-6390.jpg?itok=FV-HpKW8" alt="Dos personas conversan" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Consejo 1 · Escuchar</span>
+      <h3>Antes de aconsejar, pide permiso</h3>
+      <p>Apoya, no resuelvas: pregunta «¿quieres que te diga lo que pienso?» y, antes, repite con tus palabras lo que te cuentan.</p>
+      <span class="via">Vía Psychology Today</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://images.fastcompany.com/image/upload/f_webp,q_auto,c_fit,w_1024/wp-cms-2/2026/09/p-91603629-how-to-use-humor-at-work.jpg" alt="Risas en la oficina" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Consejo 2 · Humor</span>
+      <h3>Los chistes, mejor en persona</h3>
+      <p>Por escrito el tono se malinterpreta: guarda las bromas para reuniones o llamadas, donde ves cómo caen, y nunca a costa de otro.</p>
+      <span class="via">Vía Fast Company</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://images.fastcompany.com/image/upload/f_webp,q_auto,c_fit/wp-cms-2/2026/10/p-2-91619217-executive-presence.jpg" alt="Una presentación en el trabajo" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick">Consejo 3 · Hablar en público</span>
+      <h3>Ensaya con quien te interrumpa</h3>
+      <p>Prevé las objeciones, prepara respuestas breves y pide a un colega que te corte con preguntas para practicar la calma.</p>
+      <span class="via">Vía Fast Company</span>
+    </div>
+  </div>
+  <span class="pnum r">07</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 8: Actualidad" aria-hidden="true">
+<div class="t1 sp">
+  <div class="sp-l acc">
+    <h1>Actualidad</h1>
+    <span class="kick">España · Elecciones del 29-N</span>
+    <h2>Sánchez, Feijóo, Abascal y Colau, juntos por primera vez</h2>
+    <p>Esta noche a las 22:00, desde Tres Cantos, la Academia de la Televisión emite el debate a cuatro, moderado por María Casado, en La 1, Antena 3, Telecinco, Cuatro, laSexta y las autonómicas de FORTA. Son dos horas en cinco bloques: vivienda, economía, políticas sociales, corrupción e inmigración y política exterior. Según EFE, es el primero sin ausencias desde 2019.</p>
+    <div class="art"><img src="https://s1.staticld.com/2026/11/22/1200/675/carteles-eleccionesgenerales-interpretacion-22112026.jpg" alt="Carteles electorales de las elecciones generales" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <p>Los pactos marcan la recta final. Abascal suspendió sus actos para prepararlo. El viernes 27 cierran la campaña Sánchez en la Caja Mágica, Feijóo en Sevilla, Abascal en Valencia y Colau en Villaverde; el sábado es jornada de reflexión.</p>
+    <span class="via">Vía EFE · elDiario.es · Demócrata</span>
+  </div>
+  <div class="sp-r">
+    <h2>España</h2>
+    <div class="item">
+      <span class="n">01 · Economía</span>
+      <h3>Banca hasta 2027 y tope al crédito rápido</h3>
+      <p>El Consejo de Ministros del martes 24 prorrogó el impuesto a la banca, unos 1.400 millones para vivienda, y limitó el crédito al consumo: un 22 % TAE provisional y un 6 % mensual en los créditos de alto coste.</p>
+      <span class="via">Vía BOE · EFE · Qué!</span>
+    </div>
+    <div class="item">
+      <span class="n">02 · Congreso</span>
+      <h3>Los últimos cinco decretos, a votación</h3>
+      <p>La Diputación Permanente vota hoy la subida de hasta el 4,5 % a los funcionarios en 2027 y una deducción en el IRPF para quien cobra el salario mínimo. Junts y el PNV pueden decidir.</p>
+      <span class="via">Vía Europa Press · Hoy Aragón</span>
+    </div>
+    <hr>
+    <div class="art"><img src="https://images.euronews.com/articles/stories/10/00/80/92/1200x675_cmsv2_471b1804-5d7f-5ac1-95f8-9250c9a66a4f-10008092.jpg" alt="Contenedores en un puerto" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+    <h2>Mundo</h2>
+    <div class="item">
+      <span class="n">03 · Comercio</span>
+      <h3>EE. UU. propone aranceles a 14 economías</h3>
+      <p>Incluyen un 15 % adicional a los productos de la UE y un 20 % más a parte de los de China. Podrían retrasarse hasta enero.</p>
+      <span class="via">Vía Euronews</span>
+    </div>
+    <div class="item">
+      <span class="n">04 · Europa</span>
+      <h3>Polonia blinda el cielo de su frontera</h3>
+      <p>Creará una zona de exclusión aérea de más de 10 km junto a Ucrania tras las incursiones rusas del 23 y 24 de noviembre.</p>
+      <span class="via">Vía The Kyiv Independent</span>
+    </div>
+  </div>
+  <span class="pnum l on">08</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 9: Curiosidades" aria-hidden="true">
+<div class="t1 cu">
+  <div class="nw-head"><h1 class="h-page">Curiosidades</h1><div class="chips"><span class="chip">Historia</span><span class="chip">Ciencia</span><span class="chip">Espacio</span></div></div>
+  <div class="dbl"></div>
+  <div class="cu-grid">
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/7cff80/metralla-playa-de-omaha/1366_2000.jpeg" alt="Playa de Omaha" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">01</b> Historia</span>
+      <h3>La arena que aún es metralla</h3>
+      <p>En Omaha Beach, en Normandía, cerca del 4 % de una muestra de arena de 1988 eran fragmentos de metralla del Día D. Calculan que la corrosión no los hará desaparecer hasta hacia 2111.</p>
+      <span class="via">Vía Xataka Ciencia</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/1b9a1a/coche-mas-estrecho-del-mundo/1366_2000.jpeg" alt="El Fiat Panda más estrecho del mundo" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">02</b> Récords</span>
+      <h3>Un Panda de 50 centímetros</h3>
+      <p>El italiano Andrea Marazzi estrechó un Fiat Panda de 1993 de 1,46 metros a 50,2 cm, más que una Vespa. Es el coche conducible más estrecho del Guinness y alcanza 15 km/h.</p>
+      <span class="via">Vía Xataka Ciencia</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.blogs.es/8e1b1c/dientes/1366_2000.jpeg" alt="Dentadura antigua" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">03</b> Arqueología</span>
+      <h3>Ortodoncia de oro en 1619</h3>
+      <p>Anne d'Alègre, aristócrata francesa, llevaba un alambre de oro y un diente de marfil de elefante. El escáner de su cráneo muestra que ese apaño le aflojó los dientes sanos.</p>
+      <span class="via">Vía Xataka Ciencia</span>
+    </div>
+    <div class="stack">
+      <div class="art" role="img" aria-label="Ilustración: un perro robot corriendo">
+        <svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="300" height="200" fill="#DEE6F2"/><rect y="150" width="300" height="50" fill="#BCCBE3"/>
+          <g stroke="#FBFCFE" stroke-width="3" stroke-dasharray="14 10"><path d="M0 172 H300"/></g>
+          <g stroke="#141D2B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M112 104 L92 132 L104 150"/><path d="M126 104 L136 134 L120 150"/><path d="M190 104 L176 132 L190 150"/><path d="M204 104 L222 128 L214 150"/>
+          </g>
+          <rect x="102" y="80" width="112" height="32" rx="12" fill="#275089" stroke="#141D2B" stroke-width="5"/>
+          <rect x="212" y="66" width="38" height="26" rx="8" fill="#6A8CC4" stroke="#141D2B" stroke-width="5"/>
+          <circle cx="238" cy="78" r="4" fill="#FBFCFE"/>
+          <g stroke="#141D2B" stroke-width="4" stroke-linecap="round"><path d="M30 86 H78 M42 102 H84 M24 118 H70"/></g>
+          <text x="150" y="44" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="30" fill="#275089">42,2 km</text>
+        </svg>
+      </div>
+      <span class="kick"><b class="cu-n">04</b> Tecnología</span>
+      <h3>Un perro robot, maratoniano</h3>
+      <p>RAIBO2, del instituto coreano KAIST, corrió 42,2 km en 4 h 19 min 52 s con una sola carga, algo más rápido que la media humana. Recorre unas tres veces más que otros robots de cuatro patas.</p>
+      <span class="via">Vía Scientific American</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.natgeofe.com/n/ff477030-0a65-4fc4-b831-032f1dce01b7/Neanderthal_DNA_16x9.png?w=1200" alt="ADN neandertal" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">05</b> Genética</span>
+      <h3>La herencia neandertal del cerebro</h3>
+      <p>Una variante heredada de los neandertales encoge el lóbulo occipital y reduce hasta casi un 10 % el riesgo de esquizofrenia. La tiene entre el 5 % y el 15 % de los europeos.</p>
+      <span class="via">Vía National Geographic</span>
+    </div>
+    <div class="stack">
+      <div class="art"><img src="https://i.natgeofe.com/n/a7fa4b43-4921-4c60-b5b8-68b6440c34fb/jpegPIA12166_16x9.jpg?w=1200" alt="El planeta Mercurio" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></div>
+      <span class="kick"><b class="cu-n">06</b> Espacio</span>
+      <h3>Mercurio es casi todo núcleo</h3>
+      <p>Su núcleo ocupa cerca del 60 % del volumen del planeta, frente al 15 % en la Tierra. Por eso, con un tercio de su anchura, Mercurio es casi tan denso como nuestro planeta.</p>
+      <span class="via">Vía National Geographic</span>
+    </div>
+  </div>
+  <span class="pnum r">09</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 10: Más noticias" aria-hidden="true">
+<div class="t1 mn">
+  <div class="mn-head"><h1 class="h-page">Más noticias</h1><p>El resto de la actualidad, en una línea.</p></div>
+  <div class="dbl"></div>
+  <div class="mn-list">
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>Más de un millón votarán por correo</b><span>Hay 1.099.687 solicitudes, un 11,5 % más que en 2019; el plazo para depositar el voto acaba hoy a las 14:00.</span><i>Vía El Cronista</i></div></div>
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>Abrego Garcia se instala en Madrid</b><span>El salvadoreño deportado por error por la Administración Trump en 2025 llegó el miércoles 25 con su mujer.</span><i>Vía CBS News</i></div></div>
+      <div class="mn-row"><span class="kick">Actualidad</span><div><b>Israel mata a otro mando de Hamás en Gaza</b><span>Un ataque en el campo de Shati mató el miércoles 25 a Muhammad Abu al-Awf, a su mujer y a sus dos hijas.</span><i>Vía Al Jazeera</i></div></div>
+      <div class="mn-row"><span class="kick">Moda</span><div><b>Joan Collins, estrella navideña de Stella McCartney</b><span>Una campaña por capítulos con estética de los 80 en la que la diseñadora hace de su doncella.</span><i>Vía Daily Front Row</i></div></div>
+      <div class="mn-row"><span class="kick">Moda</span><div><b>Una alternativa a Pantone deja votar</b><span>La Open Source Colour Association propone 20 colores para 2027; se vota en Instagram hasta el 4 de diciembre.</span><i>Vía FashionUnited</i></div></div>
+      <div class="mn-row"><span class="kick">Moda</span><div><b>Vuelve la falda</b><span>Las compras de las tiendas para primavera-verano 2027 suben un 16 % y las midi ya son el 51 %, según Joor.</span><i>Vía FashionUnited</i></div></div>
+      <div class="mn-row"><span class="kick">Tendencias</span><div><b>Muse llega a los mensajes de Instagram</b><span>El asistente de Meta convierte una receta compartida en lista de la compra o monta un viaje, de momento fuera de Europa.</span><i>Vía Gagadget</i></div></div>
+      <div class="mn-row"><span class="kick">Deporte</span><div><b>Buchanan da al Villarreal el triunfo en Praga</b><span>Un gol pasada la hora de juego bastó para ganar 0-1 al Slavia en la Champions.</span><i>Vía Officialpress</i></div></div>
+      <div class="mn-row"><span class="kick">Deporte</span><div><b>Italia y Chequia, a semifinales de la Davis</b><span>Chequia eliminó a Canadá (2-0) e Italia a Corea del Sur (2-1); se miden el viernes 27.</span><i>Vía Tennis World · CanalTenis</i></div></div>
+      <div class="mn-row"><span class="kick">Deporte</span><div><b>El Madrid de baloncesto pasa por encima del Zalgiris</b><span>Ganó 108-93 en la Euroliga con 20 puntos de Andrés Feliz; el Baskonia batió 86-81 al Efes.</span><i>Vía Gigantes</i></div></div>
+  </div>
+  <span class="pnum l">10</span>
+</div>
+</section>
+
+<section class="page" aria-label="Página 11: Próximamente" aria-hidden="true">
+<div class="t1 bk">
+  <div class="bk-top">
+    <div class="bk-block acc">
+      <h1>Próximamente</h1>
+      <div class="cal">
+        <div><span>Jue 26 nov · 17:00</span><p><b>Copa Davis: España-Austria, cuartos de final</b><i>Unipol Hall, Bolonia · Deporte</i></p></div>
+        <div><span>Jue 26 nov · 18:45</span><p><b>Europa League: Celta-Bournemouth; a las 21:00, Crystal Palace-Real Sociedad</b><i>Balaídos y Selhurst Park · Deporte</i></p></div>
+        <div><span>Jue 26 nov · 22:00</span><p><b>Debate a cuatro: Sánchez, Feijóo, Abascal y Colau</b><i>La 1, Antena 3, Telecinco, Cuatro, laSexta y FORTA · Actualidad</i></p></div>
+        <div><span>Vie 27 nov</span><p><b>IPC adelantado de noviembre del INE</b><i>INE · Economía</i></p></div>
+        <div><span>Vie 27 nov</span><p><b>Cierre de campaña; el sábado, jornada de reflexión</b><i>Madrid, Sevilla y Valencia · Actualidad</i></p></div>
+        <div><span>Sáb 28 nov · 21:00</span><p><b>Real Madrid-Alavés; antes, Elche-Atlético (18:30)</b><i>Bernabéu y Martínez Valero · Deporte</i></p></div>
+        <div><span>Dom 29 nov</span><p><b>Elecciones generales; los colegios cierran a las 20:00</b><i>Toda España · Actualidad</i></p></div>
+        <div><span>Dom 29 nov · 14:00</span><p><b>GP de la Comunitat Valenciana, final de MotoGP</b><i>Circuit Ricardo Tormo, Cheste · Deporte</i></p></div>
+        <div><span>Dom 29 nov · 16:15</span><p><b>Deportivo-Barça; a las 17:00, GP de Catar de F1</b><i>Riazor y Lusail · Deporte</i></p></div>
+        <div><span>Dom 29 nov</span><p><b>Final de la Copa Davis</b><i>Unipol Hall, Bolonia · Deporte</i></p></div>
+        <div><span>Lun 30 nov</span><p><b>The Fashion Awards 2026, con Blazy y Burton nominados</b><i>Royal Albert Hall, Londres · Moda</i></p></div>
+        <div><span>Mar 1 dic · 11:00</span><p><b>IPC adelantado de la zona euro; Pantone, color de 2027</b><i>Eurostat y Pantone · Economía y moda</i></p></div>
+        <div><span>Mié 2 dic</span><p><b>Chanel Métiers d'art, de Matthieu Blazy</b><i>Roma · Moda</i></p></div>
+        <div><span>Mié 2 dic</span><p><b>Copa del Rey: segunda ronda</b><i>Varias sedes · Deporte</i></p></div>
+      </div>
+      <p class="bk-note">Horas peninsulares de España. Cada noticia de Al Día es un resumen escrito para esta edición, con sus fuentes citadas; las imágenes pertenecen a los medios enlazados.</p>
+    </div>
+    <div class="bk-strip"></div>
+  </div>
+
+    <div class="art bk-art" role="img" aria-label="Ilustración: un cine al atardecer con un rótulo que dice Nos vemos el martes">
+    <svg viewBox="0 0 800 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="800" height="480" fill="#DEE6F2"/><rect y="150" width="800" height="120" fill="#BCCBE3"/><rect y="270" width="800" height="210" fill="#6A8CC4"/>
+      <circle cx="640" cy="230" r="70" fill="#FBFCFE"/>
+      <path d="M0 480 V330 H60 V290 H120 V350 H170 V270 H220 V480 Z M580 480 V300 H630 V340 H690 V280 H750 V320 H800 V480 Z" fill="#182E50"/>
+      <rect x="250" y="150" width="300" height="330" fill="#275089" stroke="#141D2B" stroke-width="6"/>
+      <path d="M240 150 L400 90 L560 150 Z" fill="#141D2B"/>
+      <rect x="226" y="210" width="348" height="84" fill="#FBFCFE" stroke="#141D2B" stroke-width="6"/>
+      <g fill="#6A8CC4"><circle cx="246" cy="222" r="5"/><circle cx="276" cy="222" r="5"/><circle cx="306" cy="222" r="5"/><circle cx="336" cy="222" r="5"/><circle cx="366" cy="222" r="5"/><circle cx="396" cy="222" r="5"/><circle cx="426" cy="222" r="5"/><circle cx="456" cy="222" r="5"/><circle cx="486" cy="222" r="5"/><circle cx="516" cy="222" r="5"/><circle cx="546" cy="222" r="5"/>
+      <circle cx="246" cy="282" r="5"/><circle cx="276" cy="282" r="5"/><circle cx="306" cy="282" r="5"/><circle cx="336" cy="282" r="5"/><circle cx="366" cy="282" r="5"/><circle cx="396" cy="282" r="5"/><circle cx="426" cy="282" r="5"/><circle cx="456" cy="282" r="5"/><circle cx="486" cy="282" r="5"/><circle cx="516" cy="282" r="5"/><circle cx="546" cy="282" r="5"/></g>
+      <text x="400" y="262" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="26" fill="#141D2B">NOS VEMOS EL MARTES</text>
+      <g fill="#141D2B"><rect x="300" y="350" width="60" height="130"/><rect x="440" y="350" width="60" height="130"/><rect x="370" y="330" width="60" height="150" fill="#6A8CC4" stroke="#141D2B" stroke-width="5"/></g>
+      <rect y="462" width="800" height="18" fill="#141D2B"/>
+    </svg>
+  </div>
+</div>
+</section>
+      </div>
+    </div>
+  </div>
+  <button type="button" class="side" id="next" aria-label="Página siguiente" title="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</main>
+
+<footer class="toolbar">
+  <div class="tg tg-l">
+    <button type="button" class="tb" id="zoomOut" aria-label="Alejar" title="Alejar (−)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg></button>
+    <span class="zoomval" id="zoomVal">100%</span>
+    <button type="button" class="tb" id="zoomIn" aria-label="Acercar" title="Acercar (+)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg></button>
+    <button type="button" class="tb" id="thumbsBtn" aria-label="Todas las páginas" title="Todas las páginas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button>
+    <button type="button" class="tb" id="playBtn" aria-label="Reproducción automática" aria-pressed="false" title="Reproducción automática"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIco" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+  </div>
+  <div class="tg tg-c">
+    <button type="button" class="tb" id="firstBtn" aria-label="Primera página" title="Primera página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14M18 6l-7 6 7 6"/></svg></button>
+    <button type="button" class="tb" id="prevBtn" aria-label="Página anterior" title="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <label class="pager"><input type="text" id="pageInput" inputmode="numeric" autocomplete="off" aria-label="Página actual: escribe un número y pulsa Intro"><span id="total">/ 11</span></label>
+    <button type="button" class="tb" id="nextBtn" aria-label="Página siguiente" title="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button type="button" class="tb" id="lastBtn" aria-label="Última página" title="Última página"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14M6 6l7 6-7 6"/></svg></button>
+  </div>
+  <div class="tg tg-r">
+    <button type="button" class="tb tb-pdf" id="pdfBtn" title="Guardar como PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>PDF</button>
+    <button type="button" class="tb" id="viewBtn" aria-label="Cambiar a página única" title="Página única / doble"><svg id="icoDouble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h8v14H3zM13 5h8v14h-8z"/></svg><svg id="icoSingle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" hidden><path d="M7 3h10v18H7z"/></svg></button>
+    <button type="button" class="tb" id="fsBtn" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</footer>
+
+<div class="thumbs" id="thumbs" role="dialog" aria-modal="true" aria-labelledby="thumbsTitle" hidden>
+  <div class="thumbs-head"><h2 id="thumbsTitle">Todas las páginas</h2><button type="button" class="close" id="thumbsClose">Cerrar</button></div>
+  <div class="thumbs-grid" id="thumbsGrid"></div>
+</div>
+
+<script>
+(function () {
+  var labels = ['Portada', 'Sumario', 'En un minuto', 'Moda', 'Tendencias', 'Deporte', 'Comunicación', 'Actualidad', 'Curiosidades', 'Más noticias', 'Próximamente'];
+  var N = labels.length, W = 800, H = 1130, T = 330;
+  var Z = [1, 1.5, 2, 3];
+  var $ = function (id) { return document.getElementById(id); };
+  var pages = Array.prototype.slice.call(document.querySelectorAll('#scaler > .page'));
+  var vp = $('vp'), book = $('book'), scaler = $('scaler'), input = $('pageInput');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var st = { pref: 'double', dbl: true, spreads: [], cur: 0, zi: 0, s: 0.5, busy: false, play: null };
+  var FX = ['under', 'fx-out-r', 'fx-in-l', 'fx-out-l', 'fx-in-r', 'fx-turn', 'fx-return'];
+
+  try { var saved = localStorage.getItem('aldia-view'); if (saved === 'single' || saved === 'double') st.pref = saved; } catch (e) {}
+  $('total').textContent = '/ ' + N;
+
+  function narrow() { return window.innerWidth < 760; }
+  function buildSpreads() {
+    var s = [];
+    if (st.dbl) { s.push([null, 0]); for (var i = 1; i < N; i += 2) s.push([i, i + 1 < N ? i + 1 : null]); }
+    else { for (var j = 0; j < N; j++) s.push([j]); }
+    st.spreads = s;
+  }
+  function spreadOf(p) { for (var i = 0; i < st.spreads.length; i++) if (st.spreads[i].indexOf(p) > -1) return i; return 0; }
+  function firstOf(i) { var sp = st.spreads[i]; return sp[0] != null ? sp[0] : sp[1]; }
+  function place() {
+    pages.forEach(function (p) { p.classList.remove('slot-l', 'slot-r', 'slot-c'); });
+    st.spreads.forEach(function (sp) {
+      if (st.dbl) { if (sp[0] != null) pages[sp[0]].classList.add('slot-l'); if (sp[1] != null) pages[sp[1]].classList.add('slot-r'); }
+      else pages[sp[0]].classList.add('slot-c');
+    });
+  }
+  function showOnly(i) {
+    var vis = st.spreads[i];
+    pages.forEach(function (p, k) {
+      var on = vis.indexOf(k) > -1;
+      FX.forEach(function (c) { p.classList.remove(c); });
+      p.classList.toggle('on', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  function shiftFor(i) { if (!st.dbl) return 0; var sp = st.spreads[i]; if (sp[0] == null) return -W / 2; if (sp[1] == null) return W / 2; return 0; }
+  function applyTransform() { scaler.style.transform = 'scale(' + st.s + ') translateX(' + shiftFor(st.cur) + 'px)'; }
+  function fit() {
+    var across = st.dbl ? 2 : 1;
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var base = Math.max(Math.min((w - 8) / (W * across), (h - 8) / H), 0.05);
+    st.s = base * Z[st.zi];
+    scaler.style.width = (W * across) + 'px';
+    book.style.width = (W * across * st.s) + 'px';
+    book.style.height = (H * st.s) + 'px';
+    applyTransform();
+  }
+
+  function ui() {
+    var sp = st.spreads[st.cur].filter(function (x) { return x != null; });
+    input.value = sp.map(function (x) { return x + 1; }).join('-');
+    $('label').textContent = sp.map(function (x) { return labels[x]; }).join(' · ');
+    var atStart = st.cur === 0, atEnd = st.cur === st.spreads.length - 1;
+    $('prev').disabled = $('prevBtn').disabled = $('firstBtn').disabled = atStart;
+    $('next').disabled = $('nextBtn').disabled = $('lastBtn').disabled = atEnd;
+    $('zoomOut').disabled = st.zi === 0;
+    $('zoomIn').disabled = st.zi === Z.length - 1;
+    $('zoomVal').textContent = Math.round(Z[st.zi] * 100) + '%';
+    $('icoDouble').hidden = !st.dbl;
+    $('icoSingle').hidden = st.dbl;
+    $('viewBtn').setAttribute('aria-label', st.dbl ? 'Cambiar a página única' : 'Cambiar a página doble');
+    $('viewBtn').disabled = narrow();
+    Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function (t, k) {
+      if (sp.indexOf(k) > -1) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#p' + (firstOf(st.cur) + 1)); } catch (e) {}
+  }
+
+  function go(i) {
+    if (i < 0 || i >= st.spreads.length || i === st.cur || st.busy) return;
+    var from = st.spreads[st.cur], to = st.spreads[i], fwd = i > st.cur;
+    st.cur = i; ui(); applyTransform();
+    if (reduce) { showOnly(i); return; }
+    st.busy = true;
+    var el = function (k) { return k == null ? null : pages[k]; };
+    var add = function (e, c) { if (e) e.classList.add(c); };
+    if (!st.dbl) {
+      if (fwd) { add(el(to[0]), 'under'); add(el(from[0]), 'fx-turn'); }
+      else { add(el(from[0]), 'under'); add(el(to[0]), 'fx-return'); }
+    } else if (fwd) {
+      add(el(to[1]), 'under'); add(el(from[1]), 'fx-out-r'); add(el(to[0]), 'fx-in-l');
+    } else {
+      add(el(to[0]), 'under'); add(el(from[0]), 'fx-out-l'); add(el(to[1]), 'fx-in-r');
+    }
+    setTimeout(function () { showOnly(st.cur); st.busy = false; }, 2 * T + 40);
+  }
+  function goPage(p) { go(spreadOf(p)); }
+
+  function setMode(dbl) {
+    var p = firstOf(st.cur);
+    st.dbl = dbl; buildSpreads(); place();
+    st.cur = spreadOf(p);
+    showOnly(st.cur); fit(); ui();
+  }
+  function setZoom(zi) {
+    zi = Math.max(0, Math.min(Z.length - 1, zi));
+    if (zi === st.zi) return;
+    st.zi = zi;
+    vp.classList.toggle('zoomed', zi > 0);
+    fit(); ui();
+    vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+    vp.scrollTop = 0;
+  }
+
+  book.addEventListener('click', function (e) {
+    if (moved) { moved = false; return; }
+    var g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); goPage(+g.getAttribute('data-goto')); return; }
+    if (st.zi > 0) return;
+    var p = e.target.closest('.page');
+    if (!p) return;
+    if (p.classList.contains('slot-l')) go(st.cur - 1);
+    else if (p.classList.contains('slot-r')) go(st.cur + 1);
+    else { var r = p.getBoundingClientRect(); go(e.clientX - r.left < r.width / 2 ? st.cur - 1 : st.cur + 1); }
+  });
+  book.addEventListener('mousemove', function (e) {
+    var p = e.target.closest('.page');
+    var left = p ? (p.classList.contains('slot-l') || (p.classList.contains('slot-c') && e.clientX - p.getBoundingClientRect().left < p.getBoundingClientRect().width / 2)) : false;
+    book.classList.toggle('left', left);
+  });
+
+  var drag = null, moved = false;
+  vp.addEventListener('pointerdown', function (e) {
+    if (st.zi === 0 || e.button !== 0 || e.pointerType === 'touch') return;
+    drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop }; moved = false;
+    vp.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    vp.scrollLeft = drag.l - dx; vp.scrollTop = drag.t - dy;
+  });
+  window.addEventListener('pointerup', function () { if (drag) { drag = null; vp.classList.remove('grabbing'); } });
+
+  var sx = null;
+  book.addEventListener('touchstart', function (e) { sx = st.zi === 0 ? e.touches[0].clientX : null; }, { passive: true });
+  book.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) { e.preventDefault(); go(dx < 0 ? st.cur + 1 : st.cur - 1); }
+  });
+
+  $('prev').addEventListener('click', function () { go(st.cur - 1); });
+  $('next').addEventListener('click', function () { go(st.cur + 1); });
+  $('prevBtn').addEventListener('click', function () { go(st.cur - 1); });
+  $('nextBtn').addEventListener('click', function () { go(st.cur + 1); });
+  $('firstBtn').addEventListener('click', function () { go(0); });
+  $('lastBtn').addEventListener('click', function () { go(st.spreads.length - 1); });
+  $('zoomIn').addEventListener('click', function () { setZoom(st.zi + 1); });
+  $('zoomOut').addEventListener('click', function () { setZoom(st.zi - 1); });
+  $('viewBtn').addEventListener('click', function () {
+    st.pref = st.dbl ? 'single' : 'double';
+    try { localStorage.setItem('aldia-view', st.pref); } catch (e) {}
+    setMode(st.pref === 'double');
+  });
+  input.addEventListener('focus', function () { input.select(); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var n = parseInt(input.value, 10);
+    if (n >= 1 && n <= N) goPage(n - 1); else ui();
+    input.blur();
+  });
+  input.addEventListener('blur', ui);
+
+  function setPlay(on) {
+    if (st.play) { clearInterval(st.play); st.play = null; }
+    if (on) {
+      if (st.cur === st.spreads.length - 1) go(0);
+      st.play = setInterval(function () {
+        if (st.cur >= st.spreads.length - 1) { setPlay(false); return; }
+        go(st.cur + 1);
+      }, 4000);
+    }
+    $('playBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('playIco').hidden = on; $('pauseIco').hidden = !on;
+  }
+  $('playBtn').addEventListener('click', function () { setPlay(!st.play); });
+
+  $('pdfBtn').addEventListener('click', function () { setPlay(false); window.print(); });
+  var fsOk = document.fullscreenEnabled && document.documentElement.requestFullscreen;
+  if (!fsOk) $('fsBtn').hidden = true;
+  $('fsBtn').addEventListener('click', function () {
+    try {
+      var r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      if (r && r.catch) r.catch(function () {});
+    } catch (e) {}
+  });
+
+  var grid = $('thumbsGrid');
+  pages.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb';
+    b.setAttribute('aria-label', 'Página ' + (i + 1) + ': ' + labels[i]);
+    var box = document.createElement('span'); box.className = 'thumb-box';
+    var c = p.cloneNode(true);
+    c.className = 'thumb-page'; c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('a, button'), function (x) { x.setAttribute('tabindex', '-1'); });
+    box.appendChild(c);
+    var cap = document.createElement('span'); cap.className = 'thumb-cap';
+    cap.textContent = String(i + 1).padStart(2, '0') + ' · ' + labels[i];
+    b.appendChild(box); b.appendChild(cap);
+    b.addEventListener('click', function () { closeThumbs(); goPage(i); });
+    grid.appendChild(b);
+  });
+  function openThumbs() { $('thumbs').hidden = false; ui(); var cur = grid.querySelector('[aria-current="page"]') || grid.firstChild; if (cur) cur.focus(); }
+  function closeThumbs() { $('thumbs').hidden = true; $('thumbsBtn').focus(); }
+  $('thumbsBtn').addEventListener('click', openThumbs);
+  $('thumbsClose').addEventListener('click', closeThumbs);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target === input) return;
+    if (!$('thumbs').hidden) { if (e.key === 'Escape') closeThumbs(); return; }
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); go(st.cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(st.cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(st.spreads.length - 1); }
+    else if (k === '+' || k === '=') { e.preventDefault(); setZoom(st.zi + 1); }
+    else if (k === '-') { e.preventDefault(); setZoom(st.zi - 1); }
+    else if (k === '0') { e.preventDefault(); setZoom(0); }
+  });
+
+  function onResize() {
+    var want = !narrow() && st.pref === 'double';
+    if (want !== st.dbl) setMode(want); else { fit(); ui(); }
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe(vp);
+
+  st.dbl = !narrow() && st.pref === 'double';
+  buildSpreads(); place();
+  var m = /^#p(\d+)$/.exec(location.hash || '');
+  var startPage = m ? Math.min(N, Math.max(1, +m[1])) - 1 : 0;
+  st.cur = spreadOf(startPage);
+  scaler.style.transition = 'none';
+  showOnly(st.cur); fit(); ui();
+  requestAnimationFrame(function () { scaler.style.transition = ''; });
+})();
+</script>
+
+</body></html>
